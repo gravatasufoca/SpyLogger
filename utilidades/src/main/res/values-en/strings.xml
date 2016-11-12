@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="market">You are not allowed to use this app. Go to the Market and buy it first.</string>
+    <string name="com_error">Problem to communicate with the Market, try it later.</string>
+    <string name="premium_message">Only Premium Version could use this feature!</string>
+    <string name="ja_comprou">You already have the Premium Version</string>
+
+</resources>

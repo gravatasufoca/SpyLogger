@@ -1,0 +1,55 @@
+<resources>
+    <string name="app_name">SpyLogger</string>
+    
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password (optional)</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="display_name">Messages logger</string>
+    <string name="version">1</string>
+    <string name="version_label">versão 1</string>
+    <string name="zipped_file_name">chatSpy_messages.zip</string>
+    <string name="action_settings">Configurações</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_log">Conversas</string>
+    <string name="title_activity_chat">Mensagens</string>
+    <string name="title_activity_conf">Configurações</string>
+    <string name="icon">Ícone</string>
+    <string name="show">Mostrar</string>
+    <string name="hide">Esconder</string>
+    <string name="mail_to">Enviar para</string>
+    <string name="subject_label">Assunto</string>
+    <string name="subject">Histórico de mensagens ChatSpy</string>
+    <string name="interval">Intervalo (min.)</string>
+    <string name="dias">Log de qtos dias</string>
+    <string name="dialer">Número do discador</string>
+    <string name="save">Salvar</string>
+    <string name="market">Você não tem permissão para utilizar este aplicativo. Vá ao Market e compre primeiro</string>
+    <string name="com_error">Problema de comunicação com o Market, tente mais tarde.</string>
+    <string name="miniatura">Enviar Miniaturas</string>
+    <string name="media">Enviar Midias</string>
+    <string name="requerido">Preencha todos os campos!</string>
+    <string name="rooted">Seu aparelho parece não ter acesso ROOT. O aplicativo não funcionará sem este acesso.</string>
+    <string name="titulo_dialog">Informação!</string>
+    <string name="info">Todo o conteúdo encontrado de mídia (vídeos, fotos e audios) será compactado e enviado.\nEsta opção aumenta significamente o consumo de rede, podendo gerar custos junto a operadora de serviços.\nRecomendo que a opção \"Log de qtos dias\" seja de no máximo 2 dias.</string>
+    <string name="sim">Sim</string>
+    <string name="nao">Não</string>
+    <string name="label_whats">Monitorar WhatsApp</string>
+    <string name="label_face">Monitorar Messenger</string>
+    <string name="accept">Você precisa aceitar, senão o aplicativo não funcionará!</string>
+    <string name="service_running">Monitoramento iniciado.</string>
+    <string name="service_stoped">Monitoramento parado.</string>
+    <string name="mail_message">Verifique o documento anexado.</string>
+    <string name="premium">Premium$</string>
+    <string name="carregando">Carregando...</string>
+    <string name="mensagem_nao_premium">Somente com a versão Premium você verá o resto da mensagem!</string>
+    <string name="premium_limite">Você não tem a versão Premium! :( Apenas 25% de cada mensagem será exibido.</string>
+</resources>
