@@ -2,11 +2,12 @@ package com.gravatasufoca.spylogger.model.messenger;
 
 import java.io.Serializable;
 
+import com.gravatasufoca.spylogger.model.EntidadeAbstrata;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName="contacts")
-public class Contact extends EntidadeAbstrata{
+public class Contact extends EntidadeAbstrata {
 
 	private static final long serialVersionUID = 723873977185254805L;
 

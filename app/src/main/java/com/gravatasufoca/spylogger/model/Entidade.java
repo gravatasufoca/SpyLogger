@@ -1,4 +1,4 @@
-package com.gravatasufoca.spylogger.model.messenger;
+package com.gravatasufoca.spylogger.model;
 
 import java.io.Serializable;
 

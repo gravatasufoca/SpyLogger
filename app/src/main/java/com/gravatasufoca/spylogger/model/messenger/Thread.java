@@ -1,5 +1,6 @@
 package com.gravatasufoca.spylogger.model.messenger;
 
+import com.gravatasufoca.spylogger.model.EntidadeAbstrata;
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
@@ -16,7 +17,7 @@ import java.util.Date;
 import java.util.List;
 
 @DatabaseTable(tableName="threads")
-public class Thread extends EntidadeAbstrata{
+public class Thread extends EntidadeAbstrata {
 	private static final long serialVersionUID = -4679985146526783051L;
 
 	public Thread() {

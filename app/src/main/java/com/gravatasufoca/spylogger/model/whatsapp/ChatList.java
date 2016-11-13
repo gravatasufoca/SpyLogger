@@ -2,6 +2,7 @@ package com.gravatasufoca.spylogger.model.whatsapp;
 
 import android.content.ContentResolver;
 
+import com.gravatasufoca.spylogger.model.EntidadeAbstrata;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DataType;
@@ -16,7 +17,7 @@ import java.util.Date;
 import java.util.List;
 
 @DatabaseTable(tableName="chat_list")
-public class ChatList extends EntidadeAbstrata{
+public class ChatList extends EntidadeAbstrata {
 	private static final long serialVersionUID = -4679985146526783051L;
 
 	public ChatList() {

@@ -1,17 +1,19 @@
 package com.gravatasufoca.spylogger.model.messenger;
 
-import java.io.Serializable;
-import java.util.Date;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import com.gravatasufoca.spylogger.model.EntidadeAbstrata;
+import com.gravatasufoca.spylogger.model.Mensagem;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
+import java.util.Date;
+
 @DatabaseTable
-public class Messages extends EntidadeAbstrata implements Comparable<Messages>{
+public class Messages extends EntidadeAbstrata implements Comparable<Messages>,Mensagem{
 	private static final long serialVersionUID = -4679985146526783051L;
 
 	public Messages() {

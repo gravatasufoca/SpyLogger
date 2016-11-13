@@ -87,6 +87,8 @@ public class Utils {
 	public static String PREF="jabi";
 	public static String COMPRADO="potoca";
 
+	public static Context context;
+
 	public static String getDeviceId(ContentResolver contentResolver){
 		String deviceId = Secure.getString(contentResolver,Secure.ANDROID_ID);
 		return "_#$A3d12abk%"+deviceId;
@@ -212,7 +214,8 @@ public class Utils {
 
 	public static String getContactDisplayNameByNumber(String number,
 			ContentResolver contentResolver) {
-		Cursor contact = getContact(number, contentResolver);
+		if(number.isEmpty()) return "";
+		Cursor contact = getContact(number.substring(0,number.indexOf("@")), contentResolver);
 		return getContactDisplayNameByNumber(contact);
 	}
 

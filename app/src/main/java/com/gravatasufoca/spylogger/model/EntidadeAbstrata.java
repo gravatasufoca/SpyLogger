@@ -1,4 +1,4 @@
-package com.gravatasufoca.spylogger.model.whatsapp;
+package com.gravatasufoca.spylogger.model;
 
 /**
  * Classe base para as entidades do sistema.

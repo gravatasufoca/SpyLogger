@@ -1,6 +1,5 @@
 package com.gravatasufoca.spylogger.model;
 
-import com.gravatasufoca.spylogger.model.whatsapp.EntidadeAbstrata;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
