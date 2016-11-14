@@ -3,7 +3,7 @@ package com.gravatasufoca.spylogger.model.whatsapp;
 import android.content.ContentResolver;
 
 import com.gravatasufoca.spylogger.model.EntidadeAbstrata;
-import com.gravatasufoca.spylogger.model.Mensagem;
+import com.gravatasufoca.spylogger.model.MensagenInterface;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
@@ -18,7 +18,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @DatabaseTable
-public class Messages extends EntidadeAbstrata implements Comparable<Messages>,Mensagem{
+public class Messages extends EntidadeAbstrata implements Comparable<Messages>,MensagenInterface {
 	private static final long serialVersionUID = -4679985146526783051L;
 
 	public Messages() {
@@ -71,7 +71,7 @@ public class Messages extends EntidadeAbstrata implements Comparable<Messages>,M
 
 	@DatabaseField()
 	private String media_hash;
-
+//	select date(timestamp/1000,'unixepoch','localtime'), * from messages where remote_resource='556184320285@s.whatsapp.net' and media_wa_type=13 limit 10;
 	@DatabaseField()
 	private double latitude;
 

