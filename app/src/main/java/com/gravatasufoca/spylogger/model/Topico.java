@@ -31,10 +31,8 @@ public class Topico extends EntidadeAbstrata{
     private Integer id;
     @DatabaseField(canBeNull = false)
     private String idReferencia;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = true)
     private String nome;
-    @DatabaseField(dataType= DataType.DATE_LONG)
-    private Date dataCriacao;
     @DatabaseField(dataType= DataType.DATE_LONG)
     private Date ordenacao;
 
@@ -68,10 +66,6 @@ public class Topico extends EntidadeAbstrata{
             return this;
         }
 
-        public TopicoBuilder setDataCriacao(Date dataCriacao){
-            topico.setDataCriacao(dataCriacao);
-            return this;
-        }
 
         public TopicoBuilder setOrdenacao(Date data){
             topico.setOrdenacao(data);

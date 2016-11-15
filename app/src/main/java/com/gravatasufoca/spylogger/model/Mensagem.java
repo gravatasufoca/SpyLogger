@@ -44,9 +44,6 @@ public class Mensagem extends EntidadeAbstrata{
     @DatabaseField
     private String contato;
 
-    @DatabaseField
-    private String remoteKey;
-
     @DatabaseField( dataType = DataType.BYTE_ARRAY)
     private byte[] raw_data=null;
 
@@ -109,11 +106,6 @@ public class Mensagem extends EntidadeAbstrata{
 
         public MensagemBuilder setTexto(String texto) {
             mensagem.setTexto(texto);
-            return this;
-        }
-
-        public MensagemBuilder setRemoteKey(String texto) {
-            mensagem.setRemoteKey(texto);
             return this;
         }
 
