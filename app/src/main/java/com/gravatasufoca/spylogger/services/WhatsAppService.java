@@ -132,8 +132,6 @@ public class WhatsAppService extends Service {
 
 		try {
 			daoMsgExternal = external.getMessagesDao();
-			daoChatExternal = external.getChatDao();
-
 			daoMsgExternal.executeRaw("attach database '"+inFileName+"' as 'localdb' ");
 
 
@@ -183,7 +181,6 @@ public class WhatsAppService extends Service {
 				mensagems.add(mensagem);
 			}
 
-			mensagems.size();
 			dbHelper.getMensagemDao().create(mensagems);
 
 

