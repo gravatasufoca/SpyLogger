@@ -83,10 +83,12 @@ public class Messages extends EntidadeAbstrata implements Comparable<Messages>,M
 
 	public Sender getSender() {
 		if(sender==null){
-			try {
-				sender= new Sender(new JSONObject(tsender));
-			} catch (JSONException e) {
-				e.printStackTrace();
+			if(tsender!=null) {
+				try {
+					sender = new Sender(new JSONObject(tsender));
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		return sender;

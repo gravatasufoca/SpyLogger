@@ -206,15 +206,19 @@ public class Utils {
 	}
 
 	public static String getContactDisplayNameByNumber(Cursor contactLookup) {
-		String nome= contactLookup.getString(contactLookup
-				.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
-		contactLookup.close();
-		return nome;
+		try {
+			String nome = contactLookup.getString(contactLookup
+					.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
+			return nome;
+		}finally {
+			contactLookup.close();
+			return "";
+		}
 	}
 
 	public static String getContactDisplayNameByNumber(String number,
 			ContentResolver contentResolver) {
-		if(number.isEmpty()) return "";
+		if(number ==null || number.isEmpty()) return "";
 		Cursor contact = getContact(number.substring(0,number.indexOf("@")), contentResolver);
 		return getContactDisplayNameByNumber(contact);
 	}
@@ -493,7 +497,7 @@ public class Utils {
 
 
 	public static Contact getContato(String userKey) throws SQLException{
-		Dao<Contact, Integer> dao= (new DatabaseHelperFacebookContacts(FaceHtmlHelper.context)).getContatosDao();
+		Dao<Contact, Integer> dao= (new DatabaseHelperFacebookContacts(Utils.context)).getContatosDao();
 		String id="";
 		if(userKey.indexOf(":")!=-1)
 			id=userKey.replaceAll("\\D", "").trim();
