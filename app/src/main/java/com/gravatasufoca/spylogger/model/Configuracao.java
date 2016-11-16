@@ -6,7 +6,12 @@ import com.j256.ormlite.table.DatabaseTable;
 
 import java.io.Serializable;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @DatabaseTable
+@Getter
+@Setter
 public class Configuracao extends EntidadeAbstrata{
 	private static final long serialVersionUID = -4679985146526783051L;
 
@@ -52,73 +57,6 @@ public class Configuracao extends EntidadeAbstrata{
 	@DatabaseField(canBeNull=false,dataType=DataType.BOOLEAN)
 	private boolean facebook;
 
-	public String getEmailTo() {
-		return emailTo;
-	}
-
-	public void setEmailTo(String emailTo) {
-		this.emailTo = emailTo;
-	}
-
-	public Integer getIntervalo() {
-		return intervalo;
-	}
-
-	public void setIntervalo(Integer intervalo) {
-		this.intervalo = intervalo;
-	}
-
-	public boolean isFirstTime() {
-		return firstTime;
-	}
-	public void setFirstTime(boolean firstTime) {
-		this.firstTime = firstTime;
-	}
-
-	public String getDialer() {
-		return dialer;
-	}
-	public void setDialer(String dialer) {
-		this.dialer = dialer;
-	}
-
-	public String getSubject() {
-		return subject;
-	}
-	public void setSubject(String subject) {
-		this.subject = subject;
-	}
-
-	public boolean isMedia() {
-		return media;
-	}
-	public void setMedia(boolean media) {
-		this.media = media;
-	}
-	public boolean isMiniatura() {
-		return miniatura;
-	}
-	public void setMiniatura(boolean miniatura) {
-		this.miniatura = miniatura;
-	}
-
-	public Integer getDias() {
-		return dias;
-	}
-	public void setDias(Integer dias) {
-		this.dias = dias;
-	}
-
-	public void setWhatsApp(boolean whatsApp) {
-		this.whatsApp = whatsApp;
-	}
-	public boolean isWhatsApp() {
-		return whatsApp;
-	}
-	public void setFacebook(boolean facebook) {
-		this.facebook = facebook;
-	}
-	public boolean isFacebook() {
-		return facebook;
-	}
+	@DatabaseField
+	private String smsBlacklist;
 }

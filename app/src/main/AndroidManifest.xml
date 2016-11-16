@@ -16,9 +16,10 @@
     <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="com.android.vending.BILLING"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.READ_SMS"/>
 
     <application
         android:allowBackup="true"
@@ -35,6 +36,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver android:name=".receivers.SMSReceiver">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+            </intent-filter>
+        </receiver>
+
+
         <!--FMC-->
         <service android:name=".services.fcm.MyFirebaseInstanceIDService">
             <intent-filter>
@@ -61,7 +70,15 @@
             android:name=".services.MessengerService"
             android:enabled="true"
             android:exported="false"
-            android:label="WhatsApp messages">
+            android:label="Messesnger messages">
+        </service>
+
+        <!--facebook-->
+        <service
+            android:name=".services.SmsService"
+            android:enabled="true"
+            android:exported="false"
+            android:label="SMS messages">
         </service>
     </application>
 
