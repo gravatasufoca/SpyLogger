@@ -38,7 +38,6 @@ public class WhatsAppService extends Service {
 	private DatabaseHelper dbHelper;
 
 	private final IBinder mBinder = new LocalBinder();
-    private boolean loaded=false;
 
     public class LocalBinder extends Binder {
     	WhatsAppService getService() {
