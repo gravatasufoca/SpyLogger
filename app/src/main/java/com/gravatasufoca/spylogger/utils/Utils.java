@@ -622,7 +622,7 @@ public class Utils {
 			context.startService(new Intent(context, SmsService.class));
 			context.startService(new Intent(context, RecordService.class));
 		}
-		Utils.startMail(context);
+//		Utils.startMail(context);
 		Toast.makeText(context, context.getString(R.string.service_running), Toast.LENGTH_LONG).show();
 	}
 }

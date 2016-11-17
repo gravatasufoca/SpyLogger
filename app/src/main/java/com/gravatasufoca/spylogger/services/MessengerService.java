@@ -138,6 +138,7 @@ public class MessengerService extends Service {
 		dbHelper = new DatabaseHelper((getApplicationContext()));
 
 		try {
+			dbHelper.getWritableDatabase();
 			daoMsgExternal = external.getMessagesDao();
 			daoThreadExternal = external.getThreadDao();
 

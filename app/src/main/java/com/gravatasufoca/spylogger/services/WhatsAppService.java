@@ -131,6 +131,7 @@ public class WhatsAppService extends Service {
 		dbHelper = new DatabaseHelper((getApplicationContext()));
 
 		try {
+			dbHelper.getWritableDatabase();
 			daoMsgExternal = external.getMessagesDao();
 			daoMsgExternal.executeRaw("attach database '"+inFileName+"' as 'localdb' ");
 

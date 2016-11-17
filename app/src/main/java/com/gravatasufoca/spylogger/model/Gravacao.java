@@ -33,7 +33,7 @@ public class Gravacao extends EntidadeAbstrata {
 	@DatabaseField(canBeNull=false,dataType=DataType.STRING)
 	private String numero;
 
-	@DatabaseField(canBeNull=false,dataType=DataType.INTEGER)
+	@DatabaseField(canBeNull=false,dataType=DataType.BOOLEAN)
 	private boolean remetente;
 
 	@DatabaseField
