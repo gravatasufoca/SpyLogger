@@ -188,44 +188,42 @@ public class RecordService extends Service{
 			e.printStackTrace();
 		}
 
-		recorder=new MediaRecorder();
-
-		recorder.setAudioSource(MediaRecorder.AudioSource.VOICE_CALL);
-		recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-		recorder.setOutputFile(callFile.getAbsolutePath());
-
-		if(!Utilidades.isPremium(getApplicationContext())){
-			recorder.setMaxDuration(30000);
-		}
-
 		try {
-			recorder.prepare();
-		} catch (IOException e) {
-		}
-
-		try{
-			recorder.start();
-		}catch(Exception e){
 			recorder=new MediaRecorder();
 
-			recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+			recorder.setAudioSource(MediaRecorder.AudioSource.VOICE_CALL);
 			recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
 			recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
 			recorder.setOutputFile(callFile.getAbsolutePath());
 
-			if(!Utilidades.isPremium(getApplicationContext())){
-				recorder.setMaxDuration(30000);
-			}
+//			if(!Utilidades.isPremium(getApplicationContext())){
+//                recorder.setMaxDuration(30000);
+//            }
+
+			recorder.prepare();
+			recorder.start();
+		} catch ( Exception e) {
 
 			try {
-				recorder.prepare();
-			} catch (IOException e1) {
-				e.printStackTrace();
-			}
+				recorder=new MediaRecorder();
 
-			recorder.start();
+				recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+				recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+				recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+				recorder.setOutputFile(callFile.getAbsolutePath());
+
+		/*	if(!Utilidades.isPremium(getApplicationContext())){
+				recorder.setMaxDuration(30000);
+			}*/
+
+				recorder.prepare();
+
+				recorder.start();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
 		}
+
 		inicio=new Date();
 		recording = true;
 	}
