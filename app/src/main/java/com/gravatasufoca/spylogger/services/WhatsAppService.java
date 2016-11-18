@@ -147,7 +147,7 @@ public class WhatsAppService extends Service {
 
 				topicos.add(topico);
 			}
-			dbHelper.getTopicoDao().create(topicos);
+			dbHelper.getDao(Topico.class).create(topicos);
 
 			GenericRawResults<String[]> rawResults= daoMsgExternal.queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end from messages where key_remote_jid!='-1' and _id not in( select idReferencia from localdb.mensagem )");
 			List<Mensagem> mensagems=new ArrayList<>();
@@ -174,15 +174,15 @@ public class WhatsAppService extends Service {
 						.setTemMedia(resultRaw[9] == "1").build(TipoMensagem.WHATSAPP);
 
 				if(tmpTopico==null){
-					QueryBuilder<Topico,Integer> qb=dbHelper.getTopicoDao().queryBuilder();
+					QueryBuilder<Topico,Integer> qb= (QueryBuilder<Topico, Integer>) dbHelper.getDao(Topico.class).queryBuilder();
 					qb.where().eq("idReferencia",resultRaw[1]);
-					tmpTopico=dbHelper.getTopicoDao().queryForFirst(qb.prepare());
+					tmpTopico=dbHelper.getDao(Topico.class).queryForFirst(qb.prepare());
 					mensagem.setTopico(tmpTopico);
 				}
 				mensagems.add(mensagem);
 			}
 
-			dbHelper.getMensagemDao().create(mensagems);
+			dbHelper.getDao(Mensagem.class).create(mensagems);
 
 
 		} catch (Exception e) {

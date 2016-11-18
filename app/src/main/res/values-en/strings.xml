@@ -51,4 +51,6 @@
     <string name="carregando">Loading...</string>
     <string name="mensagem_nao_premium">Only with Premium Version you see the whole message!</string>
     <string name="premium_limite">You don\'t have the Premium version! :( Only 25% of each message will be shown!</string>
+    <string name="nao_conectado">No internet access found!</string>
+
 </resources>

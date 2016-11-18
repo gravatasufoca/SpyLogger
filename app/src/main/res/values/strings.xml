@@ -52,4 +52,5 @@
     <string name="carregando">Carregando...</string>
     <string name="mensagem_nao_premium">Somente com a versão Premium você verá o resto da mensagem!</string>
     <string name="premium_limite">Você não tem a versão Premium! :( Apenas 25% de cada mensagem será exibido.</string>
+    <string name="nao_conectado">Nenhuma conexão a internet foi encontrada!</string>
 </resources>

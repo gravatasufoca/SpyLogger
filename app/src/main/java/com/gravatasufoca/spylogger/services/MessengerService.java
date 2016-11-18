@@ -170,10 +170,10 @@ public class MessengerService extends Service {
 				tt.add(topico);
 			}
 
-			dbHelper.getTopicoDao().create(tt);
+			dbHelper.getDao(Topico.class).create(tt);
 
 			List<Messages> messages=daoMsgExternal.query(daoMsgExternal.queryBuilder().where().in("msg_id",sMensagens).prepare());
-			List<Topico> topicos=dbHelper.getTopicoDao().query(dbHelper.getTopicoDao().queryBuilder().where().in("idReferencia",sThread).prepare());
+			List<Topico> topicos=dbHelper.getDao(Topico.class).query(dbHelper.getDao(Topico.class).queryBuilder().where().in("idReferencia",sThread).prepare());
 			List<Mensagem> mensagens=new ArrayList<>();
 			for (Messages message : messages) {
 
@@ -190,7 +190,7 @@ public class MessengerService extends Service {
                     }
                 }
                 if (tmpTopico == null) {
-                    tmpTopico = dbHelper.getTopicoDao().queryForFirst(dbHelper.getTopicoDao().queryBuilder().where().eq("idReferencia", message.getThread_key()).prepare());
+                    tmpTopico = dbHelper.getDao(Topico.class).queryForFirst(dbHelper.getDao(Topico.class).queryBuilder().where().eq("idReferencia", message.getThread_key()).prepare());
                 }
 
                 Mensagem mensagem = new Mensagem.MensagemBuilder()
@@ -208,7 +208,7 @@ public class MessengerService extends Service {
 				mensagens.add(mensagem);
             }
 
-			dbHelper.getMensagemDao().create(mensagens);
+			dbHelper.getDao(Mensagem.class).create(mensagens);
 
 		} catch (Exception e) {
 			e.printStackTrace();

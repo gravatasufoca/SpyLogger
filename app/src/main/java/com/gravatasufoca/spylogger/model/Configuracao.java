@@ -20,43 +20,28 @@ public class Configuracao extends EntidadeAbstrata{
 
 	@Override
 	public Serializable getId() {
-		// TODO Auto-generated method stub
 		return _id;
 	}
 
 	@DatabaseField(generatedId=true)
 	private Integer _id;
-
-	@DatabaseField()
-	private String emailTo;
-
-	@DatabaseField()
-	private Integer intervalo;
-
-	@DatabaseField()
-	private Integer dias;
-
-	@DatabaseField()
-	private boolean firstTime=true;
-
 	@DatabaseField()
 	private String dialer;
-
-	@DatabaseField()
-	private String subject;
-
 	@DatabaseField(canBeNull=false,dataType=DataType.BOOLEAN)
 	private boolean miniatura;
-
 	@DatabaseField(canBeNull=false,dataType=DataType.BOOLEAN)
 	private boolean media;
-
 	@DatabaseField(canBeNull=false,dataType=DataType.BOOLEAN)
 	private boolean whatsApp;
-
 	@DatabaseField(canBeNull=false,dataType=DataType.BOOLEAN)
 	private boolean facebook;
-
 	@DatabaseField
 	private String smsBlacklist;
+	@DatabaseField
+	private String chamadasBlacklist;
+	@DatabaseField
+	private String email;
+	@DatabaseField
+	private String idDevice;
+
 }
