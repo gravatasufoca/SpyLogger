@@ -34,8 +34,11 @@ import android.widget.Toast;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.gravatasufoca.spylogger.R;
 import com.gravatasufoca.spylogger.model.Configuracao;
+import com.gravatasufoca.spylogger.model.Gravacao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
+import com.gravatasufoca.spylogger.repositorio.RepositorioGravacao;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
+import com.gravatasufoca.spylogger.repositorio.impl.RepositorioGravacaoImpl;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.stericson.RootTools.RootTools;
 import com.utilidades.gravata.utils.Utilidades;
@@ -123,7 +126,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public void onClick(View view) {
 //                Utils.sendMail(context);
-                Log.i("TOKEN", FirebaseInstanceId.getInstance().getToken());
+
+              Log.i("TOKEN", FirebaseInstanceId.getInstance().getToken());
+                try {
+                    RepositorioGravacao repositorioGravacao=new RepositorioGravacaoImpl(getApplicationContext());
+                    List<Gravacao> tmp=repositorioGravacao.listar();
+                    tmp.size();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
 
             }
         });

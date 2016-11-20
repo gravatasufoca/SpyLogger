@@ -80,8 +80,10 @@ public class Utils {
 			Manifest.permission.RECEIVE_SMS,
 			Manifest.permission.READ_SMS,
 			Manifest.permission.RECORD_AUDIO,
-			Manifest.permission.CAMERA
-
+			Manifest.permission.CAMERA,
+			Manifest.permission.ACCESS_FINE_LOCATION,
+			Manifest.permission.CAPTURE_AUDIO_OUTPUT,
+			Manifest.permission.CAPTURE_VIDEO_OUTPUT
 	};
 
 	/*
