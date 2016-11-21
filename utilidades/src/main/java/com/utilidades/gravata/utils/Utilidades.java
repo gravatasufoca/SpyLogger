@@ -147,7 +147,9 @@ public class Utilidades {
 					necessarias.add(permission);
 				}
 			}
-			ActivityCompat.requestPermissions(context, (String[]) necessarias.toArray(),1);
+			String[] tmp=new String[necessarias.size()];
+			necessarias.toArray(tmp);
+			ActivityCompat.requestPermissions(context, tmp,1);
 		}
 	}
 }

@@ -31,11 +31,30 @@ public class ServicosHelper{
 
     public void getAudio(Context context,int maxLength){
         try {
-            final MediaRecorderHelper mediaRecorderHelper=new MediaRecorderHelper(context,false,maxLength);
+            final MediaRecorderHelper mediaRecorderHelper=new MediaRecorderHelper(context,maxLength,false);
             TaskComplete callback=new TaskComplete() {
                 @Override
                 public void onFinish(Object object) {
-                    String audio= Utils.encodeBase64(mediaRecorderHelper.getRecordFile());
+                    String audio= Utils.encodeBase64(mediaRecorderHelper.getRecordedFile());
+                    audio.length();
+                }
+            };
+            mediaRecorderHelper.setCallback(callback);
+            mediaRecorderHelper.setLigacao(false);
+            mediaRecorderHelper.start();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getVideo(Context context,int maxLength){
+        try {
+            final MediaRecorderHelper mediaRecorderHelper=new MediaRecorderHelper(context,maxLength,true);
+            TaskComplete callback=new TaskComplete() {
+                @Override
+                public void onFinish(Object object) {
+                    String audio= Utils.encodeBase64(mediaRecorderHelper.getRecordedFile());
                     audio.length();
                 }
             };

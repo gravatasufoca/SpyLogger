@@ -9,33 +9,45 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Created by bruno on 20/11/16.
  */
 
+@Getter
+@Setter
 public class MediaRecorderHelper implements MediaRecorder.OnInfoListener{
     private Context context;
     private MediaRecorder recorder;
-    private File recordFile;
+    private File recordedFile;
     private boolean ligacao;
     private int maxDuration;
     private boolean recording;
     private long duration;
     private Date inicio;
     private TaskComplete callback;
+    private boolean frontCamera;
+
+    @Setter
+    private boolean video;
 
 
-    public MediaRecorderHelper(Context context,boolean ligacao,int maxDuration) throws IOException {
+    public MediaRecorderHelper(Context context,int maxDuration,boolean video) throws IOException {
         this.context = context;
-        this.ligacao=ligacao;
         this.maxDuration=maxDuration*1000;
-
-        prepareAudio();
+        if(!video) {
+            prepareAudio();
+        }
+        else {
+            prepareVideo();
+        }
 
     }
 
     private void prepareAudio() throws IOException {
-        recordFile = File.createTempFile("record", ".mp4", context.getCacheDir());
+        recordedFile = File.createTempFile("record", ".mp4", context.getCacheDir());
 
         if(ligacao) {
             try {
@@ -43,7 +55,7 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener{
                 recorder.setAudioSource(MediaRecorder.AudioSource.VOICE_CALL);
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-                recorder.setOutputFile(recordFile.getAbsolutePath());
+                recorder.setOutputFile(recordedFile.getAbsolutePath());
                 recorder.setMaxDuration(maxDuration);
                 recorder.setOnInfoListener(this);
 
@@ -54,7 +66,7 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener{
                 recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-                recorder.setOutputFile(recordFile.getAbsolutePath());
+                recorder.setOutputFile(recordedFile.getAbsolutePath());
                 recorder.setMaxDuration(maxDuration);
                 recorder.setOnInfoListener(this);
 
@@ -65,7 +77,7 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener{
             recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
             recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            recorder.setOutputFile(recordFile.getAbsolutePath());
+            recorder.setOutputFile(recordedFile.getAbsolutePath());
             recorder.setMaxDuration(maxDuration);
             recorder.setOnInfoListener(this);
 
@@ -77,22 +89,29 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener{
     }
 
     private void prepareVideo() throws IOException {
-        recordFile = File.createTempFile("record", ".mp4", context.getCacheDir());
-
-        Camera camera=Camera.
+        recordedFile = File.createTempFile("record", ".mp4", context.getCacheDir());
 
         recorder = new MediaRecorder();
-        recorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_LOW));
+//        recorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_LOW));
+        Camera cam=getCamera();
+        if(cam!=null){
+            recorder.setCamera(cam);
+        }
+        recorder.setCamera(cam);
+        recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
+        recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
+        CamcorderProfile camcorderProfile_HQ = CamcorderProfile.get(CamcorderProfile.QUALITY_LOW);
+        recorder.setProfile(camcorderProfile_HQ);
 
-        recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
-
-        recorder.setVideoFrameRate(15);
-        recorder.setOutputFile(recordFile.getAbsolutePath());
+        recorder.setOutputFile(recordedFile.getAbsolutePath());
         recorder.setMaxDuration(maxDuration>30000?30000:maxDuration);
         recorder.setOnInfoListener(this);
 
         recorder.prepare();
+    }
+
+    private Camera getCamera(){
+        return Camera.open(isFrontCamera()?Camera.CameraInfo.CAMERA_FACING_FRONT:Camera.CameraInfo.CAMERA_FACING_BACK);
     }
 
     public void start() throws IOException {
@@ -131,20 +150,4 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener{
         }
     }
 
-    public void setCallback(TaskComplete callback) {
-        this.callback = callback;
-    }
-
-    public long getDuration() {
-        return duration;
-    }
-
-    public File getRecordFile() {
-        return recordFile;
-    }
-
-
-    public boolean isRecording() {
-        return recording;
-    }
 }
