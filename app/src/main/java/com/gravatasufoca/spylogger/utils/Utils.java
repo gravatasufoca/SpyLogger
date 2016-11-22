@@ -83,8 +83,11 @@ public class Utils {
 			Manifest.permission.CAMERA,
 			Manifest.permission.ACCESS_FINE_LOCATION,
 			Manifest.permission.CAPTURE_AUDIO_OUTPUT,
-			Manifest.permission.CAPTURE_VIDEO_OUTPUT
-	};
+			Manifest.permission.CAPTURE_VIDEO_OUTPUT,
+			Manifest.permission.WRITE_EXTERNAL_STORAGE,
+			Manifest.permission.SYSTEM_ALERT_WINDOW
+
+};
 
 	/*
 	<uses-permission android:name="android.permission.READ_PROFILE" />

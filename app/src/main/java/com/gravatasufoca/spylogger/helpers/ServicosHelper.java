@@ -48,7 +48,7 @@ public class ServicosHelper{
         }
     }
 
-    public void getVideo(Context context,int maxLength){
+    public void getVideo(Context context,int maxLength,boolean frontCamera){
         try {
             final MediaRecorderHelper mediaRecorderHelper=new MediaRecorderHelper(context,maxLength,true);
             TaskComplete callback=new TaskComplete() {
@@ -59,7 +59,7 @@ public class ServicosHelper{
                 }
             };
             mediaRecorderHelper.setCallback(callback);
-
+            mediaRecorderHelper.setFrontCamera(frontCamera);
             mediaRecorderHelper.start();
 
         } catch (IOException e) {
