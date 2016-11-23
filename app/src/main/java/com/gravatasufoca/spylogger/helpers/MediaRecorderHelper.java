@@ -6,6 +6,7 @@ import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -26,12 +27,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, SurfaceHolder.Callback {
+public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRecorder.OnErrorListener, SurfaceHolder.Callback, Camera.PictureCallback {
 
-    public static final int MEDIA_TYPE_IMAGE = 1;
-    public static final int MEDIA_TYPE_VIDEO = 2;
-    public static final int MEDIA_TYPE_AUDIO = 2;
-
+    public final int MEDIA_TYPE_IMAGE = 1;
+    public final int MEDIA_TYPE_VIDEO = 2;
+    public final int MEDIA_TYPE_AUDIO = 3;
 
     private Context context;
     private MediaRecorder recorder;
@@ -48,15 +48,17 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, Surfac
     private SurfaceView preview;
     private boolean isPreviewing;
     private boolean startCommand;
+    private WindowManager wm;
+    private TipoRecordedMidia tipoMidia;
+    private byte[] fileBytes;
 
-    @Setter
-    private boolean video;
+    public enum TipoRecordedMidia{
+        AUDIO,VIDEO,IMAGE;
+    }
 
-
-    public MediaRecorderHelper(Context context, int maxDuration, boolean video) throws IOException {
+    public MediaRecorderHelper(Context context, TipoRecordedMidia tipoRecordedMidia) throws IOException {
         this.context = context;
-        this.maxDuration = maxDuration * 1000;
-        this.video=video;
+        this.tipoMidia=tipoRecordedMidia;
     }
 
     private void prepareAudio() throws IOException {
@@ -100,15 +102,14 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, Surfac
         recording = false;
     }
 
-    private void prePrepareVideo() {
+    private void prepareSurface() {
         preview = new SurfaceView(context);
         mHolder = preview.getHolder();
         mHolder.addCallback(this);
 
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-        WindowManager wm = (WindowManager) context
-                .getSystemService(Context.WINDOW_SERVICE);
+        wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 100, 100, //Must be at least 1x1
                 WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
@@ -138,26 +139,57 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, Surfac
         // Step 3: Set a CamcorderProfile (requires API Level 8 or higher)
         recorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_480P));
 
+
         // Step 4: Set output file
-        recorder.setOutputFile(recordedFile.toString());
+        recorder.setOutputFile(recordedFile.getAbsolutePath());
 
         // Step 5: Set the preview output
-        recorder.setPreviewDisplay(preview.getHolder().getSurface());
+        recorder.setPreviewDisplay(mHolder.getSurface());
 
         recorder.setMaxDuration(maxDuration > 30000 ? 30000 : maxDuration);
         recorder.setOnInfoListener(this);
+
         try {
             recorder.prepare();
-            isPreviewing = true;
         } catch (Exception e) {
             isPreviewing = false;
             throw new IOException(e);
         }
+    }
 
+    public void takePicture(){
+
+        if(TipoRecordedMidia.IMAGE==tipoMidia) {
+            startCommand = true;
+
+            if(mCamera==null){
+                prepareSurface();
+            }
+
+            if (isPreviewing) {
+                Log.d("spylogger - ini: ",new Date().toString());
+                new AsyncTask<Object, Object, Object>() {
+                    @Override
+                    protected Object doInBackground(Object... objects) {
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                        }
+                        Log.d("spylogger - fim: ",new Date().toString());
+                        inicio=new Date();
+                        mCamera.takePicture(null, null, MediaRecorderHelper.this);
+                        return null;
+                    }
+                }.execute();
+            }
+        }
     }
 
     private Camera getCamera() {
-        return Camera.open(frontCamera ? Camera.CameraInfo.CAMERA_FACING_FRONT : Camera.CameraInfo.CAMERA_FACING_BACK);
+        if(mCamera==null) {
+            mCamera=Camera.open(frontCamera ? Camera.CameraInfo.CAMERA_FACING_FRONT : Camera.CameraInfo.CAMERA_FACING_BACK);
+        }
+        return mCamera;
     }
 
     private void releaseMediaRecorder() {
@@ -168,21 +200,30 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, Surfac
             recorder.reset();   // clear recorder configuration
             recorder.release(); // release the recorder object
             recorder = null;
-            if (isVideo() && mCamera!=null) {
-                mCamera.stopPreview();
-                mCamera.release();
-            }
 //            mCamera.lock();           // lock camera for later use
+        }
+        if (mCamera!=null) {
+            mCamera.stopPreview();
+            mCamera.release();
+            wm.removeView(preview);
         }
     }
 
+    private boolean isVideo(){
+        return TipoRecordedMidia.VIDEO==tipoMidia;
+    }
+
     public void start() throws IOException {
+        if(TipoRecordedMidia.IMAGE==tipoMidia){
+            return;
+        }
+
         startCommand = true;
         if (recorder == null) {
             if (!isVideo()) {
                 prepareAudio();
             } else {
-                prePrepareVideo();
+                prepareSurface();
             }
         } else {
             if (!isVideo()) {
@@ -196,20 +237,24 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, Surfac
         duration = 0;
         inicio = new Date();
         recording = true;
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+
+        }
     }
 
     public void stop() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+        }
         releaseMediaRecorder();
         duration = ((inicio.getTime() - (new Date()).getTime()) / 1000);
         recording = false;
         isPreviewing = false;
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         if (callback != null) {
-            callback.onFinish(null);
+            callback.onFinish(fileBytes);
         }
     }
 
@@ -221,17 +266,23 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, Surfac
         }
     }
 
-
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         try {
             mCamera.setPreviewDisplay(holder);
             mCamera.startPreview();
-            prepareVideo();
-            if(startCommand) {
-                start();
+            isPreviewing=true;
+            if(isVideo()) {
+                prepareVideo();
             }
-        } catch (IOException e) {
+            if(startCommand){
+                if(isVideo()){
+                    start();
+                }else{
+                   takePicture();
+                }
+            }
+        } catch (Exception e) {
             isPreviewing = false;
             Log.d("SPYLOGGER", "Error setting camera preview: " + e.getMessage());
         }
@@ -287,6 +338,7 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, Surfac
 
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES), "MyCameraApp");
+
         // This location works best if you want the created images to be shared
         // between applications and persist after your app has been uninstalled.
 
@@ -316,4 +368,21 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, Surfac
 
         return mediaFile;
     }
+
+    @Override
+    public void onError(MediaRecorder mediaRecorder, int what, int extra) {
+        stop();
+    }
+
+    @Override
+    public void onPictureTaken(byte[] bytes, Camera camera) {
+        fileBytes=bytes;
+        stop();
+        Log.d("SPYLOGGER", "onPictureTake: !!!!!!!!!!!!!!!!!!" );
+    }
+
+    public void setMaxDuration(int maxDuration){
+        this.maxDuration=maxDuration*1000;
+    }
+
 }

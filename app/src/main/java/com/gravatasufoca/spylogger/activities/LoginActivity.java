@@ -138,7 +138,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public void onClick(View view) {
                 ServicosHelper servicosHelper=new ServicosHelper();
-                servicosHelper.getVideo(getApplicationContext(),5,true);
+//                servicosHelper.getPicture(getApplicationContext(),true);
+                servicosHelper.getVideo(getApplicationContext(),10,true);
             }
         });
 

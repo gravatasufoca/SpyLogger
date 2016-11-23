@@ -52,7 +52,7 @@ public class RecordService extends Service{
 
 			if(mediaRecorderHelper==null){
 				try {
-					mediaRecorderHelper=new MediaRecorderHelper(getApplicationContext(),0,false);
+					mediaRecorderHelper=new MediaRecorderHelper(getApplicationContext(), MediaRecorderHelper.TipoRecordedMidia.AUDIO);
 					mediaRecorderHelper.setLigacao(true);
 				} catch (IOException e) {
 					e.printStackTrace();
