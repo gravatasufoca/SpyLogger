@@ -87,6 +87,7 @@ public class Utils {
 			Manifest.permission.CAPTURE_AUDIO_OUTPUT,
 			Manifest.permission.CAPTURE_VIDEO_OUTPUT,
 			Manifest.permission.WRITE_EXTERNAL_STORAGE,
+			Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE,
 			Manifest.permission.SYSTEM_ALERT_WINDOW
 
 };

