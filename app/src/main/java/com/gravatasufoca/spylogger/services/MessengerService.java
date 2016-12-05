@@ -166,6 +166,7 @@ public class MessengerService extends Service {
 				Topico topico=new Topico.TopicoBuilder()
 						.setIdReferencia(thread.getId().toString())
 						.setNome(thread.getNomes(proprietario))
+						.setGrupo(thread.getSenders()!=null && thread.getSenders().size()>2)
 						.build();
 				tt.add(topico);
 			}

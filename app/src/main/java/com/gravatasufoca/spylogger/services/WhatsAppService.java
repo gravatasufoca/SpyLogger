@@ -39,11 +39,11 @@ public class WhatsAppService extends Service {
 
 	private final IBinder mBinder = new LocalBinder();
 
-    public class LocalBinder extends Binder {
-    	WhatsAppService getService() {
-            return WhatsAppService.this;
-        }
-    }
+	public class LocalBinder extends Binder {
+		WhatsAppService getService() {
+			return WhatsAppService.this;
+		}
+	}
 
 	public WhatsAppService() {
 	}
@@ -57,10 +57,10 @@ public class WhatsAppService extends Service {
 
 		try{
 			CommandCapture command = new CommandCapture(0, "chmod -R 777 "
-				+ android.os.Environment.getDataDirectory().toString()
-				+ "/data/com.whatsapp", "chmod -R 777 "
-						+ getApplicationContext().getPackageManager()
-						.getPackageInfo(getPackageName(), 0).applicationInfo.dataDir);
+					+ android.os.Environment.getDataDirectory().toString()
+					+ "/data/com.whatsapp", "chmod -R 777 "
+					+ getApplicationContext().getPackageManager()
+					.getPackageInfo(getPackageName(), 0).applicationInfo.dataDir);
 			RootTools.getShell(true).add(command);
 		}catch(Exception e){
 			e.printStackTrace();
@@ -77,8 +77,8 @@ public class WhatsAppService extends Service {
 		chmod();
 		try {
 			inFileName = getApplicationContext().getPackageManager()
-                        .getPackageInfo(getPackageName(), 0).applicationInfo.dataDir
-                        + "/databases/"+ DatabaseHelper.DATABASE_NAME;
+					.getPackageInfo(getPackageName(), 0).applicationInfo.dataDir
+					+ "/databases/"+ DatabaseHelper.DATABASE_NAME;
 		} catch (NameNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -111,14 +111,14 @@ public class WhatsAppService extends Service {
 			public void onEvent(int event, String file) {
 
 				switch (event) {
-				case FileObserver.MODIFY:
-					Log.d("DEBUG", "MODIFY:" + pathToWatch + file);
+					case FileObserver.MODIFY:
+						Log.d("DEBUG", "MODIFY:" + pathToWatch + file);
 
-					updateMsg();
-					break;
-				default:
-					// just ignore
-					break;
+						updateMsg();
+						break;
+					default:
+						// just ignore
+						break;
 				}
 
 			}
@@ -143,13 +143,14 @@ public class WhatsAppService extends Service {
 				Topico topico=new Topico.TopicoBuilder()
 						.setIdReferencia(resultRaw[1])
 						.setNome(resultRaw[2])
-						.setOrdenacao(new Date(Long.parseLong(resultRaw[3]))).build();
+						.setGrupo(resultRaw[2]!=null && !resultRaw[2].isEmpty())
+						.build();
 
 				topicos.add(topico);
 			}
 			dbHelper.getDao(Topico.class).create(topicos);
 
-			GenericRawResults<String[]> rawResults= daoMsgExternal.queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end from messages where key_remote_jid!='-1' and _id not in( select idReferencia from localdb.mensagem )");
+			GenericRawResults<String[]> rawResults= daoMsgExternal.queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end,media_mime_type from messages where key_remote_jid!='-1' and _id not in( select idReferencia from localdb.mensagem )");
 			List<Mensagem> mensagems=new ArrayList<>();
 			for(final String[] resultRaw:rawResults){
 				Topico tmpTopico=null;
@@ -162,16 +163,31 @@ public class WhatsAppService extends Service {
 
 				Mensagem mensagem = new Mensagem.MensagemBuilder()
 						.setIdReferencia(resultRaw[0])
-						.setRemetente(resultRaw[2] == "1")
+						.setRemetente(resultRaw[2].equals("1"))
 						.setTexto(resultRaw[3])
 						.setData(new Date(Long.parseLong(resultRaw[4])))
 						.setDataRecebida(new Date(Long.parseLong(resultRaw[8])))
 						.setTamanhoArquivo(Long.parseLong(resultRaw[6]))
 						.setTipoMidia(TipoMidia.getTipoMidia(resultRaw[5]))
+						.setMediaMime(resultRaw[10])
 //						.setContato(Utils.getContactDisplayNameByNumber(resultRaw[7],getContentResolver()))
-						.setContato(resultRaw[7])
+						.setContato(resultRaw[7]!=null ? resultRaw[7]:resultRaw[1])
 						.setTopico(tmpTopico)
 						.setTemMedia(resultRaw[9] == "1").build(TipoMensagem.WHATSAPP);
+
+				if(resultRaw[7]!=null){
+					if(resultRaw[7].indexOf("@")!=-1){
+						mensagem.setNumeroContato(resultRaw[7].substring(0,resultRaw[7].indexOf("@")));
+					}else{
+						mensagem.setNumeroContato(resultRaw[7]);
+					}
+				}else{
+					if(resultRaw[1].indexOf("@")!=-1){
+						mensagem.setNumeroContato(resultRaw[1].substring(0,resultRaw[1].indexOf("@")));
+					}else{
+						mensagem.setNumeroContato(resultRaw[1]);
+					}
+				}
 
 				if(tmpTopico==null){
 					QueryBuilder<Topico,Integer> qb= (QueryBuilder<Topico, Integer>) dbHelper.getDao(Topico.class).queryBuilder();

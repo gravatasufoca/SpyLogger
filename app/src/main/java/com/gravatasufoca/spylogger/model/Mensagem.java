@@ -5,7 +5,10 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +20,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @DatabaseTable(tableName = "mensagem")
-public class Mensagem extends EntidadeAbstrata{
+public class Mensagem extends EntidadeAbstrata {
     private static final long serialVersionUID = -8813262353266302208L;
 
     private Mensagem() {
@@ -31,9 +34,9 @@ public class Mensagem extends EntidadeAbstrata{
     private boolean remetente;
     @DatabaseField(canBeNull = true)
     private String texto;
-    @DatabaseField(canBeNull = false,dataType=DataType.DATE_LONG)
+    @DatabaseField(canBeNull = false, dataType = DataType.DATE_LONG)
     private Date data;
-    @DatabaseField(canBeNull = false,dataType= DataType.DATE_LONG)
+    @DatabaseField(canBeNull = false, dataType = DataType.DATE_LONG)
     private Date dataRecebida;
     @DatabaseField(dataType = DataType.ENUM_STRING)
     private TipoMidia tipoMidia;
@@ -43,11 +46,13 @@ public class Mensagem extends EntidadeAbstrata{
     private long tamanhoArquivo;
     @DatabaseField
     private String contato;
+    @DatabaseField
+    private String numeroContato;
 
-    @DatabaseField( dataType = DataType.BYTE_ARRAY)
-    private byte[] raw_data=null;
+    @DatabaseField(dataType = DataType.BYTE_ARRAY)
+    private byte[] raw_data = null;
 
-    @DatabaseField(foreign=true, foreignColumnName="id",columnName="topico_id")
+    @DatabaseField(foreign = true, foreignColumnName = "id", columnName = "topico_id")
     private Topico topico;
 
     @DatabaseField(dataType = DataType.ENUM_INTEGER)
@@ -55,6 +60,9 @@ public class Mensagem extends EntidadeAbstrata{
 
     @DatabaseField(canBeNull = false)
     private boolean enviada;
+
+    @DatabaseField(canBeNull = false)
+    private boolean midiaEnviada;
 
     private boolean temMedia;
 
@@ -89,17 +97,44 @@ public class Mensagem extends EntidadeAbstrata{
         return result;
     }
 
+    public static Map<String, Integer> columns() {
+        Map<String, Integer> colunas = new HashMap<>();
+
+        Field[] fields = Mensagem.class.getDeclaredFields();
+        int i = 0;
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(DatabaseField.class)) {
+                DatabaseField anotation = field.getAnnotation(DatabaseField.class);
+                String colName;
+                if (anotation.columnName() != null && !anotation.columnName().isEmpty()) {
+                    colName = anotation.columnName();
+                } else {
+                    colName=field.getName();
+                }
+                colunas.put(colName, i);
+                i++;
+            }
+        }
+        return colunas;
+    }
+
     public static class MensagemBuilder {
 
-        private Mensagem mensagem=new Mensagem();
+        private Mensagem mensagem = new Mensagem();
 
         public MensagemBuilder() {
         }
 
-        public Mensagem build(TipoMensagem tipoMensagem){
+        public Mensagem build(TipoMensagem tipoMensagem) {
             mensagem.setTipoMensagem(tipoMensagem);
             mensagem.setEnviada(false);
+            mensagem.setMidiaEnviada(false);
             return mensagem;
+        }
+
+        public MensagemBuilder setId(Integer id) {
+            mensagem.setId(id);
+            return this;
         }
 
         public MensagemBuilder setIdReferencia(String idReferencia) {
@@ -146,10 +181,17 @@ public class Mensagem extends EntidadeAbstrata{
             mensagem.setContato(contato);
             return this;
         }
+
+        public MensagemBuilder setNumeroContato(String numeroContato) {
+            mensagem.setNumeroContato(numeroContato);
+            return this;
+        }
+
         public MensagemBuilder setTemMedia(boolean temMedia) {
             mensagem.setTemMedia(temMedia);
             return this;
         }
+
         public MensagemBuilder setMediaMime(String mime) {
             mensagem.setMidiaMime(mime);
             return this;

@@ -1,13 +1,11 @@
 package com.gravatasufoca.spylogger.model;
 
 import com.j256.ormlite.dao.ForeignCollection;
-import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import java.io.Serializable;
-import java.util.Date;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -33,8 +31,11 @@ public class Topico extends EntidadeAbstrata{
     private String idReferencia;
     @DatabaseField(canBeNull = true)
     private String nome;
-    @DatabaseField(dataType= DataType.DATE_LONG)
-    private Date ordenacao;
+    @DatabaseField(canBeNull = false)
+    private Boolean enviado;
+    @DatabaseField(canBeNull = false)
+    private Boolean grupo;
+
 
     @ForeignCollectionField(eager=false,orderAscending=false,orderColumnName="data", foreignFieldName="topico")
     private ForeignCollection<Mensagem> mensagens;
@@ -48,6 +49,10 @@ public class Topico extends EntidadeAbstrata{
     public static class TopicoBuilder{
         private Topico topico=new Topico();
 
+        public TopicoBuilder setId(Integer id){
+            topico.setId(id);
+            return this;
+        }
         public TopicoBuilder setIdReferencia(String idReferencia){
             topico.setIdReferencia(idReferencia);
             return this;
@@ -58,12 +63,13 @@ public class Topico extends EntidadeAbstrata{
             return this;
         }
 
-        public TopicoBuilder setOrdenacao(Date data){
-            topico.setOrdenacao(data);
+        public TopicoBuilder setGrupo(boolean grupo){
+            topico.setGrupo(grupo);
             return this;
         }
 
         public Topico build(){
+            topico.setEnviado(false);
             return topico;
         }
     }

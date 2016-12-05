@@ -9,7 +9,8 @@ public enum TipoMidia {
     TELA_CHAMADA("8", ""),
     ARQUIVO("9", "Docs"),
     CHAMADA("10", ""),
-    GIF("13", "Images");
+    GIF("13", "Images"),
+    CONTATO(null,"");
 
     private String tipo;
     private String id;

