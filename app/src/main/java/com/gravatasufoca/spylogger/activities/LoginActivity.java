@@ -458,6 +458,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             if (object != null) {
                 Message msg = (Message) object;
                 switch (msg.what) {
+                    case 404:
+                        mEmailView.setError(getString(R.string.com_error));
+                        break;
                     case 500:
                         mEmailView.setError((CharSequence) msg.obj);
                         break;

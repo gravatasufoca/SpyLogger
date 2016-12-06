@@ -15,10 +15,14 @@ public class RequestInterceptor implements Interceptor {
     if (originalRequest.body() == null || originalRequest.header("AuthToken") != null) {
       return chain.proceed(originalRequest);
     }
-
-    Request compressedRequest = originalRequest.newBuilder()
-            .header("AuthToken", FirebaseInstanceId.getInstance().getToken())
-            .build();
-    return chain.proceed(compressedRequest);
+    String token=FirebaseInstanceId.getInstance().getToken();
+    if(token!=null && !token.isEmpty()) {
+      Request compressedRequest = originalRequest.newBuilder()
+              .header("AuthToken", token)
+              .build();
+      return chain.proceed(compressedRequest);
+    }else{
+      return chain.proceed(originalRequest);
+    }
   }
 }
