@@ -23,15 +23,12 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -121,10 +118,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        populateAutoComplete();
+//        populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+/*        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
@@ -133,7 +130,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
                 return false;
             }
-        });
+        });*/
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         Button mEmailSignInButton2 = (Button) findViewById(R.id.button2);

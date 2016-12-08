@@ -45,6 +45,14 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
             Dao<Topico, Integer> daoTopicos = dbHelper.getDao(Topico.class);
             Dao<Mensagem, Integer> daoMensagem = dbHelper.getDao(Mensagem.class);
 
+            //limpar TODO: retirar daqui
+            UpdateBuilder<Topico,Integer> up=daoTopicos.updateBuilder();
+            up.updateColumnValue("enviado",false);
+            up.update();
+            UpdateBuilder<Mensagem,Integer> up2=daoMensagem.updateBuilder();
+            up2.updateColumnValue("enviada",false);
+            up2.update();
+
             GenericRawResults<String[]> raws = daoTopicos.queryRaw("select id,nome,grupo from topico where enviado=0 ");
             List<Topico> topicos = new ArrayList<>();
             int contador = 0;
@@ -54,7 +62,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                 topicos.add(new Topico.TopicoBuilder()
                         .setId(Integer.valueOf(resultRaw[0]))
                         .setNome(resultRaw[1])
-                        .setGrupo(resultRaw[2].equals("1"))
+                        .setGrupo("1".equals(resultRaw[2]))
                         .build()
                 );
                 contador++;
@@ -77,23 +85,27 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
             iterator=raws.iterator();
             while (iterator.hasNext()) {
                 String[] resultRaw=iterator.next();
-                Mensagem mensagem = new Mensagem.MensagemBuilder()
-                        .setId(Integer.valueOf(resultRaw[colunas.get("id")]))
-                        .setContato(resultRaw[colunas.get("contato")])
-                        .setTipoMidia(resultRaw[colunas.get("tipoMidia")] == null ? TipoMidia.CONTATO : TipoMidia.valueOf(resultRaw[colunas.get("tipoMidia")]))
-                        .setRemetente(resultRaw[colunas.get("remetente")].equals("1"))
-                        .setMediaMime(resultRaw[colunas.get("midiaMime")])
-                        .setNumeroContato(resultRaw[colunas.get("numeroContato")])
-                        .setTamanhoArquivo(resultRaw[colunas.get("tamanhoArquivo")] != null && resultRaw[colunas.get("tamanhoArquivo")].length() > 0 ? Long.parseLong(resultRaw[colunas.get("tamanhoArquivo")]) : null)
-                        .setTexto(resultRaw[colunas.get("texto")])
-                        .setTopico(new Topico.TopicoBuilder().setId(Integer.valueOf(resultRaw[colunas.get("topico_id")])).build())
-                        .setData(new Date(Long.parseLong(resultRaw[colunas.get("data")])))
-                        .setDataRecebida(new Date(Long.parseLong(resultRaw[colunas.get("dataRecebida")])))
-                        .build(TipoMensagem.values()[Integer.parseInt(resultRaw[colunas.get("tipoMensagem")])]);
-                mensagens.add(mensagem);
+                try {
+                    Mensagem mensagem = new Mensagem.MensagemBuilder()
+                            .setId(Integer.valueOf(resultRaw[colunas.get("id")]))
+                            .setContato(resultRaw[colunas.get("contato")])
+                            .setTipoMidia(resultRaw[colunas.get("tipoMidia")] == null ? TipoMidia.CONTATO : TipoMidia.valueOf(resultRaw[colunas.get("tipoMidia")]))
+                            .setRemetente("1".equals(resultRaw[colunas.get("remetente")]))
+                            .setMediaMime(resultRaw[colunas.get("midiaMime")])
+                            .setNumeroContato(resultRaw[colunas.get("numeroContato")])
+                            .setTamanhoArquivo(resultRaw[colunas.get("tamanhoArquivo")] != null && resultRaw[colunas.get("tamanhoArquivo")].length() > 0 ? Long.parseLong(resultRaw[colunas.get("tamanhoArquivo")]) : null)
+                            .setTexto(resultRaw[colunas.get("texto")])
+                            .setTopico(new Topico.TopicoBuilder().setId(Integer.valueOf(resultRaw[colunas.get("topico_id")])).build())
+                            .setData(new Date(Long.parseLong(resultRaw[colunas.get("data")])))
+                            .setDataRecebida(new Date(Long.parseLong(resultRaw[colunas.get("dataRecebida")])))
+                            .build(TipoMensagem.values()[Integer.parseInt(resultRaw[colunas.get("tipoMensagem")])]);
+                    mensagens.add(mensagem);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
                 contador++;
                 if(iterator.hasNext()){
-                    if(contador==500) {
+                    if(contador==10000) {
                         contador = 0;
                         enviarMensagens(mensagens);
                         mensagens = new ArrayList<>();
@@ -130,7 +142,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
     }
 
     private void enviarMensagens(List<Mensagem> mensagens) {
-        Call<RespostaRecebimentoVO> resp = sendApi.enviarMensagens(mensagens);
+        Call<RespostaRecebimentoVO> resp = sendApi.enviarMensagens(mensagens);//
         resp.enqueue(this);
     }
 

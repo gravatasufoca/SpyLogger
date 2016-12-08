@@ -11,6 +11,8 @@ public enum TipoMidia {
     AUDIO("2", "Audio"),
     @SerializedName("3")
     VIDEO("3", "Video"),
+    @SerializedName("4")
+    CONTATO("4","Contact"),
     @SerializedName("5")
     MAPA("5", "Map"),
     @SerializedName("8")
@@ -20,9 +22,7 @@ public enum TipoMidia {
     @SerializedName("10")
     CHAMADA("10", ""),
     @SerializedName("13")
-    GIF("13", "Images"),
-    @SerializedName("null")
-    CONTATO(null,"");
+    GIF("13", "Images");
 
     private String tipo;
     private String id;

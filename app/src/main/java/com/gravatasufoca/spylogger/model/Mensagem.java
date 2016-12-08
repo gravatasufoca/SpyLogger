@@ -30,7 +30,7 @@ public class Mensagem extends EntidadeAbstrata {
     private Integer id;
     @DatabaseField(canBeNull = false)
     private String idReferencia;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false,defaultValue = "0")
     private boolean remetente;
     @DatabaseField(canBeNull = true)
     private String texto;
@@ -52,16 +52,16 @@ public class Mensagem extends EntidadeAbstrata {
     @DatabaseField(dataType = DataType.BYTE_ARRAY)
     private byte[] raw_data = null;
 
-    @DatabaseField(foreign = true, foreignColumnName = "id", columnName = "topico_id")
+    @DatabaseField(foreign = true,canBeNull = false,foreignColumnName = "id", columnName = "topico_id")
     private Topico topico;
 
     @DatabaseField(dataType = DataType.ENUM_INTEGER)
     private TipoMensagem tipoMensagem;
 
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false,defaultValue = "0")
     private boolean enviada;
 
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false,defaultValue = "0")
     private boolean midiaEnviada;
 
     private boolean temMedia;
