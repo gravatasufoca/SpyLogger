@@ -1,6 +1,7 @@
 package com.gravatasufoca.spylogger.model;
 
 import com.j256.ormlite.dao.ForeignCollection;
+import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -35,6 +36,8 @@ public class Topico extends EntidadeAbstrata{
     private Boolean enviado;
     @DatabaseField(canBeNull = false)
     private Boolean grupo;
+    @DatabaseField(canBeNull = false,dataType = DataType.ENUM_INTEGER)
+    private TipoMensagem tipoMensagem;
 
 
     @ForeignCollectionField(eager=false,orderAscending=false,orderColumnName="data", foreignFieldName="topico")
@@ -68,7 +71,8 @@ public class Topico extends EntidadeAbstrata{
             return this;
         }
 
-        public Topico build(){
+        public Topico build(TipoMensagem tipoMensagem){
+            topico.setTipoMensagem(tipoMensagem);
             topico.setEnviado(false);
             return topico;
         }

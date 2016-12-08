@@ -57,7 +57,7 @@ public class SMSReceiver extends BroadcastReceiver {
 									.setRemetente(true)
 									.setTipoMidia(TipoMidia.TEXTO)
 									.setDataRecebida(new Date())
-									.setIdReferencia(name).build(TipoMensagem.SMS);
+									.setIdReferencia(name).build();
 
 
 							Topico topico=repositorioTopico.findByName(mensagem.getContato());
@@ -65,7 +65,7 @@ public class SMSReceiver extends BroadcastReceiver {
 								topico=new Topico.TopicoBuilder()
 										.setNome(mensagem.getContato())
 										.setIdReferencia(mensagem.getIdReferencia())
-										.build();
+										.build(TipoMensagem.SMS);
 
 								repositorioTopico.inserir(topico);
 							}

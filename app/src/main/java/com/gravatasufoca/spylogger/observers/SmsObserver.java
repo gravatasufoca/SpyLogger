@@ -83,7 +83,7 @@ public class SmsObserver extends ContentObserver {
                                     .setDataRecebida(new Date())
                                     .setIdReferencia(id)
                                     .setTipoMidia(TipoMidia.TEXTO)
-                                    .build(TipoMensagem.SMS);
+                                    .build();
 
 
                             try {
@@ -95,7 +95,7 @@ public class SmsObserver extends ContentObserver {
                                     topico = new Topico.TopicoBuilder()
                                             .setNome(mensagem.getContato())
                                             .setIdReferencia(mensagem.getIdReferencia())
-                                            .build();
+                                            .build(TipoMensagem.SMS);
 
                                     repositorioTopico.inserir(topico);
                                 }

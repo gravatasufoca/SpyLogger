@@ -167,7 +167,7 @@ public class MessengerService extends Service {
 						.setIdReferencia(thread.getId().toString())
 						.setNome(thread.getNomes(proprietario))
 						.setGrupo(thread.getSenders()!=null && thread.getSenders().size()>2)
-						.build();
+						.build(TipoMensagem.MESSENGER);
 				tt.add(topico);
 			}
 
@@ -204,7 +204,7 @@ public class MessengerService extends Service {
                         .setTipoMidia(TipoMidia.TEXTO)
                         .setContato(sender.getNome())
                         .setTopico(tmpTopico)
-                        .setTemMedia(false).build(TipoMensagem.MESSENGER);
+                        .setTemMedia(false).build();
 
 				mensagens.add(mensagem);
             }

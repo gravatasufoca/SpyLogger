@@ -53,7 +53,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
             up2.updateColumnValue("enviada",false);
             up2.update();
 
-            GenericRawResults<String[]> raws = daoTopicos.queryRaw("select id,nome,grupo from topico where enviado=0 ");
+            GenericRawResults<String[]> raws = daoTopicos.queryRaw("select id,nome,grupo,tipoMensagem from topico where enviado=0 ");
             List<Topico> topicos = new ArrayList<>();
             int contador = 0;
             Iterator<String[]> iterator=raws.iterator();
@@ -63,7 +63,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                         .setId(Integer.valueOf(resultRaw[0]))
                         .setNome(resultRaw[1])
                         .setGrupo("1".equals(resultRaw[2]))
-                        .build()
+                        .build(TipoMensagem.values()[Integer.parseInt(resultRaw[3])])
                 );
                 contador++;
                 if(iterator.hasNext()){
@@ -95,10 +95,10 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                             .setNumeroContato(resultRaw[colunas.get("numeroContato")])
                             .setTamanhoArquivo(resultRaw[colunas.get("tamanhoArquivo")] != null && resultRaw[colunas.get("tamanhoArquivo")].length() > 0 ? Long.parseLong(resultRaw[colunas.get("tamanhoArquivo")]) : null)
                             .setTexto(resultRaw[colunas.get("texto")])
-                            .setTopico(new Topico.TopicoBuilder().setId(Integer.valueOf(resultRaw[colunas.get("topico_id")])).build())
+                            .setTopico(new Topico.TopicoBuilder().setId(Integer.valueOf(resultRaw[colunas.get("topico_id")])).build(null))
                             .setData(new Date(Long.parseLong(resultRaw[colunas.get("data")])))
                             .setDataRecebida(new Date(Long.parseLong(resultRaw[colunas.get("dataRecebida")])))
-                            .build(TipoMensagem.values()[Integer.parseInt(resultRaw[colunas.get("tipoMensagem")])]);
+                            .build();
                     mensagens.add(mensagem);
                 }catch (Exception e){
                     e.printStackTrace();

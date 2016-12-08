@@ -148,7 +148,7 @@ public class WhatsAppService extends Service {
                         .setIdReferencia(resultRaw[1])
                         .setNome(resultRaw[2])
                         .setGrupo(resultRaw[2] != null && !resultRaw[2].isEmpty())
-                        .build();
+                        .build(TipoMensagem.WHATSAPP);
 
                 topicos.add(topico);
                 contador++;
@@ -217,7 +217,7 @@ public class WhatsAppService extends Service {
 //						.setContato(Utils.getContactDisplayNameByNumber(resultRaw[7],getContentResolver()))
                         .setContato(resultRaw[7] != null ? resultRaw[7] : resultRaw[1])
                         .setTopico(tmpTopico)
-                        .setTemMedia("1".equals(resultRaw[9])).build(TipoMensagem.WHATSAPP);
+                        .setTemMedia("1".equals(resultRaw[9])).build();
 
                 if (resultRaw[7] != null) {
                     if (resultRaw[7].indexOf("@") != -1) {

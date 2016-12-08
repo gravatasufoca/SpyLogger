@@ -12,5 +12,9 @@ public enum TipoMensagem {
     @SerializedName("1")
     MESSENGER,
     @SerializedName("2")
-    SMS;
+    SMS,
+    @SerializedName("3")
+    AUDIO,
+    @SerializedName("4")
+    VIDEO;
 }

