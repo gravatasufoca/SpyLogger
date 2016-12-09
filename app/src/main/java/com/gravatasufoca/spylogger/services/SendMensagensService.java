@@ -34,6 +34,9 @@ import retrofit2.Response;
 public class SendMensagensService extends SendDataService<RespostaRecebimentoVO> {
     private Context context;
 
+    private Integer MAX_TOPICOS=500;
+    private Integer MAX_MENSAGENS=15000;
+
     public SendMensagensService(Context context, TaskComplete handler) {
         super(handler);
         this.context = context;
@@ -67,7 +70,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                 );
                 contador++;
                 if(iterator.hasNext()){
-                    if(contador==500) {
+                    if(contador==MAX_TOPICOS) {
                         contador = 0;
                         enviarTopicos(topicos);
                         topicos = new ArrayList<>();
@@ -105,7 +108,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                 }
                 contador++;
                 if(iterator.hasNext()){
-                    if(contador==10000) {
+                    if(contador==MAX_MENSAGENS) {
                         contador = 0;
                         enviarMensagens(mensagens);
                         mensagens = new ArrayList<>();
