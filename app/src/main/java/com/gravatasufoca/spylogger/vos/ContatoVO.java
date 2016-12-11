@@ -1,48 +1,30 @@
 package com.gravatasufoca.spylogger.vos;
 
-import java.io.File;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class ContatoVO {
 
 	private String nome;
-	private File foto;
+	private String numero;
+	private byte[] foto;
 	private String fotoBase;
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
 
-	public ContatoVO(String nome) {
-		this.nome=nome;
+		ContatoVO contatoVO = (ContatoVO) o;
+
+		return numero != null ? numero.equals(contatoVO.numero) : contatoVO.numero == null;
+
 	}
 
-
-	public String getNome() {
-		return nome;
+	@Override
+	public int hashCode() {
+		return numero != null ? numero.hashCode() : 0;
 	}
-
-
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
-
-
-	public File getFoto() {
-		return foto;
-	}
-
-
-	public void setFoto(File foto) {
-		this.foto = foto;
-	}
-
-
-	public String getFotoBase() {
-		return fotoBase;
-	}
-
-
-	public void setFotoBase(String fotoBase) {
-		this.fotoBase = fotoBase;
-	}
-
-
-
 }

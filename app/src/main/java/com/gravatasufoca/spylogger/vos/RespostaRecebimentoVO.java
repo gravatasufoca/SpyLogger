@@ -16,7 +16,7 @@ import lombok.Setter;
 @EqualsAndHashCode
 public class RespostaRecebimentoVO implements Serializable {
 
-    private static final long serialVersionUID = 2916040642760790514L;
+    private static final long serialVersionUID = 3616277176061786990L;
     private String tipo;
     private List<Integer> ids;
 }
