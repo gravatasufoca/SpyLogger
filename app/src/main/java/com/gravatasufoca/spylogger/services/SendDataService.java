@@ -7,6 +7,8 @@ import com.google.gson.GsonBuilder;
 import com.gravatasufoca.spylogger.helpers.RequestInterceptor;
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
 
+import java.util.concurrent.TimeUnit;
+
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -27,6 +29,9 @@ public abstract class SendDataService<E> implements Callback<E>{
     public SendDataService(TaskComplete handler) {
         this.handler=handler;
         OkHttpClient.Builder client = new OkHttpClient.Builder();
+        client.connectTimeout(10, TimeUnit.MINUTES);
+        client.readTimeout(10,TimeUnit.MINUTES);
+        client.writeTimeout(10,TimeUnit.MINUTES);
         client.addInterceptor(new RequestInterceptor());
 
         Gson gson = new GsonBuilder()
@@ -43,6 +48,7 @@ public abstract class SendDataService<E> implements Callback<E>{
 
     @Override
     public void onFailure(Call<E> call, Throwable t) {
+        t.printStackTrace();
         if(handler!=null){
             Message msg=new Message();
             msg.what=500;

