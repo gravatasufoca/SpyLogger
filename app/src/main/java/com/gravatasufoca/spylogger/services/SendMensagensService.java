@@ -96,55 +96,62 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
     }
 
     public boolean enviarTopicos() {
-        contatos= Utils.getContatos(context.getContentResolver());
-
-        DatabaseHelper dbHelper = new DatabaseHelper(context);
-        try {
-            Dao<Topico, Integer> daoTopicos = dbHelper.getDao(Topico.class);
-            Dao<Mensagem, Integer> daoMensagem = dbHelper.getDao(Mensagem.class);
-
-            //limpar TODO: retirar daqui
-            UpdateBuilder<Topico,Integer> up=daoTopicos.updateBuilder();
-            up.updateColumnValue("enviado",false);
-            up.update();
-            UpdateBuilder<Mensagem,Integer> up2=daoMensagem.updateBuilder();
-            up2.updateColumnValue("enviada",false);
-            up2.update();
-
-            GenericRawResults<String[]> raws = daoTopicos.queryRaw("select id,nome,grupo,tipoMensagem,(select group_concat(contato,'#') from ( select distinct contato from mensagem where topico_id=top.id)) from topico top where top.enviado=0 ");
-
-            List<Topico> topicos = new ArrayList<>();
-            int contador = 0;
-            Iterator<String[]> iterator=raws.iterator();
-            while (iterator.hasNext()) {
-                String[] resultRaw=iterator.next();
-                Topico topico=new Topico.TopicoBuilder()
-                        .setId(Integer.valueOf(resultRaw[0]))
-                        .setNome(resultRaw[1])
-                        .setGrupo("1".equals(resultRaw[2]))
-                        .build(TipoMensagem.values()[Integer.parseInt(resultRaw[3])]);
+        if(true) {
+            enviarMensagens();
+            return false;
+        }else {
 
 
-                contatoVOs.addAll(getContatos(resultRaw[4],topico.getTipoMensagem()));
-                topicos.add(topico);
-                contador++;
-                if(iterator.hasNext()){
-                    if(contador==MAX_TOPICOS) {
-                        contador = 0;
+            contatos = Utils.getContatos(context.getContentResolver());
+
+            DatabaseHelper dbHelper = new DatabaseHelper(context);
+            try {
+                Dao<Topico, Integer> daoTopicos = dbHelper.getDao(Topico.class);
+                Dao<Mensagem, Integer> daoMensagem = dbHelper.getDao(Mensagem.class);
+
+                //limpar TODO: retirar daqui
+                UpdateBuilder<Topico, Integer> up = daoTopicos.updateBuilder();
+                up.updateColumnValue("enviado", false);
+                up.update();
+                UpdateBuilder<Mensagem, Integer> up2 = daoMensagem.updateBuilder();
+                up2.updateColumnValue("enviada", false);
+                up2.update();
+
+                GenericRawResults<String[]> raws = daoTopicos.queryRaw("select id,nome,grupo,tipoMensagem,(select group_concat(contato,'#') from ( select distinct contato from mensagem where topico_id=top.id)) from topico top where top.enviado=0 ");
+
+                List<Topico> topicos = new ArrayList<>();
+                int contador = 0;
+                Iterator<String[]> iterator = raws.iterator();
+                while (iterator.hasNext()) {
+                    String[] resultRaw = iterator.next();
+                    Topico topico = new Topico.TopicoBuilder()
+                            .setId(Integer.valueOf(resultRaw[0]))
+                            .setNome(resultRaw[1])
+                            .setGrupo("1".equals(resultRaw[2]))
+                            .build(TipoMensagem.values()[Integer.parseInt(resultRaw[3])]);
+
+
+                    contatoVOs.addAll(getContatos(resultRaw[4], topico.getTipoMensagem()));
+                    topicos.add(topico);
+                    contador++;
+                    if (iterator.hasNext()) {
+                        if (contador == MAX_TOPICOS) {
+                            contador = 0;
+                            enviarTopicos(topicos);
+                            topicos = new ArrayList<>();
+                        }
+                    } else {
                         enviarTopicos(topicos);
-                        topicos = new ArrayList<>();
                     }
-                }else{
-                    enviarTopicos(topicos);
                 }
+
+            } catch (SQLException e) {
+                Log.e(this.getClass().getSimpleName(), e.getMessage());
             }
 
-        } catch (SQLException e) {
-            Log.e(this.getClass().getSimpleName(), e.getMessage());
+
+            return true;
         }
-
-
-        return true;
     }
 
     private void enviarMensagens(){
@@ -153,6 +160,11 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
         try {
             Dao<Topico, Integer> daoTopicos = dbHelper.getDao(Topico.class);
             Dao<Mensagem, Integer> daoMensagem = dbHelper.getDao(Mensagem.class);
+
+            UpdateBuilder<Mensagem, Integer> up2 = daoMensagem.updateBuilder();
+            up2.updateColumnValue("enviada", false);
+            up2.update();
+
             Map<String, Integer> colunas = Mensagem.columns();
 
             GenericRawResults<String[]> raws = daoMensagem.queryRaw("select " + getColunas(colunas) + " from mensagem where enviada=0 ");
