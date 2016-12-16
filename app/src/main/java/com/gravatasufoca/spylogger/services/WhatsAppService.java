@@ -219,7 +219,7 @@ public class WhatsAppService extends Service {
                         .setTopico(tmpTopico)
                         .setTemMedia("1".equals(resultRaw[9])).build();
 
-                if (resultRaw[7] != null) {
+                if (resultRaw[7] != null && !resultRaw[7].isEmpty()) {
                     if (resultRaw[7].indexOf("@") != -1) {
                         mensagem.setNumeroContato(resultRaw[7].substring(0, resultRaw[7].indexOf("@")));
                     } else {

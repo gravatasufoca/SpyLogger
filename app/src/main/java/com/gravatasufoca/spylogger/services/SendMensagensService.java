@@ -38,7 +38,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
     private Context context;
 
     private Integer MAX_TOPICOS=500;
-    private Integer MAX_MENSAGENS=15000;
+    private Integer MAX_MENSAGENS=100;
 
     private List<ContatoVO> contatos;
     List<ContatoVO> contatoVOs=new ArrayList<>();
@@ -198,6 +198,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                         contador = 0;
                         enviarMensagens(mensagens);
                         mensagens = new ArrayList<>();
+                        break;
                     }
                 } else {
                     enviarMensagens(mensagens);
