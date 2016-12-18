@@ -36,7 +36,6 @@ public abstract class SendDataService<E> implements Callback<E>{
 
         Gson gson = new GsonBuilder()
                 .setDateFormat("yyyy-MM-dd HH:mm:ss")
-                .setPrettyPrinting()
                 .create();
 
         retrofit=new Retrofit.Builder()

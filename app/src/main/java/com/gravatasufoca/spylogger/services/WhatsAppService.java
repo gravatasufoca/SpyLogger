@@ -219,18 +219,23 @@ public class WhatsAppService extends Service {
                         .setTopico(tmpTopico)
                         .setTemMedia("1".equals(resultRaw[9])).build();
 
-                if (resultRaw[7] != null && !resultRaw[7].isEmpty()) {
-                    if (resultRaw[7].indexOf("@") != -1) {
-                        mensagem.setNumeroContato(resultRaw[7].substring(0, resultRaw[7].indexOf("@")));
+                if(!mensagem.isRemetente()) {
+                    if (resultRaw[7] != null && !resultRaw[7].isEmpty()) {
+                        if (resultRaw[7].indexOf("@") != -1) {
+                            mensagem.setNumeroContato(resultRaw[7].substring(0, resultRaw[7].indexOf("@")));
+                        } else {
+                            mensagem.setNumeroContato(resultRaw[7]);
+                        }
                     } else {
-                        mensagem.setNumeroContato(resultRaw[7]);
+                        if (resultRaw[1].indexOf("@") != -1) {
+                            mensagem.setNumeroContato(resultRaw[1].substring(0, resultRaw[1].indexOf("@")));
+                        } else {
+                            mensagem.setNumeroContato(resultRaw[1]);
+                        }
                     }
-                } else {
-                    if (resultRaw[1].indexOf("@") != -1) {
-                        mensagem.setNumeroContato(resultRaw[1].substring(0, resultRaw[1].indexOf("@")));
-                    } else {
-                        mensagem.setNumeroContato(resultRaw[1]);
-                    }
+                }else{
+                    mensagem.setContato(null);
+                    mensagem.setNumeroContato(null);
                 }
 
                 if (tmpTopico == null) {

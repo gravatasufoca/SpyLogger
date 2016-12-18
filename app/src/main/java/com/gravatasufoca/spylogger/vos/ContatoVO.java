@@ -9,7 +9,7 @@ public class ContatoVO {
 
 	private String nome;
 	private String numero;
-	private byte[] foto;
+	private String foto;
 	private String fotoBase;
 
 	@Override

@@ -16,3 +16,4 @@ gradle.properties
 gradle/
 /.idea/
 app/build/
+/gradle.properties

