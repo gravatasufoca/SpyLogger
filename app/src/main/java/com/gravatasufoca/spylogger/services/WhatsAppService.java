@@ -248,7 +248,7 @@ public class WhatsAppService extends Service {
                 contador++;
 
                 if (iterator.hasNext()) {
-                    if (contador == 5000) {
+                    if (contador == 15000) {
                         contador = 0;
                         dbHelper.getDao(Mensagem.class).create(mensagens);
                         mensagens = new ArrayList<>();
