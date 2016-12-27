@@ -188,6 +188,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                             .setData(new Date(Long.parseLong(resultRaw[colunas.get("data")])))
                             .setDataRecebida(new Date(Long.parseLong(resultRaw[colunas.get("dataRecebida")])))
                             .build();
+//                    mensagem.setRaw_data(resultRaw[colunas.get("raw_data")]);
 
                     mensagens.add(mensagem);
                 } catch (Exception e) {

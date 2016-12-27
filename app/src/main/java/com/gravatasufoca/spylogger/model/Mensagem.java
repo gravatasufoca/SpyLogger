@@ -52,6 +52,9 @@ public class Mensagem extends EntidadeAbstrata {
     @DatabaseField(dataType = DataType.BYTE_ARRAY)
     private byte[] raw_data = null;
 
+    @DatabaseField(dataType=DataType.BYTE_ARRAY)
+    private byte[] thumb_image;
+
     @DatabaseField(foreign = true,canBeNull = false,foreignColumnName = "id", columnName = "topico_id")
     private Topico topico;
 
