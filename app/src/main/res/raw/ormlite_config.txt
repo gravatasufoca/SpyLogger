@@ -1,5 +1,5 @@
 #
-# generated on 2016/12/27 12:14:59
+# generated on 2016/12/27 12:17:21
 #
 # --table-start--
 dataClass=com.gravatasufoca.spylogger.model.Mensagem
@@ -7,6 +7,7 @@ tableName=mensagem
 # --table-fields-start--
 # --field-start--
 fieldName=id
+dataPersister=INTEGER
 generatedId=true
 # --field-end--
 # --field-start--

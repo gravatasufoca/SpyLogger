@@ -26,13 +26,13 @@ public class Mensagem extends EntidadeAbstrata {
     private Mensagem() {
     }
 
-    @DatabaseField(generatedId = true)
+    @DatabaseField(generatedId = true,dataType = DataType.INTEGER)
     private Integer id;
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false,dataType = DataType.STRING)
     private String idReferencia;
-    @DatabaseField(canBeNull = false,defaultValue = "0")
+    @DatabaseField(canBeNull = false,defaultValue = "0",dataType = DataType.BOOLEAN_INTEGER)
     private boolean remetente;
-    @DatabaseField(canBeNull = true)
+    @DatabaseField(canBeNull = true,dataType = DataType.STRING)
     private String texto;
     @DatabaseField(canBeNull = false, dataType = DataType.DATE_LONG)
     private Date data;
@@ -40,13 +40,13 @@ public class Mensagem extends EntidadeAbstrata {
     private Date dataRecebida;
     @DatabaseField(dataType = DataType.ENUM_STRING)
     private TipoMidia tipoMidia;
-    @DatabaseField
+    @DatabaseField(dataType = DataType.STRING)
     private String midiaMime;
-    @DatabaseField
+    @DatabaseField(dataType = DataType.LONG)
     private long tamanhoArquivo;
-    @DatabaseField
+    @DatabaseField(dataType = DataType.STRING)
     private String contato;
-    @DatabaseField
+    @DatabaseField(dataType = DataType.STRING)
     private String numeroContato;
 
     @DatabaseField(dataType = DataType.BYTE_ARRAY)
@@ -55,13 +55,13 @@ public class Mensagem extends EntidadeAbstrata {
     @DatabaseField(dataType=DataType.BYTE_ARRAY)
     private byte[] thumb_image;
 
-    @DatabaseField(foreign = true,canBeNull = false,foreignColumnName = "id", columnName = "topico_id")
+    @DatabaseField(foreign = true,canBeNull = false,foreignColumnName = "id", columnName = "topico_id",dataType = DataType.INTEGER)
     private Topico topico;
 
-    @DatabaseField(canBeNull = false,defaultValue = "0")
+    @DatabaseField(canBeNull = false,defaultValue = "0",dataType = DataType.BOOLEAN_INTEGER)
     private boolean enviada;
 
-    @DatabaseField(canBeNull = false,defaultValue = "0")
+    @DatabaseField(canBeNull = false,defaultValue = "0",dataType = DataType.BOOLEAN_INTEGER)
     private boolean midiaEnviada;
 
     private boolean temMedia;
