@@ -1,5 +1,5 @@
 #
-# generated on 2016/12/27 12:17:21
+# generated on 2016/12/27 11:56:27
 #
 # --table-start--
 dataClass=com.gravatasufoca.spylogger.model.Mensagem
@@ -7,7 +7,6 @@ tableName=mensagem
 # --table-fields-start--
 # --field-start--
 fieldName=id
-dataPersister=INTEGER
 generatedId=true
 # --field-end--
 # --field-start--
@@ -66,7 +65,6 @@ dataPersister=BYTE_ARRAY
 # --field-start--
 fieldName=topico
 columnName=topico_id
-dataPersister=INTEGER
 canBeNull=false
 foreign=true
 foreignColumnName=id

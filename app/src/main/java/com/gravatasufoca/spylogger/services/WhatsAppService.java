@@ -229,7 +229,7 @@ public class WhatsAppService extends Service {
                 mensagem.setRaw_data(resultRaw[11]!=null? (byte[]) resultRaw[11]:null);
                 mensagem.setThumb_image(resultRaw[12]!=null? (byte[]) resultRaw[12]:null);
 
-                if(!mensagem.isRemetente()) {
+                if(!mensagem.getRemetente()) {
                     if (resultRaw[7] != null && !((String)resultRaw[7]).isEmpty()) {
                         if (((String)resultRaw[7]).indexOf("@") != -1) {
                             mensagem.setNumeroContato(((String)resultRaw[7]).substring(0, ((String)resultRaw[7]).indexOf("@")));

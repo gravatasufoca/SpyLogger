@@ -26,12 +26,12 @@ public class Mensagem extends EntidadeAbstrata {
     private Mensagem() {
     }
 
-    @DatabaseField(generatedId = true,dataType = DataType.INTEGER)
+    @DatabaseField(generatedId = true)
     private Integer id;
     @DatabaseField(canBeNull = false,dataType = DataType.STRING)
     private String idReferencia;
     @DatabaseField(canBeNull = false,defaultValue = "0",dataType = DataType.BOOLEAN_INTEGER)
-    private boolean remetente;
+    private Boolean remetente;
     @DatabaseField(canBeNull = true,dataType = DataType.STRING)
     private String texto;
     @DatabaseField(canBeNull = false, dataType = DataType.DATE_LONG)
@@ -43,7 +43,7 @@ public class Mensagem extends EntidadeAbstrata {
     @DatabaseField(dataType = DataType.STRING)
     private String midiaMime;
     @DatabaseField(dataType = DataType.LONG)
-    private long tamanhoArquivo;
+    private Long tamanhoArquivo;
     @DatabaseField(dataType = DataType.STRING)
     private String contato;
     @DatabaseField(dataType = DataType.STRING)
@@ -55,16 +55,16 @@ public class Mensagem extends EntidadeAbstrata {
     @DatabaseField(dataType=DataType.BYTE_ARRAY)
     private byte[] thumb_image;
 
-    @DatabaseField(foreign = true,canBeNull = false,foreignColumnName = "id", columnName = "topico_id",dataType = DataType.INTEGER)
+    @DatabaseField(foreign = true,canBeNull = false,foreignColumnName = "id", columnName = "topico_id")
     private Topico topico;
 
     @DatabaseField(canBeNull = false,defaultValue = "0",dataType = DataType.BOOLEAN_INTEGER)
-    private boolean enviada;
+    private Boolean enviada;
 
     @DatabaseField(canBeNull = false,defaultValue = "0",dataType = DataType.BOOLEAN_INTEGER)
-    private boolean midiaEnviada;
+    private Boolean midiaEnviada;
 
-    private boolean temMedia;
+    private Boolean temMedia;
 
     @Override
     public Serializable getId() {
@@ -97,8 +97,8 @@ public class Mensagem extends EntidadeAbstrata {
         return result;
     }
 
-    public static Map<String, Integer> columns() {
-        Map<String, Integer> colunas = new HashMap<>();
+    public static Map<String, Map<Integer,DataType>> columns() {
+        Map<String,  Map<Integer,DataType>> colunas = new HashMap<>();
 
         Field[] fields = Mensagem.class.getDeclaredFields();
         int i = 0;
@@ -111,11 +111,38 @@ public class Mensagem extends EntidadeAbstrata {
                 } else {
                     colName=field.getName();
                 }
-                colunas.put(colName, i);
+                Map<Integer,DataType> m=new HashMap<>();
+                m.put(i,getType(field));
+                colunas.put(colName, m);
                 i++;
             }
         }
         return colunas;
+    }
+
+    private static DataType getType(Field field){
+        if(field.getType().isAssignableFrom(String.class))
+            return DataType.STRING;
+
+        if(field.getType().isAssignableFrom(Integer.class))
+            return DataType.INTEGER;
+
+        if(field.getType().isAssignableFrom(Date.class))
+            return DataType.DATE_LONG;
+
+        if(field.getType().isAssignableFrom(Long.class))
+            return DataType.LONG;
+
+        if(field.getType().getSimpleName().equals("byte[]"))
+            return DataType.BYTE_ARRAY;
+
+        if(field.getType().isAssignableFrom(Boolean.class))
+            return DataType.BOOLEAN_INTEGER;
+
+        if(field.getType().isAssignableFrom(TipoMidia.class) || field.getType().isAssignableFrom(Topico.class))
+            return DataType.INTEGER;
+
+        return DataType.UNKNOWN;
     }
 
     public static class MensagemBuilder {
