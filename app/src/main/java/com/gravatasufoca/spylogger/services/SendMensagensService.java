@@ -169,9 +169,9 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
 
             Map<String, Map<Integer, DataType>> colunas = Mensagem.columns();
 
-//            GenericRawResults<Object[]> raws = daoMensagem.queryRaw("select " + getColunas(colunas) + " from mensagem where enviada=0 ",getTipos(colunas));
-            GenericRawResults<Object[]> raws = daoMensagem.queryRaw("select id,contato,tipoMidia,remetente,midiaMime,numeroContato,tamanhoArquivo,texto,topico_id,data,dataRecebida ,raw_data, thumb_image from mensagem where enviada=0 ",
-                    new DataType[]{DataType.INTEGER,DataType.STRING,DataType.INTEGER,DataType.BOOLEAN_INTEGER,DataType.STRING,DataType.STRING,DataType.STRING,DataType.STRING,DataType.INTEGER,DataType.DATE_LONG,DataType.DATE_LONG,DataType.BYTE_ARRAY,DataType.BYTE_ARRAY});
+            GenericRawResults<Object[]> raws = daoMensagem.queryRaw("select " + getColunas(colunas) + " from mensagem where enviada=0 ",getTipos(colunas));
+//            GenericRawResults<Object[]> raws = daoMensagem.queryRaw("select id,contato,tipoMidia,remetente,midiaMime,numeroContato,tamanhoArquivo,texto,topico_id,data,dataRecebida ,raw_data, thumb_image from mensagem where enviada=0 ",
+//                    new DataType[]{DataType.INTEGER,DataType.STRING,DataType.INTEGER,DataType.BOOLEAN_INTEGER,DataType.STRING,DataType.STRING,DataType.STRING,DataType.STRING,DataType.INTEGER,DataType.DATE_LONG,DataType.DATE_LONG,DataType.BYTE_ARRAY,DataType.BYTE_ARRAY});
             List<Mensagem> mensagens = new ArrayList<>();
             contador = 0;
             Iterator<Object[]> iterator = raws.iterator();

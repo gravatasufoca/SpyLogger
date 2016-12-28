@@ -42,7 +42,7 @@ public class Mensagem extends EntidadeAbstrata {
     private TipoMidia tipoMidia;
     @DatabaseField(dataType = DataType.STRING)
     private String midiaMime;
-    @DatabaseField(dataType = DataType.LONG)
+    @DatabaseField()
     private Long tamanhoArquivo;
     @DatabaseField(dataType = DataType.STRING)
     private String contato;
