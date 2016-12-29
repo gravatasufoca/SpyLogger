@@ -259,7 +259,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                 }
                 contador++;
                 if (iterator.hasNext()) {
-                    if (contador == MAX_MENSAGENS) {
+                    if (contador == 100) {
                         contador = 0;
                         enviarMensagens(mensagens);
                         mensagens = new ArrayList<>();
