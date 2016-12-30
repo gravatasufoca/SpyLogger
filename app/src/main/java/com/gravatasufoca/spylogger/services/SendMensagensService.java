@@ -258,8 +258,9 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                     e.printStackTrace();
                 }
                 contador++;
+                Log.i("kk", String.valueOf(contador));
                 if (iterator.hasNext()) {
-                    if (contador == 100) {
+                    if (contador == 1000) {
                         contador = 0;
                         enviarMensagens(mensagens);
                         mensagens = new ArrayList<>();
