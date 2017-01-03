@@ -1,6 +1,44 @@
 #
-# generated on 2016/12/31 11:37:56
+# generated on 2017/01/03 03:03:23
 #
+# --table-start--
+dataClass=com.gravatasufoca.spylogger.model.Topico
+tableName=topico
+# --table-fields-start--
+# --field-start--
+fieldName=id
+generatedId=true
+# --field-end--
+# --field-start--
+fieldName=idReferencia
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=nome
+# --field-end--
+# --field-start--
+fieldName=enviado
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=grupo
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=tipoMensagem
+dataPersister=ENUM_INTEGER
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=mensagens
+foreignCollection=true
+foreignCollectionOrderColumnName=data
+foreignCollectionOrderAscending=false
+foreignCollectionForeignFieldName=topico
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
 # --table-start--
 dataClass=com.gravatasufoca.spylogger.model.Mensagem
 tableName=mensagem
@@ -77,6 +115,172 @@ fieldName=midiaEnviada
 dataPersister=BOOLEAN_INTEGER
 defaultValue=0
 canBeNull=false
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
+# --table-start--
+dataClass=com.gravatasufoca.spylogger.model.Configuracao
+tableName=configuracao
+# --table-fields-start--
+# --field-start--
+fieldName=_id
+generatedId=true
+# --field-end--
+# --field-start--
+fieldName=dialer
+# --field-end--
+# --field-start--
+fieldName=miniatura
+dataPersister=BOOLEAN
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=media
+dataPersister=BOOLEAN
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=whatsApp
+dataPersister=BOOLEAN
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=facebook
+dataPersister=BOOLEAN
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=smsBlacklist
+# --field-end--
+# --field-start--
+fieldName=chamadasBlacklist
+# --field-end--
+# --field-start--
+fieldName=email
+# --field-end--
+# --field-start--
+fieldName=idAparelho
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
+# --table-start--
+dataClass=com.gravatasufoca.spylogger.model.Ligacao
+tableName=ligacao
+# --table-fields-start--
+# --field-start--
+fieldName=id
+generatedId=true
+# --field-end--
+# --field-start--
+fieldName=data
+dataPersister=DATE_TIME
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=enviado
+dataPersister=BOOLEAN
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=audio
+dataPersister=BYTE_ARRAY
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=numero
+dataPersister=STRING
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=remetente
+dataPersister=BOOLEAN
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=duracao
+# --field-end--
+# --field-start--
+fieldName=nome
+# --field-end--
+# --field-start--
+fieldName=topico
+columnName=topico_id
+foreign=true
+foreignColumnName=id
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
+# --table-start--
+dataClass=com.gravatasufoca.spylogger.model.messenger.Prefs
+tableName=preferences
+# --table-fields-start--
+# --field-start--
+fieldName=key
+id=true
+# --field-end--
+# --field-start--
+fieldName=type
+# --field-end--
+# --field-start--
+fieldName=value
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
+# --table-start--
+dataClass=com.gravatasufoca.spylogger.model.messenger.Contact
+tableName=contacts
+# --table-fields-start--
+# --field-start--
+fieldName=internal_id
+id=true
+# --field-end--
+# --field-start--
+fieldName=fbid
+# --field-end--
+# --field-start--
+fieldName=smallPictureUrl
+columnName=small_picture_url
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=smallPictureSize
+columnName=small_picture_size
+canBeNull=false
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
+# --table-start--
+dataClass=com.gravatasufoca.spylogger.model.whatsapp.ChatList
+tableName=chat_list
+# --table-fields-start--
+# --field-start--
+fieldName=_id
+# --field-end--
+# --field-start--
+fieldName=key_remote_jid
+id=true
+# --field-end--
+# --field-start--
+fieldName=message_table_id
+# --field-end--
+# --field-start--
+fieldName=mensagens
+foreignCollection=true
+foreignCollectionOrderColumnName=timestamp
+foreignCollectionOrderAscending=false
+foreignCollectionForeignFieldName=chatList
+# --field-end--
+# --field-start--
+fieldName=subject
+# --field-end--
+# --field-start--
+fieldName=creation
+dataPersister=DATE_LONG
 # --field-end--
 # --table-fields-end--
 # --table-end--
@@ -167,240 +371,6 @@ fieldName=chatList
 columnName=key_remote_jid
 foreign=true
 foreignColumnName=key_remote_jid
-# --field-end--
-# --table-fields-end--
-# --table-end--
-#################################
-# --table-start--
-dataClass=com.gravatasufoca.spylogger.model.whatsapp.ChatList
-tableName=chat_list
-# --table-fields-start--
-# --field-start--
-fieldName=_id
-# --field-end--
-# --field-start--
-fieldName=key_remote_jid
-id=true
-# --field-end--
-# --field-start--
-fieldName=message_table_id
-# --field-end--
-# --field-start--
-fieldName=mensagens
-foreignCollection=true
-foreignCollectionOrderColumnName=timestamp
-foreignCollectionOrderAscending=false
-foreignCollectionForeignFieldName=chatList
-# --field-end--
-# --field-start--
-fieldName=subject
-# --field-end--
-# --field-start--
-fieldName=creation
-dataPersister=DATE_LONG
-# --field-end--
-# --table-fields-end--
-# --table-end--
-#################################
-# --table-start--
-dataClass=com.gravatasufoca.spylogger.model.Configuracao
-tableName=configuracao
-# --table-fields-start--
-# --field-start--
-fieldName=_id
-generatedId=true
-# --field-end--
-# --field-start--
-fieldName=dialer
-# --field-end--
-# --field-start--
-fieldName=miniatura
-dataPersister=BOOLEAN
-canBeNull=false
-# --field-end--
-# --field-start--
-fieldName=media
-dataPersister=BOOLEAN
-canBeNull=false
-# --field-end--
-# --field-start--
-fieldName=whatsApp
-dataPersister=BOOLEAN
-canBeNull=false
-# --field-end--
-# --field-start--
-fieldName=facebook
-dataPersister=BOOLEAN
-canBeNull=false
-# --field-end--
-# --field-start--
-fieldName=smsBlacklist
-# --field-end--
-# --field-start--
-fieldName=chamadasBlacklist
-# --field-end--
-# --field-start--
-fieldName=email
-# --field-end--
-# --field-start--
-fieldName=idAparelho
-# --field-end--
-# --table-fields-end--
-# --table-end--
-#################################
-# --table-start--
-dataClass=com.gravatasufoca.spylogger.model.messenger.Prefs
-tableName=preferences
-# --table-fields-start--
-# --field-start--
-fieldName=key
-id=true
-# --field-end--
-# --field-start--
-fieldName=type
-# --field-end--
-# --field-start--
-fieldName=value
-# --field-end--
-# --table-fields-end--
-# --table-end--
-#################################
-# --table-start--
-dataClass=com.gravatasufoca.spylogger.model.messenger.Contact
-tableName=contacts
-# --table-fields-start--
-# --field-start--
-fieldName=internal_id
-id=true
-# --field-end--
-# --field-start--
-fieldName=fbid
-# --field-end--
-# --field-start--
-fieldName=smallPictureUrl
-columnName=small_picture_url
-canBeNull=false
-# --field-end--
-# --field-start--
-fieldName=smallPictureSize
-columnName=small_picture_size
-canBeNull=false
-# --field-end--
-# --table-fields-end--
-# --table-end--
-#################################
-# --table-start--
-dataClass=com.gravatasufoca.spylogger.model.Topico
-tableName=topico
-# --table-fields-start--
-# --field-start--
-fieldName=id
-generatedId=true
-# --field-end--
-# --field-start--
-fieldName=idReferencia
-canBeNull=false
-# --field-end--
-# --field-start--
-fieldName=nome
-# --field-end--
-# --field-start--
-fieldName=enviado
-canBeNull=false
-# --field-end--
-# --field-start--
-fieldName=grupo
-canBeNull=false
-# --field-end--
-# --field-start--
-fieldName=tipoMensagem
-dataPersister=ENUM_INTEGER
-canBeNull=false
-# --field-end--
-# --field-start--
-fieldName=mensagens
-foreignCollection=true
-foreignCollectionOrderColumnName=data
-foreignCollectionOrderAscending=false
-foreignCollectionForeignFieldName=topico
-# --field-end--
-# --table-fields-end--
-# --table-end--
-#################################
-# --table-start--
-dataClass=com.gravatasufoca.spylogger.model.Ligacao
-tableName=ligacao
-# --table-fields-start--
-# --field-start--
-fieldName=id
-generatedId=true
-# --field-end--
-# --field-start--
-fieldName=data
-dataPersister=DATE_TIME
-canBeNull=false
-# --field-end--
-# --field-start--
-fieldName=enviado
-dataPersister=BOOLEAN
-canBeNull=false
-# --field-end--
-# --field-start--
-fieldName=audio
-dataPersister=BYTE_ARRAY
-canBeNull=false
-# --field-end--
-# --field-start--
-fieldName=numero
-dataPersister=STRING
-canBeNull=false
-# --field-end--
-# --field-start--
-fieldName=remetente
-dataPersister=BOOLEAN
-canBeNull=false
-# --field-end--
-# --field-start--
-fieldName=duracao
-# --field-end--
-# --field-start--
-fieldName=nome
-# --field-end--
-# --field-start--
-fieldName=topico
-columnName=topico_id
-foreign=true
-foreignColumnName=id
-# --field-end--
-# --table-fields-end--
-# --table-end--
-#################################
-# --table-start--
-dataClass=com.gravatasufoca.spylogger.model.Contato
-tableName=contatos
-# --table-fields-start--
-# --field-start--
-fieldName=id
-generatedId=true
-# --field-end--
-# --field-start--
-fieldName=nome
-# --field-end--
-# --field-start--
-fieldName=numero
-canBeNull=false
-unique=true
-# --field-end--
-# --field-start--
-fieldName=raw_data
-dataPersister=BYTE_ARRAY
-# --field-end--
-# --field-start--
-fieldName=mensagens
-foreignCollection=true
-foreignCollectionOrderColumnName=data
-foreignCollectionOrderAscending=false
-foreignCollectionForeignFieldName=contato
 # --field-end--
 # --table-fields-end--
 # --table-end--

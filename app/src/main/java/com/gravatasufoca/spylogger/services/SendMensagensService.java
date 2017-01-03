@@ -163,15 +163,13 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
             Dao<Topico, Integer> daoTopicos = dbHelper.getDao(Topico.class);
             Dao<Mensagem, Integer> daoMensagem = dbHelper.getDao(Mensagem.class);
 
-            /*UpdateBuilder<Mensagem, Integer> up2 = daoMensagem.updateBuilder();
+           /* UpdateBuilder<Mensagem, Integer> up2 = daoMensagem.updateBuilder();
             up2.updateColumnValue("enviada", false);
             up2.update();*/
 
             Map<String, Map<Integer, DataType>> colunas = Mensagem.columns();
 
-            GenericRawResults<Object[]> raws = daoMensagem.queryRaw("select " + getColunas(colunas) + " from mensagem where enviada=0 and raw_data is null",getTipos(colunas));
-//            GenericRawResults<Object[]> raws = daoMensagem.queryRaw("select id,contato,tipoMidia,remetente,midiaMime,numeroContato,tamanhoArquivo,texto,topico_id,data,dataRecebida ,raw_data, thumb_image from mensagem where enviada=0 ",
-//                    new DataType[]{DataType.INTEGER,DataType.STRING,DataType.INTEGER,DataType.BOOLEAN_INTEGER,DataType.STRING,DataType.STRING,DataType.STRING,DataType.STRING,DataType.INTEGER,DataType.DATE_LONG,DataType.DATE_LONG,DataType.BYTE_ARRAY,DataType.BYTE_ARRAY});
+            GenericRawResults<Object[]> raws = daoMensagem.queryRaw("select " + getColunas(colunas) + " from mensagem where enviada=0",getTipos(colunas));
             List<Mensagem> mensagens = new ArrayList<>();
             contador = 0;
             Iterator<Object[]> iterator = raws.iterator();
@@ -181,66 +179,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                     Mensagem mensagem = new Mensagem.MensagemBuilder()
                             .setId((Integer) resultRaw[colunas.get("id").keySet().iterator().next()])
                             .setContato((String) resultRaw[colunas.get("contato").keySet().iterator().next()])
-                            .setTipoMidia(resultRaw[colunas.get("tipoMidia").keySet().iterator().next()] == null ? TipoMidia.CONTATO : TipoMidia.getTipoMidia(String.valueOf(resultRaw[colunas.get("tipoMidia").keySet().iterator().next()])))
-                            .setRemetente("1".equals(resultRaw[colunas.get("remetente").keySet().iterator().next()]))
-                            .setMediaMime((String) resultRaw[colunas.get("midiaMime").keySet().iterator().next()])
-                            .setNumeroContato((String) resultRaw[colunas.get("numeroContato").keySet().iterator().next()])
-                            .setTamanhoArquivo((Long) resultRaw[colunas.get("tamanhoArquivo").keySet().iterator().next()])
-                            .setTexto((String) resultRaw[colunas.get("texto").keySet().iterator().next()])
-                            .setTopico(new Topico.TopicoBuilder().setId((Integer) resultRaw[colunas.get("topico_id").keySet().iterator().next()]).build(null))
-                            .setData((Date) resultRaw[colunas.get("data").keySet().iterator().next()])
-                            .setDataRecebida((Date) resultRaw[colunas.get("dataRecebida").keySet().iterator().next()])
-                            .build();
-//                    mensagem.setRaw_data(resultRaw[colunas.get("raw_data").keySet().iterator().next()]!=null ? (byte[]) resultRaw[colunas.get("raw_data").keySet().iterator().next()] :null);
-//                    mensagem.setThumb_image(resultRaw[colunas.get("thumb_image").keySet().iterator().next()]!=null ? (byte[]) resultRaw[colunas.get("thumb_image").keySet().iterator().next()] :null);
-
-                    mensagens.add(mensagem);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                contador++;
-                if (iterator.hasNext()) {
-                    if (contador == MAX_MENSAGENS) {
-                        contador = 0;
-                        enviarMensagens(mensagens);
-                        mensagens = new ArrayList<>();
-//                        break;
-                    }
-                } else {
-                    enviarMensagens(mensagens);
-                }
-            }
-        }catch (SQLException e){
-            e.printStackTrace();
-        }
-    }
-
-    private void enviarMensagensComArquivos(){
-        int contador=0;
-        DatabaseHelper dbHelper = new DatabaseHelper(context);
-        try {
-            Dao<Topico, Integer> daoTopicos = dbHelper.getDao(Topico.class);
-            Dao<Mensagem, Integer> daoMensagem = dbHelper.getDao(Mensagem.class);
-
-            /*UpdateBuilder<Mensagem, Integer> up2 = daoMensagem.updateBuilder();
-            up2.updateColumnValue("enviada", false);
-            up2.update();*/
-
-            Map<String, Map<Integer, DataType>> colunas = Mensagem.columns();
-
-            GenericRawResults<Object[]> raws = daoMensagem.queryRaw("select " + getColunas(colunas) + " from mensagem where enviada=0 and raw_data is not null",getTipos(colunas));
-//            GenericRawResults<Object[]> raws = daoMensagem.queryRaw("select id,contato,tipoMidia,remetente,midiaMime,numeroContato,tamanhoArquivo,texto,topico_id,data,dataRecebida ,raw_data, thumb_image from mensagem where enviada=0 ",
-//                    new DataType[]{DataType.INTEGER,DataType.STRING,DataType.INTEGER,DataType.BOOLEAN_INTEGER,DataType.STRING,DataType.STRING,DataType.STRING,DataType.STRING,DataType.INTEGER,DataType.DATE_LONG,DataType.DATE_LONG,DataType.BYTE_ARRAY,DataType.BYTE_ARRAY});
-            List<Mensagem> mensagens = new ArrayList<>();
-            contador = 0;
-            Iterator<Object[]> iterator = raws.iterator();
-            while (iterator.hasNext()) {
-                Object[] resultRaw = iterator.next();
-                try {
-                    Mensagem mensagem = new Mensagem.MensagemBuilder()
-                            .setId((Integer) resultRaw[colunas.get("id").keySet().iterator().next()])
-                            .setContato((String) resultRaw[colunas.get("contato").keySet().iterator().next()])
-                            .setTipoMidia(resultRaw[colunas.get("tipoMidia").keySet().iterator().next()] == null ? TipoMidia.CONTATO : TipoMidia.getTipoMidia(String.valueOf(resultRaw[colunas.get("tipoMidia").keySet().iterator().next()])))
+                            .setTipoMidia(resultRaw[colunas.get("tipoMidia").keySet().iterator().next()] == null ? TipoMidia.CONTATO : TipoMidia.valueOf((String) resultRaw[colunas.get("tipoMidia").keySet().iterator().next()]))
                             .setRemetente("1".equals(resultRaw[colunas.get("remetente").keySet().iterator().next()]))
                             .setMediaMime((String) resultRaw[colunas.get("midiaMime").keySet().iterator().next()])
                             .setNumeroContato((String) resultRaw[colunas.get("numeroContato").keySet().iterator().next()])
@@ -253,18 +192,18 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                     mensagem.setRaw_data(resultRaw[colunas.get("raw_data").keySet().iterator().next()]!=null ? (String)resultRaw[colunas.get("raw_data").keySet().iterator().next()] :null);
                     mensagem.setThumb_image(resultRaw[colunas.get("thumb_image").keySet().iterator().next()]!=null ? (String)resultRaw[colunas.get("thumb_image").keySet().iterator().next()] :null);
 
+
                     mensagens.add(mensagem);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 contador++;
-                Log.i("kk", String.valueOf(contador));
                 if (iterator.hasNext()) {
-                    if (contador == 100) {
+                    if (contador == MAX_MENSAGENS) {
                         contador = 0;
                         enviarMensagens(mensagens);
                         mensagens = new ArrayList<>();
-//                        break;
+                        break;
                     }
                 } else {
                     enviarMensagens(mensagens);
@@ -357,7 +296,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                         ub.updateColumnValue("enviada", true);
                         ub.update();
 
-                        enviarMensagensComArquivos();
+                        enviarMensagens();
                     }
                 }
 

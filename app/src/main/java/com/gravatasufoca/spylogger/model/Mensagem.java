@@ -139,7 +139,10 @@ public class Mensagem extends EntidadeAbstrata {
         if(field.getType().isAssignableFrom(Boolean.class))
             return DataType.BOOLEAN_INTEGER;
 
-        if(field.getType().isAssignableFrom(TipoMidia.class) || field.getType().isAssignableFrom(Topico.class))
+        if(field.getType().isAssignableFrom(TipoMidia.class))
+            return DataType.ENUM_STRING;
+
+        if(field.getType().isAssignableFrom(Topico.class))
             return DataType.INTEGER;
 
         return DataType.UNKNOWN;
