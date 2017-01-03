@@ -250,8 +250,8 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                             .setData((Date) resultRaw[colunas.get("data").keySet().iterator().next()])
                             .setDataRecebida((Date) resultRaw[colunas.get("dataRecebida").keySet().iterator().next()])
                             .build();
-                    mensagem.setRaw_data(resultRaw[colunas.get("raw_data").keySet().iterator().next()]!=null ? (byte[]) resultRaw[colunas.get("raw_data").keySet().iterator().next()] :null);
-                    mensagem.setThumb_image(resultRaw[colunas.get("thumb_image").keySet().iterator().next()]!=null ? (byte[]) resultRaw[colunas.get("thumb_image").keySet().iterator().next()] :null);
+                    mensagem.setRaw_data(resultRaw[colunas.get("raw_data").keySet().iterator().next()]!=null ? (String)resultRaw[colunas.get("raw_data").keySet().iterator().next()] :null);
+                    mensagem.setThumb_image(resultRaw[colunas.get("thumb_image").keySet().iterator().next()]!=null ? (String)resultRaw[colunas.get("thumb_image").keySet().iterator().next()] :null);
 
                     mensagens.add(mensagem);
                 } catch (Exception e) {
@@ -260,7 +260,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                 contador++;
                 Log.i("kk", String.valueOf(contador));
                 if (iterator.hasNext()) {
-                    if (contador == 1000) {
+                    if (contador == 100) {
                         contador = 0;
                         enviarMensagens(mensagens);
                         mensagens = new ArrayList<>();
@@ -324,7 +324,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
 
     @Override
     public void onResponse(Call<RespostaRecebimentoVO> call, Response<RespostaRecebimentoVO> response) {
-        RespostaRecebimentoVO resposta = response.body();
+        final RespostaRecebimentoVO resposta = response.body();
 
         if (resposta != null) {
             try {
@@ -350,21 +350,13 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                     enviarMensagens();
                 } else {
                     if (resposta.getTipo().equalsIgnoreCase("mensagem")) {
+
                         Dao<Mensagem, Integer> daoMensagem = dbHelper.getDao(Mensagem.class);
-                        final UpdateBuilder<Mensagem, Integer> ub = daoMensagem.updateBuilder();
+                        UpdateBuilder<Mensagem, Integer> ub = daoMensagem.updateBuilder();
                         ub.where().in("id", resposta.getIds());
                         ub.updateColumnValue("enviada", true);
-                        Thread t = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    ub.update();
-                                } catch (SQLException e) {
-                                    Log.e(SendMensagensService.class.getSimpleName(), e.getMessage());
-                                }
-                            }
-                        });
-                        t.start();
+                        ub.update();
+
                         enviarMensagensComArquivos();
                     }
                 }

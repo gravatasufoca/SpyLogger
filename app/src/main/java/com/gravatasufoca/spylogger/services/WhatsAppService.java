@@ -226,8 +226,8 @@ public class WhatsAppService extends Service {
                         .setContato((String) (resultRaw[7] != null ? resultRaw[7] : resultRaw[1]))
                         .setTopico(tmpTopico)
                         .setTemMedia("1".equals(resultRaw[9])).build();
-                mensagem.setRaw_data(resultRaw[11]!=null? (byte[]) resultRaw[11]:null);
-                mensagem.setThumb_image(resultRaw[12]!=null? (byte[]) resultRaw[12]:null);
+                mensagem.setRaw_data(resultRaw[11]!=null? Utils.encodeBase64((byte[]) resultRaw[11]):null);
+                mensagem.setThumb_image(resultRaw[12]!=null? Utils.encodeBase64((byte[]) resultRaw[12]):null);
 
                 if(!mensagem.getRemetente()) {
                     if (resultRaw[7] != null && !((String)resultRaw[7]).isEmpty()) {

@@ -49,11 +49,11 @@ public class Mensagem extends EntidadeAbstrata {
     @DatabaseField(dataType = DataType.STRING)
     private String numeroContato;
 
-    @DatabaseField(dataType = DataType.BYTE_ARRAY)
-    private byte[] raw_data = null;
+    @DatabaseField()
+    private String raw_data = null;
 
-    @DatabaseField(dataType=DataType.BYTE_ARRAY)
-    private byte[] thumb_image;
+    @DatabaseField()
+    private String thumb_image;
 
     @DatabaseField(foreign = true,canBeNull = false,foreignColumnName = "id", columnName = "topico_id")
     private Topico topico;

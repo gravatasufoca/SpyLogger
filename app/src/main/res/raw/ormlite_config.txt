@@ -1,5 +1,5 @@
 #
-# generated on 2016/12/27 11:59:25
+# generated on 2016/12/31 11:37:56
 #
 # --table-start--
 dataClass=com.gravatasufoca.spylogger.model.Mensagem
@@ -55,11 +55,9 @@ dataPersister=STRING
 # --field-end--
 # --field-start--
 fieldName=raw_data
-dataPersister=BYTE_ARRAY
 # --field-end--
 # --field-start--
 fieldName=thumb_image
-dataPersister=BYTE_ARRAY
 # --field-end--
 # --field-start--
 fieldName=topico
