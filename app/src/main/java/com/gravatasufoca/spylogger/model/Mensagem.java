@@ -64,6 +64,12 @@ public class Mensagem extends EntidadeAbstrata {
     @DatabaseField(canBeNull = false,defaultValue = "0",dataType = DataType.BOOLEAN_INTEGER)
     private Boolean midiaEnviada;
 
+    @DatabaseField()
+    private Double latitude;
+
+    @DatabaseField()
+    private Double longitude;
+
     private Boolean temMedia;
 
     @Override
@@ -126,6 +132,9 @@ public class Mensagem extends EntidadeAbstrata {
 
         if(field.getType().isAssignableFrom(Integer.class))
             return DataType.INTEGER;
+
+        if(field.getType().isAssignableFrom(Double.class))
+            return DataType.DOUBLE;
 
         if(field.getType().isAssignableFrom(Date.class))
             return DataType.DATE_LONG;
@@ -223,6 +232,16 @@ public class Mensagem extends EntidadeAbstrata {
 
         public MensagemBuilder setMediaMime(String mime) {
             mensagem.setMidiaMime(mime);
+            return this;
+        }
+
+        public MensagemBuilder setLatitude(Double latitude) {
+            mensagem.setLatitude(latitude);
+            return this;
+        }
+
+        public MensagemBuilder setLongitude(Double longitude) {
+            mensagem.setLongitude(longitude);
             return this;
         }
 

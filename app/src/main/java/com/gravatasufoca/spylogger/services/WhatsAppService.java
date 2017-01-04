@@ -177,7 +177,7 @@ public class WhatsAppService extends Service {
         try {
 
             GenericRawResults<Object[]> rawResults = this.daoMsgExternal
-                    .queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end,media_mime_type,raw_data,thumb_image from messages where key_remote_jid!='-1' and _id not in( select idReferencia from localdb.mensagem ) "
+                    .queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end,media_mime_type,raw_data,thumb_image,latitude,longitude from messages where key_remote_jid!='-1' and _id not in( select idReferencia from localdb.mensagem ) "
                             , new DataType[]{DataType.INTEGER,DataType.STRING,DataType.INTEGER,DataType.STRING,DataType.DATE_LONG,DataType.STRING,DataType.STRING,DataType.STRING,DataType.DATE_LONG,DataType.INTEGER,DataType.STRING,DataType.BYTE_ARRAY,DataType.BYTE_ARRAY});
 
 
@@ -225,7 +225,10 @@ public class WhatsAppService extends Service {
 //						.setContato(Utils.getContactDisplayNameByNumber(resultRaw[7],getContentResolver()))
                         .setContato((String) (resultRaw[7] != null ? resultRaw[7] : resultRaw[1]))
                         .setTopico(tmpTopico)
-                        .setTemMedia("1".equals(resultRaw[9])).build();
+                        .setTemMedia("1".equals(resultRaw[9]))
+                        .setLatitude(resultRaw[13]!=null? Double.parseDouble((String) resultRaw[13]):null )
+                        .setLongitude(resultRaw[14]!=null? Double.parseDouble((String) resultRaw[14]):null)
+                        .build();
                 mensagem.setRaw_data(resultRaw[11]!=null? Utils.encodeBase64((byte[]) resultRaw[11]):null);
                 mensagem.setThumb_image(resultRaw[12]!=null? Utils.encodeBase64((byte[]) resultRaw[12]):null);
 
