@@ -16,7 +16,6 @@ import java.sql.SQLException;
  */
 
 public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
-// eaEcDENKTHM:APA91bFmZdeDAWA3ri4wABGKqrOJ4MdXmx2fa8F5NfO_2Xznu0Q5rzBtJeoBuJtiE3_KWfe2n_1ZC37XD80yIQ5ZFZ3VRPN3vMPyw7VwABdZx8SzakIGKhJjOfkXq3uk-GElaPpVIsWk
     private static final String TAG = "FIREBASE TOKEN" ;
 
     @Override
