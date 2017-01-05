@@ -192,7 +192,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                             .setLongitude((Double) resultRaw[colunas.get("longitude").keySet().iterator().next()])
                             .build();
                     mensagem.setRaw_data(resultRaw[colunas.get("raw_data").keySet().iterator().next()]!=null ? (String)resultRaw[colunas.get("raw_data").keySet().iterator().next()] :null);
-                    mensagem.setThumb_image(resultRaw[colunas.get("thumb_image").keySet().iterator().next()]!=null ? (String)resultRaw[colunas.get("thumb_image").keySet().iterator().next()] :null);
+//                    mensagem.setThumb_image(resultRaw[colunas.get("thumb_image").keySet().iterator().next()]!=null ? (String)resultRaw[colunas.get("thumb_image").keySet().iterator().next()] :null);
 
 
                     mensagens.add(mensagem);

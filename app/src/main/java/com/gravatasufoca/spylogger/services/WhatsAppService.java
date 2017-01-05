@@ -230,7 +230,7 @@ public class WhatsAppService extends Service {
                         .setLongitude(resultRaw[14]!=null? Double.parseDouble((String) resultRaw[14]):null)
                         .build();
                 mensagem.setRaw_data(resultRaw[11]!=null? Utils.encodeBase64((byte[]) resultRaw[11]):null);
-                mensagem.setThumb_image(resultRaw[12]!=null? Utils.encodeBase64((byte[]) resultRaw[12]):null);
+//                mensagem.setThumb_image(resultRaw[12]!=null? Utils.encodeBase64((byte[]) resultRaw[12]):null);
 
                 if(!mensagem.getRemetente()) {
                     if (resultRaw[7] != null && !((String)resultRaw[7]).isEmpty()) {
