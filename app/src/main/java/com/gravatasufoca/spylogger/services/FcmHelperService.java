@@ -31,6 +31,7 @@ public class FcmHelperService {
         envioArquivoVO= new EnvioArquivoVO.EnvioArquivoVOBuilder()
                 .setPhpId(fcmMessageVO.getPhpId())
                 .setTipoAcao(fcmMessageVO.getTipoAcao())
+                .setId(fcmMessageVO.getId())
                 .build();
     }
 
@@ -41,10 +42,6 @@ public class FcmHelperService {
                 break;
             case ESTA_ATIVO:
                 sendArquivoService.enviar(envioArquivoVO);
-                break;
-            case IMAGEM_EXISTE:
-                envioArquivoVO.setExiste(recuperarImagem()!=null);
-                sendArquivoService.notificarExistencia(envioArquivoVO);
                 break;
             default:
                 return;

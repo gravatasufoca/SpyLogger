@@ -10,9 +10,5 @@ public enum TipoAcao {
     OBTER_LOCALIZACAO,
     OBTER_VIDEO,
     OBTER_FOTO,
-    ESTA_ATIVO,
-    IMAGEM_EXISTE,
-    VIDEO_EXISTE,
-    AUDIO_EXISTE;
-
+    ESTA_ATIVO;
 }
