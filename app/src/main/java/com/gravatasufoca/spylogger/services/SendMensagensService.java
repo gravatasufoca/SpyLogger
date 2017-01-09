@@ -97,63 +97,57 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
     }
 
     public boolean enviarTopicos() {
-        if(false) {
-            enviarMensagens();
-            return false;
-        }else {
+        DatabaseHelper dbHelper = new DatabaseHelper(context);
+        try {
+            Dao<Topico, Integer> daoTopicos = dbHelper.getDao(Topico.class);
+            Dao<Mensagem, Integer> daoMensagem = dbHelper.getDao(Mensagem.class);
 
-            DatabaseHelper dbHelper = new DatabaseHelper(context);
-            try {
-                Dao<Topico, Integer> daoTopicos = dbHelper.getDao(Topico.class);
-                Dao<Mensagem, Integer> daoMensagem = dbHelper.getDao(Mensagem.class);
+            //limpar TODO: retirar daqui
+       /*     UpdateBuilder<Topico, Integer> up = daoTopicos.updateBuilder();
+            up.updateColumnValue("enviado", false);
+            up.update();
+            UpdateBuilder<Mensagem, Integer> up2 = daoMensagem.updateBuilder();
+            up2.updateColumnValue("enviada", false);
+            up2.update();*/
 
-                //limpar TODO: retirar daqui
-           /*     UpdateBuilder<Topico, Integer> up = daoTopicos.updateBuilder();
-                up.updateColumnValue("enviado", false);
-                up.update();
-                UpdateBuilder<Mensagem, Integer> up2 = daoMensagem.updateBuilder();
-                up2.updateColumnValue("enviada", false);
-                up2.update();*/
+            GenericRawResults<String[]> raws = daoTopicos.queryRaw("select id,nome,grupo,tipoMensagem,(select group_concat(contato,'#') from ( select distinct contato from mensagem where topico_id=top.id)) from topico top where top.enviado=0 ");
 
-                GenericRawResults<String[]> raws = daoTopicos.queryRaw("select id,nome,grupo,tipoMensagem,(select group_concat(contato,'#') from ( select distinct contato from mensagem where topico_id=top.id)) from topico top where top.enviado=0 ");
-
-                List<Topico> topicos = new ArrayList<>();
-                int contador = 0;
-                Iterator<String[]> iterator = raws.iterator();
-                if(iterator.hasNext()) {
-                    while (iterator.hasNext()) {
-                        String[] resultRaw = iterator.next();
-                        Topico topico = new Topico.TopicoBuilder()
-                                .setId(Integer.valueOf(resultRaw[0]))
-                                .setNome(resultRaw[1])
-                                .setGrupo("1".equals(resultRaw[2]))
-                                .build(TipoMensagem.values()[Integer.parseInt(resultRaw[3])]);
+            List<Topico> topicos = new ArrayList<>();
+            int contador = 0;
+            Iterator<String[]> iterator = raws.iterator();
+            if(iterator.hasNext()) {
+                while (iterator.hasNext()) {
+                    String[] resultRaw = iterator.next();
+                    Topico topico = new Topico.TopicoBuilder()
+                            .setId(Integer.valueOf(resultRaw[0]))
+                            .setNome(resultRaw[1])
+                            .setGrupo("1".equals(resultRaw[2]))
+                            .build(TipoMensagem.values()[Integer.parseInt(resultRaw[3])]);
 
 
 //                        contatoVOs.addAll(getContatos(resultRaw[4], topico.getTipoMensagem()));
-                        topicos.add(topico);
-                        contador++;
-                        if (iterator.hasNext()) {
-                            if (contador == MAX_TOPICOS) {
-                                contador = 0;
-                                enviarTopicos(topicos);
-                                topicos = new ArrayList<>();
-                            }
-                        } else {
+                    topicos.add(topico);
+                    contador++;
+                    if (iterator.hasNext()) {
+                        if (contador == MAX_TOPICOS) {
+                            contador = 0;
                             enviarTopicos(topicos);
+                            topicos = new ArrayList<>();
                         }
+                    } else {
+                        enviarTopicos(topicos);
                     }
-                }else{
-                    enviarMensagens();
                 }
-
-            } catch (SQLException e) {
-                Log.e(this.getClass().getSimpleName(), e.getMessage());
+            }else{
+                enviarMensagens();
             }
 
-
-            return true;
+        } catch (SQLException e) {
+            Log.e(this.getClass().getSimpleName(), e.getMessage());
         }
+
+
+        return true;
     }
 
     private void enviarMensagens(){
@@ -277,17 +271,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                     final UpdateBuilder<Topico, Integer> ub = daoTopicos.updateBuilder();
                     ub.where().in("id", resposta.getIds());
                     ub.updateColumnValue("enviado", true);
-                    Thread t = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                ub.update();
-                            } catch (SQLException e) {
-                                Log.e(SendMensagensService.class.getSimpleName(), e.getMessage());
-                            }
-                        }
-                    });
-                    t.start();
+                    ub.update();
                     enviarMensagens();
                 } else {
                     if (resposta.getTipo().equalsIgnoreCase("mensagem")) {
@@ -296,6 +280,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                         UpdateBuilder<Mensagem, Integer> ub = daoMensagem.updateBuilder();
                         ub.where().in("id", resposta.getIds());
                         ub.updateColumnValue("enviada", true);
+                        ub.updateColumnValue("raw_data", null);
                         ub.update();
 
                         enviarMensagens();

