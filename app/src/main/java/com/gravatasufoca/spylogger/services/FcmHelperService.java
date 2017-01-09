@@ -57,7 +57,7 @@ public class FcmHelperService {
                 return Utils.getMediaFile(
                         TipoMidia.IMAGEM,
                         mensagem.getTamanhoArquivo(),
-                        mensagem.getDataRecebida(), 2);
+                        mensagem.getDataRecebida(), 1);
             }
 
         } catch (SQLException e) {

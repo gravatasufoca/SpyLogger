@@ -391,7 +391,8 @@ public class Utils {
         });
 
         for (File file : arquivos) {
-            if (file.length() == tamanho)
+            long t=file.length();
+            if (t == tamanho)
                 return file;
         }
         return null;
