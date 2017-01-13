@@ -14,7 +14,6 @@ import com.gravatasufoca.spylogger.model.Mensagem;
 import com.gravatasufoca.spylogger.model.TipoMensagem;
 import com.gravatasufoca.spylogger.model.TipoMidia;
 import com.gravatasufoca.spylogger.model.Topico;
-import com.gravatasufoca.spylogger.model.whatsapp.ChatList;
 import com.gravatasufoca.spylogger.model.whatsapp.Messages;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.j256.ormlite.dao.Dao;
@@ -35,7 +34,6 @@ public class WhatsAppService extends Service {
     private String pathToWatch;
     private String inFileName;
     private DatabaseHelperExternal external;
-    private Dao<ChatList, Integer> daoChatExternal;
     private Dao<Messages, Integer> daoMsgExternal;
 
     private DatabaseHelper dbHelper;

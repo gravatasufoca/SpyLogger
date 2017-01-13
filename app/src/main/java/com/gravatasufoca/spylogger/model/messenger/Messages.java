@@ -12,6 +12,11 @@ import org.json.JSONObject;
 import java.io.Serializable;
 import java.util.Date;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 @DatabaseTable
 public class Messages extends EntidadeAbstrata implements Comparable<Messages>,MensagenInterface {
 	private static final long serialVersionUID = -4679985146526783051L;
@@ -21,7 +26,6 @@ public class Messages extends EntidadeAbstrata implements Comparable<Messages>,M
 
 	@Override
 	public Serializable getId() {
-		// TODO Auto-generated method stub
 		return msg_id;
 	}
 
@@ -44,42 +48,6 @@ public class Messages extends EntidadeAbstrata implements Comparable<Messages>,M
 	private Thread thread;
 
 	private Sender sender;
-
-	public String getMsg_id() {
-		return msg_id;
-	}
-
-	public void setMsg_id(String msg_id) {
-		this.msg_id = msg_id;
-	}
-
-	public String getThread_key() {
-		return thread_key;
-	}
-
-	public void setThread_key(String thread_key) {
-		this.thread_key = thread_key;
-	}
-
-	public String getText() {
-		return text;
-	}
-
-	public void setText(String text) {
-		this.text = text;
-	}
-
-	public Date getTimestamp_ms() {
-		return timestamp_ms;
-	}
-
-	public void setTimestamp_ms(Date timestamp_ms) {
-		this.timestamp_ms = timestamp_ms;
-	}
-
-	public Thread getThread() {
-		return thread;
-	}
 
 	public Sender getSender() {
 		if(sender==null){

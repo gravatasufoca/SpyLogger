@@ -16,6 +16,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 @DatabaseTable(tableName="threads")
 public class Thread extends EntidadeAbstrata {
 	private static final long serialVersionUID = -4679985146526783051L;
@@ -55,39 +60,6 @@ public class Thread extends EntidadeAbstrata {
 
 	private String nomes;
 
-
-
-	public String getThread_key() {
-		return thread_key;
-	}
-
-	public void setThread_key(String thread_key) {
-		this.thread_key = thread_key;
-	}
-
-	public String getSnippet() {
-		return snippet;
-	}
-
-	public void setSnippet(String snippet) {
-		this.snippet = snippet;
-	}
-
-	public ForeignCollection<Messages> getMensagens() {
-		return mensagens;
-	}
-
-	public void setMensagens(ForeignCollection<Messages> mensagens) {
-		this.mensagens = mensagens;
-	}
-
-	public Date getTimestamp_ms() {
-		return timestamp_ms;
-	}
-
-	public void setTimestamp_ms(Date timestamp_ms) {
-		this.timestamp_ms = timestamp_ms;
-	}
 
 	public String getPhoto(Contact proprietario){
 		if(photo==null || photo.isEmpty()){
