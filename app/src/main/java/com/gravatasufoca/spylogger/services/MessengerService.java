@@ -195,7 +195,7 @@ public class MessengerService extends Service {
 
 		try {
 
-			GenericRawResults<Object[]> rawResults= daoMsgExternal.queryRaw("select msg_id,thread_key,text,tsender,timestamp_ms from messages where msg_id not in( select idReferencia from localdb.mensagem )",
+			GenericRawResults<Object[]> rawResults= daoMsgExternal.queryRaw("select msg_id,thread_key,text,sender,timestamp_ms from messages where msg_id not in( select idReferencia from localdb.mensagem )",
 					new DataType[]{DataType.STRING,DataType.STRING,DataType.STRING,DataType.STRING,DataType.DATE_LONG});
 
 			Iterator<Object[]> iterator=rawResults.iterator();
