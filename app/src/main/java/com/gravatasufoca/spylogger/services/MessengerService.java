@@ -233,7 +233,8 @@ public class MessengerService extends Service {
                         .setRemetente(remetente)
                         .setTexto(message.getText())
                         .setData(message.getTimestamp_ms())
-                        .setDataRecebida(message.getTimestamp_ms())
+                        .setDataRecebida(message
+								.getTimestamp_ms())
                         .setTamanhoArquivo(0)
                         .setTipoMidia(TipoMidia.TEXTO)
                         .setContato(sender.getNome())
@@ -243,7 +244,7 @@ public class MessengerService extends Service {
 				mensagens.add(mensagem);
 				contador++;
 				if (iterator.hasNext()) {
-					if (contador == 15000) {
+					if (contador == 10000) {
 						contador = 0;
 						dbHelper.getDao(Mensagem.class).create(mensagens);
 						mensagens = new ArrayList<>();

@@ -248,7 +248,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
     }
 
     private void enviarMensagens(List<Mensagem> mensagens) {
-        Call<RespostaRecebimentoVO> resp = sendApi.enviarMensagens(mensagens);//
+        Call<RespostaRecebimentoVO> resp = sendApi.enviarMensagens(mensagens);
         resp.enqueue(this);
     }
 
