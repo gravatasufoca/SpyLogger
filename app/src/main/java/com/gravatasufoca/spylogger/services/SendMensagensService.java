@@ -151,7 +151,6 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
     }
 
     private void enviarMensagens(){
-        int contador=0;
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         try {
             Dao<Topico, Integer> daoTopicos = dbHelper.getDao(Topico.class);
@@ -165,7 +164,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
 
             GenericRawResults<Object[]> raws = daoMensagem.queryRaw("select " + getColunas(colunas) + " from mensagem where enviada=0",getTipos(colunas));
             List<Mensagem> mensagens = new ArrayList<>();
-            contador = 0;
+            int contador = 0;
             Iterator<Object[]> iterator = raws.iterator();
             while (iterator.hasNext()) {
                 Object[] resultRaw = iterator.next();

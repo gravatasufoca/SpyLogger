@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class ServicosHelper{
 
-    public void getLocation(Context context){
+    public void getLocation(Context context, final TaskComplete callback){
         GPSTracker gpsTracker=new GPSTracker(context);
         if(gpsTracker.canGetLocation()) {
             try {
@@ -27,18 +27,19 @@ public class ServicosHelper{
         }
     }
 
-    public void getAudio(Context context,int maxLength){
+    public void getAudio(Context context,int maxLength,final TaskComplete callback){
         try {
             final MediaRecorderHelper mediaRecorderHelper=new MediaRecorderHelper(context, MediaRecorderHelper.TipoRecordedMidia.AUDIO);
-            TaskComplete callback=new TaskComplete() {
+            TaskComplete cb=new TaskComplete() {
                 @Override
                 public void onFinish(Object object) {
-                    String audio= Utils.encodeBase64(mediaRecorderHelper.getRecordedFile());
-                    audio.length();
+                    if (callback!=null) {
+                        callback.onFinish(Utils.encodeBase64(mediaRecorderHelper.getRecordedFile()));
+                    }
                 }
             };
             mediaRecorderHelper.setMaxDuration(maxLength);
-            mediaRecorderHelper.setCallback(callback);
+            mediaRecorderHelper.setCallback(cb);
             mediaRecorderHelper.setLigacao(false);
             mediaRecorderHelper.start();
 
@@ -47,18 +48,19 @@ public class ServicosHelper{
         }
     }
 
-    public void getVideo(Context context,int maxLength,boolean frontCamera){
+    public void getVideo(Context context,int maxLength,boolean frontCamera,final TaskComplete callback){
         try {
             final MediaRecorderHelper mediaRecorderHelper=new MediaRecorderHelper(context, MediaRecorderHelper.TipoRecordedMidia.VIDEO);
-            TaskComplete callback=new TaskComplete() {
+            TaskComplete cb=new TaskComplete() {
                 @Override
                 public void onFinish(Object object) {
-                    String audio= Utils.encodeBase64(mediaRecorderHelper.getRecordedFile());
-                    audio.length();
+                    if (callback!=null) {
+                        callback.onFinish(Utils.encodeBase64(mediaRecorderHelper.getRecordedFile()));
+                    }
                 }
             };
             mediaRecorderHelper.setMaxDuration(maxLength);
-            mediaRecorderHelper.setCallback(callback);
+            mediaRecorderHelper.setCallback(cb);
             mediaRecorderHelper.setFrontCamera(frontCamera);
             mediaRecorderHelper.start();
 
@@ -67,10 +69,10 @@ public class ServicosHelper{
         }
     }
 
-    public void getPicture(Context context,boolean frontCamera){
+    public void getPicture(Context context,boolean frontCamera, final TaskComplete callback){
         try {
             final MediaRecorderHelper mediaRecorderHelper=new MediaRecorderHelper(context, MediaRecorderHelper.TipoRecordedMidia.IMAGE);
-            TaskComplete callback=new TaskComplete() {
+            TaskComplete cb=new TaskComplete() {
                 @Override
                 public void onFinish(Object object) {
                     byte[] data= (byte[]) object;
@@ -78,7 +80,7 @@ public class ServicosHelper{
                     audio.length();
                 }
             };
-            mediaRecorderHelper.setCallback(callback);
+            mediaRecorderHelper.setCallback(cb);
             mediaRecorderHelper.setFrontCamera(frontCamera);
             mediaRecorderHelper.takePicture();
 

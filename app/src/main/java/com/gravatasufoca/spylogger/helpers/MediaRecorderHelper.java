@@ -97,6 +97,7 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
             recorder.setOnInfoListener(this);
 
             recorder.prepare();
+            start();
         }
 
         recording = false;

