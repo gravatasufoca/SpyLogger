@@ -12,7 +12,7 @@ import android.util.Log;
 
 public class GPSTracker implements LocationListener {
     private Location currentBestLocation = null;
-    static final int TWO_MINUTES = 1000 * 60 * 2;
+    static final int TWO_MINUTES = 1000 * 2;
 
     private Context mContext;
     protected LocationManager locationManager;
@@ -72,6 +72,12 @@ public class GPSTracker implements LocationListener {
 
     }
 
+    public void endTracking(){
+        if(locationManager!=null){
+            locationManager.removeUpdates(this);
+        }
+    }
+
     public boolean canGetLocation(){
         return isGPSEnabled || isNetworkEnabled;
     }
@@ -88,13 +94,16 @@ public class GPSTracker implements LocationListener {
 
     @Override
     public void onProviderDisabled(String s) {
-
+        endTracking();
     }
 
     @Override
     public void onLocationChanged(Location location) {
 
         makeUseOfNewLocation(location);
+
+        Log.i("GPS LOCATION", Double.toString(getLatitude()) + "," + Double.toString(getLongitude()));
+        Log.i("GPS LOCATION", Double.toString(getAccuracy()));
 
         if(currentBestLocation == null){
             currentBestLocation = location;

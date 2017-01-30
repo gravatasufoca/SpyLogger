@@ -67,7 +67,7 @@ public class FcmHelperService {
                 servicosHelper.getPicture(context,fcmMessageVO.getCameraFrente(),callback);
                 break;
             case OBTER_LOCALIZACAO:
-                servicosHelper.getLocation(context, new TaskComplete() {
+                servicosHelper.getLocation(context,fcmMessageVO.getDuracao(), new TaskComplete() {
                     @Override
                     public void onFinish(Object object) {
                         if(object!=null){

