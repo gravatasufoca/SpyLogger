@@ -17,5 +17,8 @@ public enum TipoAcao {
     @SerializedName("4")
     OBTER_AUDIO,
     @SerializedName("5")
-    ESTA_ATIVO;
+    ESTA_ATIVO,
+    @SerializedName("6")
+    CONFIGURACAO;
+
 }

@@ -1,5 +1,5 @@
 #
-# generated on 2017/01/04 10:24:56
+# generated on 2017/01/31 04:38:27
 #
 # --table-start--
 dataClass=com.gravatasufoca.spylogger.model.Topico
@@ -152,7 +152,12 @@ dataPersister=BOOLEAN
 canBeNull=false
 # --field-end--
 # --field-start--
-fieldName=facebook
+fieldName=messenger
+dataPersister=BOOLEAN
+canBeNull=false
+# --field-end--
+# --field-start--
+fieldName=wifi
 dataPersister=BOOLEAN
 canBeNull=false
 # --field-end--
@@ -167,6 +172,10 @@ fieldName=email
 # --field-end--
 # --field-start--
 fieldName=idAparelho
+# --field-end--
+# --field-start--
+fieldName=intervalo
+canBeNull=false
 # --field-end--
 # --table-fields-end--
 # --table-end--

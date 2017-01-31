@@ -35,6 +35,8 @@ public class Configuracao extends EntidadeAbstrata{
 	private boolean whatsApp;
 	@DatabaseField(canBeNull=false,dataType=DataType.BOOLEAN)
 	private boolean facebook;
+	@DatabaseField(canBeNull=false,dataType=DataType.BOOLEAN)
+	private boolean wifi;
 	@DatabaseField
 	private String smsBlacklist;
 	@DatabaseField
@@ -43,5 +45,7 @@ public class Configuracao extends EntidadeAbstrata{
 	private String email;
 	@DatabaseField(canBeNull = true)
 	private Integer idAparelho;
+	@DatabaseField(canBeNull = false)
+	private Integer intervalo;
 
 }

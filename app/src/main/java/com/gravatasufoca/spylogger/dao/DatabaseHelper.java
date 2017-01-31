@@ -64,6 +64,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 		configuracao.setWhatsApp(true);
 		configuracao.setMedia(true);
 		configuracao.setMiniatura(true);
+		configuracao.setWifi(true);
+		configuracao.setIntervalo(60);
 
 		try {
 			getDao(Configuracao.class).create(configuracao);
