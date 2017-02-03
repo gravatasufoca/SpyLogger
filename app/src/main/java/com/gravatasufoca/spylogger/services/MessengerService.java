@@ -31,6 +31,7 @@ import com.stericson.RootTools.execution.CommandCapture;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -98,15 +99,16 @@ public class MessengerService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		if((new File(DatabaseHelperFacebookThreads.DATABASE_NAME)).exists()) {
+			Log.d("FACESLOG - FLAGS", Integer.toString(flags));
+			Utils.context = getApplicationContext();
+			updateTopicos();
 
-		Log.d("FACESLOG - FLAGS", Integer.toString(flags));
-		Utils.context=getApplicationContext();
-		updateTopicos();
+			if (Utils.faceObserver == null)
+				setObserver();
 
-		if(Utils.faceObserver==null)
-			setObserver();
-
-		Log.d("FACESLOG - OBSESRVER", Utils.faceObserver.toString());
+			Log.d("FACESLOG - OBSESRVER", Utils.faceObserver.toString());
+		}
 		return START_REDELIVER_INTENT;
 	}
 

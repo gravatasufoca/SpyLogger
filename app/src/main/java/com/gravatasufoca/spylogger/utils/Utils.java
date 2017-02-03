@@ -544,11 +544,14 @@ public class Utils {
     }
 
     public static void startAlarm(Context context, Configuracao configuracao){
-        if(Utils.alarm==null && configuracao!=null){
-            Utils.alarm=new Alarm();
 
-            Utils.alarm.CancelAlarm(context);
-            Utils.alarm.SetAlarm(context , configuracao.getIntervalo());
+        if(context!=null && configuracao!=null) {
+            if(alarm!=null){
+                alarm.CancelAlarm(context);
+            }
+            Utils.alarm = new Alarm();
+
+            Utils.alarm.SetAlarm(context, configuracao.getIntervalo());
         }
     }
 

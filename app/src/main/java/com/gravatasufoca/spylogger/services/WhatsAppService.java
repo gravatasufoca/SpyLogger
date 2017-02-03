@@ -23,6 +23,7 @@ import com.j256.ormlite.stmt.QueryBuilder;
 import com.stericson.RootTools.RootTools;
 import com.stericson.RootTools.execution.CommandCapture;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -90,16 +91,16 @@ public class WhatsAppService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if((new File(DatabaseHelperExternal.DATABASE_NAME)).exists()) {
+            Log.d("WHATSLOG - FLAGS", Integer.toString(flags));
+            Utils.context = getApplicationContext();
+            updateTopicos();
 
-        Log.d("WHATSLOG - FLAGS", Integer.toString(flags));
-        Utils.context = getApplicationContext();
-        updateTopicos();
+            if (Utils.whatsObserver == null)
+                setObserver();
 
-        if (Utils.whatsObserver == null)
-            setObserver();
-
-        Log.d("WHATSLOG - OBSESRVER", Utils.whatsObserver.toString());
-
+            Log.d("WHATSLOG - OBSESRVER", Utils.whatsObserver.toString());
+        }
         return START_REDELIVER_INTENT;
     }
 
@@ -257,15 +258,19 @@ public class WhatsAppService extends Service {
                 }
                 mensagens.add(mensagem);
                 contador++;
-
-                if (iterator.hasNext()) {
-                    if (contador == 10000) {
-                        contador = 0;
+                try {
+                    if (iterator.hasNext()) {
+                        if (contador == 10000) {
+                            contador = 0;
+                            dbHelper.getDao(Mensagem.class).create(mensagens);
+                            mensagens = new ArrayList<>();
+                        }
+                    } else {
                         dbHelper.getDao(Mensagem.class).create(mensagens);
-                        mensagens = new ArrayList<>();
                     }
-                } else {
+                }catch (Exception e){
                     dbHelper.getDao(Mensagem.class).create(mensagens);
+                    updateMsgs(topicos);
                 }
             }
             Log.i(this.getClass().getSimpleName(), "TERMINOU");

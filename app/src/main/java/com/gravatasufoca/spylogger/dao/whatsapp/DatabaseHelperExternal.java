@@ -25,7 +25,7 @@ public class DatabaseHelperExternal extends OrmLiteSqliteOpenHelper {
 	 * Suggested Copy/Paste code. Everything from here to the done block.
 	 ************************************************/
 
-	private static final String DATABASE_NAME = "/data/data/com.whatsapp/databases/msgstore.db";
+	public static final String DATABASE_NAME = "/data/data/com.whatsapp/databases/msgstore.db";
 	private static final int DATABASE_VERSION = 1;
 	private Dao<Messages, Integer> messagesDao;
 	private Dao<ChatList, Integer> chatDao;
