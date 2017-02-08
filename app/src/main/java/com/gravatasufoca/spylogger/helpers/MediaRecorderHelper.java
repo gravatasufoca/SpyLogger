@@ -257,7 +257,12 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
         recording = false;
         isPreviewing = false;
         if (callback != null) {
-            callback.onFinish(Utils.getBytesFromFile(recordedFile));
+            if(recordedFile!=null) {
+                callback.onFinish(Utils.getBytesFromFile(recordedFile));
+            }
+            if(fileBytes!=null){
+                callback.onFinish(fileBytes);
+            }
         }
     }
 
