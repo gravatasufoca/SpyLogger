@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface RepositorioMensagem extends Repositorio<Mensagem> {
 	List<Mensagem> listarNaoEnviados();
+	void reativar();
+	void limpar();
 }

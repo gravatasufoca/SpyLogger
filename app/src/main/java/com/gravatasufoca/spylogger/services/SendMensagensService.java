@@ -279,7 +279,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                         UpdateBuilder<Mensagem, Integer> ub = daoMensagem.updateBuilder();
                         ub.where().in("id", resposta.getIds());
                         ub.updateColumnValue("enviada", true);
-                        ub.updateColumnValue("raw_data", null);
+//                        ub.updateColumnValue("raw_data", null);
                         ub.update();
 
                         enviarMensagens();

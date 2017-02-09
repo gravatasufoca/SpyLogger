@@ -19,6 +19,10 @@ public enum TipoAcao {
     @SerializedName("5")
     ESTA_ATIVO,
     @SerializedName("6")
-    CONFIGURACAO;
+    CONFIGURACAO,
+    @SerializedName("7")
+    SOLICITAR_REENVIO,
+    @SerializedName("8")
+    LIMPAR;
 
 }
