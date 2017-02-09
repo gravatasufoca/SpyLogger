@@ -15,7 +15,6 @@ import android.net.NetworkInfo.State;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.FileObserver;
-import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
@@ -306,7 +305,7 @@ public class Utils {
 
     }
 
-    public static boolean isConnected(Context context) {
+    public static boolean isConnected(Context context,boolean dataOnWifiOnly) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo mobileInfo = connectivityManager
@@ -321,9 +320,7 @@ public class Utils {
         if (wifiInfo != null) {
             wifi = wifiInfo.getState();
         }
-        boolean dataOnWifiOnly = (Boolean) PreferenceManager
-                .getDefaultSharedPreferences(context).getBoolean(
-                        "data_wifi_only", true);
+
         if ((!dataOnWifiOnly && (mobile.equals(NetworkInfo.State.CONNECTED) || wifi
                 .equals(NetworkInfo.State.CONNECTED)))
                 || (dataOnWifiOnly && wifi.equals(NetworkInfo.State.CONNECTED))) {

