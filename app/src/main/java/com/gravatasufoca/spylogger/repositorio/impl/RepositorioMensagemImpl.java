@@ -5,7 +5,6 @@ import android.content.Context;
 import com.gravatasufoca.spylogger.model.Mensagem;
 import com.gravatasufoca.spylogger.repositorio.RepositorioGenerico;
 import com.gravatasufoca.spylogger.repositorio.RepositorioMensagem;
-import com.j256.ormlite.stmt.UpdateBuilder;
 import com.j256.ormlite.table.TableUtils;
 
 import java.sql.SQLException;
@@ -36,9 +35,7 @@ public class RepositorioMensagemImpl extends RepositorioGenerico<Mensagem> imple
 	@Override
 	public void reativar() {
 		try {
-			UpdateBuilder<Mensagem, Integer> ub = database.updateBuilder();
-			ub.updateColumnValue("enviada", false);
-			ub.update();
+			database.executeRawNoArgs("update mensagem set enviada=0 ");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

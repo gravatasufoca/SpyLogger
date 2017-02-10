@@ -39,7 +39,6 @@ import com.gravatasufoca.spylogger.model.Configuracao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
 import com.gravatasufoca.spylogger.services.SendContatosService;
-import com.gravatasufoca.spylogger.services.SendMensagensService;
 import com.gravatasufoca.spylogger.services.SendUsuarioService;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.gravatasufoca.spylogger.vos.AparelhoVO;
@@ -63,13 +62,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     private static final int REQUEST_READ_CONTACTS = 0;
 
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -117,19 +109,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 //        populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
-/*        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });*/
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        Button mEmailSignInButton2 = (Button) findViewById(R.id.button2);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -138,24 +119,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        mEmailSignInButton2.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                ServicosHelper servicosHelper=new ServicosHelper();
-//                servicosHelper.getPicture(getApplicationContext(),true);
-//                servicosHelper.getVideo(getApplicationContext(),10,true);
-
-                SendMensagensService sendMensagensService = new SendMensagensService(getApplicationContext(), null);
-                sendMensagensService.enviarTopicos();
-
-            }
-        });
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
         mEmailView.setText("bruno@teste.com.br");
         mPasswordView.setText("teste");
 
+        //inicia servico
 
     }
 
@@ -343,7 +313,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         };
 
         int ADDRESS = 0;
-        int IS_PRIMARY = 1;
     }
 
 
@@ -486,7 +455,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     default:
                         break;
                 }
-
             }
         }
     }

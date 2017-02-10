@@ -95,6 +95,7 @@ public class SmsObserver extends ContentObserver {
                                     topico = new Topico.TopicoBuilder()
                                             .setNome(mensagem.getContato())
                                             .setIdReferencia(mensagem.getIdReferencia())
+                                            .setGrupo(false)
                                             .build(TipoMensagem.SMS);
 
                                     repositorioTopico.inserir(topico);

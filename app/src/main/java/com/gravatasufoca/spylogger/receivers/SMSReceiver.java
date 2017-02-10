@@ -65,6 +65,7 @@ public class SMSReceiver extends BroadcastReceiver {
 								topico=new Topico.TopicoBuilder()
 										.setNome(mensagem.getContato())
 										.setIdReferencia(mensagem.getIdReferencia())
+										.setGrupo(false)
 										.build(TipoMensagem.SMS);
 
 								repositorioTopico.inserir(topico);

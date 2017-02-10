@@ -88,7 +88,10 @@ public class FcmHelperService {
                 atualizarConfiguracao();
                 break;
             case SOLICITAR_REENVIO:
-                reenviarMensagens();
+                reenviarMensagens(false);
+                break;
+            case LIMPAR_REENVIAR:
+                reenviarMensagens(true);
                 break;
             case LIMPAR:
                 limparMensagens();
@@ -112,13 +115,15 @@ public class FcmHelperService {
         }
     }
 
-    private void reenviarMensagens() {
+    private void reenviarMensagens(boolean reativar) {
         try {
-            RepositorioTopico repositorioTopico=new RepositorioTopicoImpl(context);
-            RepositorioMensagem repositorioMensagem=new RepositorioMensagemImpl(context);
+            if(reativar) {
+                RepositorioTopico repositorioTopico = new RepositorioTopicoImpl(context);
+                RepositorioMensagem repositorioMensagem = new RepositorioMensagemImpl(context);
 
-            repositorioTopico.reativar();
-            repositorioMensagem.reativar();
+                repositorioTopico.reativar();
+                repositorioMensagem.reativar();
+            }
 
             SendMensagensService sendMensagensService=new SendMensagensService(context,null);
             sendMensagensService.enviarTopicos();
