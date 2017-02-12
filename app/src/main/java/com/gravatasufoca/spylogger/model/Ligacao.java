@@ -21,14 +21,14 @@ public class Ligacao extends EntidadeAbstrata {
 	@DatabaseField(generatedId = true)
 	private Integer id;
 
-	@DatabaseField(canBeNull=false,dataType=DataType.DATE_TIME)
+	@DatabaseField(canBeNull = false, dataType = DataType.DATE_LONG)
 	private Date data=new Date();
 
 	@DatabaseField(canBeNull=false,dataType=DataType.BOOLEAN)
 	private boolean enviado;
 
-	@DatabaseField(canBeNull=false,dataType=DataType.BYTE_ARRAY)
-	private byte[] audio;
+	@DatabaseField(canBeNull = false)
+	private String audio;
 
 	@DatabaseField(canBeNull=false,dataType=DataType.STRING)
 	private String numero;

@@ -53,6 +53,7 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
     private WindowManager wm;
     private TipoRecordedMidia tipoMidia;
     private byte[] fileBytes;
+    private int tentativas=0;
 
     public enum TipoRecordedMidia{
         AUDIO,VIDEO,IMAGE;
@@ -99,8 +100,8 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
             recorder.setOnInfoListener(this);
 
             recorder.prepare();
-            start();
         }
+        start();
 
         recording = false;
     }
@@ -229,16 +230,32 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
                 prepareSurface();
             }
         } else {
-            if (!isVideo()) {
-                recorder.start();
-            } else {
-                if (isPreviewing) {
+            try {
+                Thread.sleep(2000);
+                if (!isVideo()) {
                     recorder.start();
+                } else {
+                    if (isPreviewing) {
+                        recorder.start();
+                    }
                 }
+                inicio = new Date();
+            } catch (Exception e) {
+                tentativas++;
+                if(tentativas<=3){
+                    releaseMediaRecorder();
+                    recorder=null;
+                    start();
+                }else{
+                    tentativas=0;
+                    stop();
+                }
+                e.printStackTrace();
             }
+
         }
         duration = 0;
-        inicio = new Date();
+
         recording = true;
         try {
             Thread.sleep(1000);
@@ -253,7 +270,9 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
         } catch (InterruptedException e) {
         }
         releaseMediaRecorder();
-        duration = ((inicio.getTime() - (new Date()).getTime()) / 1000);
+        if(inicio!=null){
+            duration = ((inicio.getTime() - (new Date()).getTime()) / 1000);
+        }
         recording = false;
         isPreviewing = false;
         if (callback != null) {

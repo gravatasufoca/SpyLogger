@@ -80,31 +80,6 @@ public class SendContatosService extends SendDataService<RespostaRecebimentoVO> 
 
     public void enviarContatos(){
         contatos = Utils.getContatos(context.getContentResolver());
-
-//        for (ContatoVO contato:contatos){
-           /* if(!TipoMensagem.MESSENGER.equals(tipoMensagem)) {
-                String num = numero.split("@")[0];
-                num = num.indexOf("-") != -1 ? num.split("-")[0] : num;
-                num = numero.replaceAll("[^\\d\\+]", "");
-                if (contato.getNumero().equals(num)) {
-                    return contato;
-                }
-                if (num.length() > 8) {
-                    num = num.substring(num.length() - 8, num.length());
-                } else {
-                    Log.i("dd", "");
-                }
-                if (contato.getNumero().endsWith(num)) {
-                    return contato;
-                }
-            }else{
-                if (contato.getNome().equalsIgnoreCase(numero)) {
-                    return contato;
-                }
-            }*/
-
-//        }
-
         Call<RespostaRecebimentoVO> resp = sendApi.enviarContatos(contatos);
         resp.enqueue(this);
     }

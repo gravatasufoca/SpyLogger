@@ -100,7 +100,6 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         try {
             Dao<Topico, Integer> daoTopicos = dbHelper.getDao(Topico.class);
-            Dao<Mensagem, Integer> daoMensagem = dbHelper.getDao(Mensagem.class);
 
             //limpar TODO: retirar daqui
        /*     UpdateBuilder<Topico, Integer> up = daoTopicos.updateBuilder();
@@ -153,7 +152,6 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
     private void enviarMensagens(){
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         try {
-            Dao<Topico, Integer> daoTopicos = dbHelper.getDao(Topico.class);
             Dao<Mensagem, Integer> daoMensagem = dbHelper.getDao(Mensagem.class);
 
            /* UpdateBuilder<Mensagem, Integer> up2 = daoMensagem.updateBuilder();

