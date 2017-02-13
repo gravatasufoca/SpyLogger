@@ -30,4 +30,9 @@ public class SendArquivoService extends SendDataService<Boolean> {
         Call<Boolean> call=sendApi.notificarExistencia(envioArquivoVO);
         call.enqueue(this);
     }
+
+    public void enviarAtivo(EnvioArquivoVO envioArquivoVO){
+        Call<Boolean> call=sendApi.enviarAtivo(envioArquivoVO);
+        call.enqueue(this);
+    }
 }

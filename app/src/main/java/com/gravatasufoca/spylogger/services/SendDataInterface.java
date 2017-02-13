@@ -23,8 +23,8 @@ import retrofit2.http.Path;
 
 public interface SendDataInterface {
 
-//    String ip="172.24.35.147";
-    String ip="192.168.1.118";
+    String ip="172.24.35.147";
+//    String ip="192.168.1.118";
 
     String apiUrl="http://"+ip+"/smartlog/api/v1/";
 
@@ -42,6 +42,9 @@ public interface SendDataInterface {
 
     @POST(apiUrl+"receber/arquivo")
     Call<Boolean> enviarArquivo(@Body EnvioArquivoVO envioArquivoVO);
+
+    @POST(apiUrl+"fcm/conectado")
+    Call<Boolean> enviarAtivo(@Body EnvioArquivoVO envioArquivoVO);
 
     @POST(apiUrl+"receber/arquivo/localizacao")
     Call<Boolean> enviarLocalizacao(@Body LocalizacaoVO envioArquivoVO);

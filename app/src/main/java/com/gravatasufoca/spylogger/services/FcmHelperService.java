@@ -61,7 +61,7 @@ public class FcmHelperService {
                 enviarArquivo(recuperarArquivo());
                 break;
             case ESTA_ATIVO:
-                sendArquivoService.enviar(envioArquivoVO);
+                sendArquivoService.enviarAtivo(envioArquivoVO);
                 break;
             case OBTER_AUDIO:
                 servicosHelper.getAudio(context,fcmMessageVO.getDuracao(),callback);
