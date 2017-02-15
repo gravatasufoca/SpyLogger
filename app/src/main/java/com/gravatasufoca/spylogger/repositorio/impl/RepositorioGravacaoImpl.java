@@ -35,6 +35,14 @@ public class RepositorioGravacaoImpl extends RepositorioGenerico<Ligacao> implem
 		}
 	}
 
+	@Override
+	public void reativar() {
+		try {
+			database.executeRawNoArgs("update ligacao set enviado=0 ");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
 
 }

@@ -9,4 +9,5 @@ public interface RepositorioGravacao extends Repositorio<Ligacao> {
 
 	List<Ligacao> listarNaoEnviados();
 
+	void reativar();
 }
