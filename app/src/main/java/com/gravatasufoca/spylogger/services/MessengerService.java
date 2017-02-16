@@ -148,7 +148,7 @@ public class MessengerService extends Service {
 			daoMsgExternal.executeRaw("attach database '"+inFileName+"' as 'localdb' ");
 
 
-			GenericRawResults<Object[]> raws= daoMsgExternal.queryRaw("select thread_key,snippet,senders,snippet_sender, timestamp_ms from threads where thread_key not in( select idReferencia from localdb.topico )",
+			GenericRawResults<Object[]> raws= daoMsgExternal.queryRaw("select thread_key,snippet,senders,snippet_sender, timestamp_ms from threads where thread_key not in( select idReferencia from localdb.topico where tipoMensagem=1 )",
 					new DataType[]{DataType.STRING,DataType.STRING,DataType.STRING,DataType.STRING,DataType.DATE_LONG});
 			List<String> sThread=new ArrayList<>();
 

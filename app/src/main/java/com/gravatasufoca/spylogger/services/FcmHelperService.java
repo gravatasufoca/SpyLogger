@@ -104,30 +104,45 @@ public class FcmHelperService {
     }
 
     private void limparMensagens() {
+        RepositorioTopico repositorioTopico;
+        RepositorioMensagem repositorioMensagem;
+        RepositorioGravacao repositorioGravacao;
         try {
-            RepositorioTopico repositorioTopico=new RepositorioTopicoImpl(context);
-            RepositorioMensagem repositorioMensagem=new RepositorioMensagemImpl(context);
+            repositorioTopico=new RepositorioTopicoImpl(context);
+            repositorioMensagem=new RepositorioMensagemImpl(context);
+            repositorioGravacao=new RepositorioGravacaoImpl(context);
 
             repositorioMensagem.limpar();
             repositorioTopico.limpar();
-
+            repositorioGravacao.limpar();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.e("spylogger",e.getMessage());
+        }finally {
+            repositorioGravacao=null;
+            repositorioMensagem=null;
+            repositorioTopico=null;
         }
     }
 
     private void reativarMensagens(){
+        RepositorioTopico repositorioTopico;
+        RepositorioMensagem repositorioMensagem;
+        RepositorioGravacao repositorioGravacao;
         try {
-            RepositorioTopico repositorioTopico = new RepositorioTopicoImpl(context);
-            RepositorioMensagem repositorioMensagem = new RepositorioMensagemImpl(context);
-            RepositorioGravacao repositorioGravacao = new RepositorioGravacaoImpl(context);
+            repositorioTopico = new RepositorioTopicoImpl(context);
+            repositorioMensagem = new RepositorioMensagemImpl(context);
+            repositorioGravacao = new RepositorioGravacaoImpl(context);
 
             repositorioTopico.reativar();
             repositorioMensagem.reativar();
             repositorioGravacao.reativar();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.e("SPYLOGGER",e.getMessage());
+        }finally {
+            repositorioGravacao=null;
+            repositorioMensagem=null;
+            repositorioTopico=null;
         }
     }
 
@@ -162,7 +177,6 @@ public class FcmHelperService {
                 configuracao.setWifi(configuracaoVO.isWifi());
 
                 repositorioConfiguracao.atualizar(configuracao);
-
 
                 Utils.startAlarm(context,configuracao);
             }

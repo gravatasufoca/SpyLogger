@@ -33,10 +33,7 @@ public class RepositorioTopicoImpl extends RepositorioGenerico<Topico> implement
 	@Override
 	public void reativar() {
 		try {
-			database.executeRawNoArgs("update topico set enviado=0 ");
-			/*UpdateBuilder<Topico, Integer> ub = database.updateBuilder();
-			ub.updateColumnValue("enviado", false);
-			ub.update();*/
+			database.executeRawNoArgs("update topico set enviado=0 where tipoMensagem!=2 ");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

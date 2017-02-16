@@ -35,7 +35,7 @@ public class RepositorioMensagemImpl extends RepositorioGenerico<Mensagem> imple
 	@Override
 	public void reativar() {
 		try {
-			database.executeRawNoArgs("update mensagem set enviada=0 ");
+			database.executeRawNoArgs("update mensagem set enviada=0 where topico_id in(select id from topico where tipoMensagem !=2 )");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

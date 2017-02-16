@@ -6,6 +6,7 @@ import android.content.Context;
 import com.gravatasufoca.spylogger.model.Ligacao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioGenerico;
 import com.gravatasufoca.spylogger.repositorio.RepositorioGravacao;
+import com.j256.ormlite.table.TableUtils;
 
 import java.sql.SQLException;
 import java.util.Collections;
@@ -39,6 +40,17 @@ public class RepositorioGravacaoImpl extends RepositorioGenerico<Ligacao> implem
 	public void reativar() {
 		try {
 			database.executeRawNoArgs("update ligacao set enviado=0 ");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void limpar() {
+		try {
+			TableUtils.dropTable(getConnectionSource(),Ligacao.class,true);
+			TableUtils.createTable(getConnectionSource(),Ligacao.class);
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
