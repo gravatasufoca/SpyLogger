@@ -385,11 +385,12 @@ public class Utils {
                 return check;
             }
         });
-
-        for (File file : arquivos) {
-            long t=file.length();
-            if (t == tamanho)
-                return file;
+        if(arquivos!=null) {
+            for (File file : arquivos) {
+                long t = file.length();
+                if (t == tamanho)
+                    return file;
+            }
         }
         return null;
     }
@@ -441,6 +442,15 @@ public class Utils {
             return os.toByteArray();
         } catch (IOException e) {
             return null;
+        }
+    }
+
+    public static String getFileExtension(File file) {
+        String name = file.getName();
+        try {
+            return name.substring(name.lastIndexOf(".") + 1);
+        } catch (Exception e) {
+            return "";
         }
     }
 

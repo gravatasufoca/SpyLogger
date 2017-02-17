@@ -25,6 +25,12 @@ public enum TipoAcao {
     @SerializedName("8")
     LIMPAR,
     @SerializedName("9")
-    LIMPAR_REENVIAR;
+    LIMPAR_REENVIAR,
+    @SerializedName("10")
+    REENVIAR_LIGACOES,
+    @SerializedName("11")
+    REENVIAR_ARQUIVOS,
+    @SerializedName("12")
+    LIMPAR_REENVIAR_LIGACOES;
 
 }
