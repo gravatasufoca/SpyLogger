@@ -74,7 +74,7 @@ public class Mensagem extends EntidadeAbstrata {
 
     @Override
     public Serializable getId() {
-        return null;
+        return id;
     }
 
     @Override
