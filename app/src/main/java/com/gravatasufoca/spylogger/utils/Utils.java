@@ -347,7 +347,7 @@ public class Utils {
         return Base64.encodeToString(getBytesFromFile(f), Base64.NO_WRAP);
     }
 
-    public static File getMediaFile(TipoMidia tipo, long tamanho, Date data, int dias) {
+    public static File getMediaFile2(TipoMidia tipo, long tamanho, Date data, int dias) {
         String path = Environment.getExternalStorageDirectory() + "/WhatsApp/Media/WhatsApp " + tipo.getTipo();
         final String nome = tipo.getPrefixo() + "-";
         File dir = new File(path);
@@ -390,6 +390,47 @@ public class Utils {
                 long t = file.length();
                 if (t == tamanho)
                     return file;
+            }
+        }
+        return null;
+    }
+
+    public static File getMediaFile(TipoMidia tipo, final long tamanho, Date data, int dias) {
+        String path = Environment.getExternalStorageDirectory() + "/WhatsApp/Media/WhatsApp " + tipo.getTipo();
+        final String nome = tipo.getPrefixo() + "-";
+        File dir = new File(path);
+
+        final List<String> datas = new ArrayList<String>();
+
+        //adiciona a qtd de dias para frente
+        Date ndata = new Date(data.getTime() + dias * 24 * 60 * 60 * 1000);
+
+        datas.add(new SimpleDateFormat("yyyyMMdd").format(ndata));
+
+        for (int i = 1; i <= dias * 2; i++) {
+
+            Date tmp = new Date(ndata.getTime() - i * 24 * 60 * 60 * 1000);
+
+            datas.add(new SimpleDateFormat("yyyyMMdd").format(tmp));
+
+
+        }
+
+        File[] arquivos = dir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String filename) {
+                return dir.length()==tamanho;
+            }
+        });
+
+        if(arquivos!=null) {
+            for (File file : arquivos) {
+                for (String data2 : datas) {
+                    if (file.getName().toLowerCase().startsWith(nome + data2)) {
+                        return file;
+                    }
+                }
+
             }
         }
         return null;

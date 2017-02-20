@@ -15,6 +15,7 @@ import com.j256.ormlite.dao.GenericRawResults;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.stmt.UpdateBuilder;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,7 +52,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
     public void enviarTopicos() {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         Dao<Topico, Integer> daoTopicos;
-        GenericRawResults<String[]> raws;
+        GenericRawResults<String[]> raws = null;
         List<Topico> topicos = new ArrayList<>();
         Iterator<String[]> iterator;
         try {
@@ -88,19 +89,20 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
 
         } catch (SQLException e) {
             Log.e(this.getClass().getSimpleName(), e.getMessage());
-        }finally {
-            dbHelper = null;
-            daoTopicos= null;
-            raws= null;
-            topicos = null;
-            iterator= null;
+        } finally {
+            try {
+                if (raws != null) {
+                    raws.close();
+                }
+            } catch (IOException ee) {
+            }
         }
     }
 
     private void enviarMensagens() {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         Dao<Mensagem, Integer> daoMensagem;
-        GenericRawResults<Object[]> raws;
+        GenericRawResults<Object[]> raws = null;
         List<Mensagem> mensagens = new ArrayList<>();
         Iterator<Object[]> iterator;
         try {
@@ -145,12 +147,13 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
             }
         } catch (SQLException e) {
             Log.e("spylogger", e.getMessage());
-        }finally {
-            dbHelper = null;
-            daoMensagem= null;
-            raws= null;
-            mensagens= null;
-            iterator= null;
+        } finally {
+            try {
+                if (raws != null) {
+                    raws.close();
+                }
+            } catch (IOException ee) {
+            }
         }
     }
 
@@ -215,7 +218,16 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                     UpdateBuilder<Topico, Integer> ub = daoTopicos.updateBuilder();
                     ub.where().in("id", resposta.getIds());
                     ub.updateColumnValue("enviado", true);
-                    ub.update();
+                    try {
+                        ub.update();
+                    } catch (Exception e) {
+                        try {
+                            Thread.sleep(3000);
+                            ub.update();
+                        } catch (Exception e1) {
+                        }
+
+                    }
                     enviarMensagens();
                 } else {
                     if (resposta.getTipo().equalsIgnoreCase("mensagem")) {
@@ -225,17 +237,16 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                         ub.where().in("id", resposta.getIds());
                         ub.updateColumnValue("enviada", true);
                         ub.update();
-
                         enviarMensagens();
                     }
                 }
 
             } catch (SQLException e) {
                 Log.e(this.getClass().getSimpleName(), e.getMessage());
-            }finally {
+            } finally {
                 dbHelper = null;
-                daoTopicos= null;
-                daoMensagem= null;
+                daoTopicos = null;
+                daoMensagem = null;
             }
         }
     }

