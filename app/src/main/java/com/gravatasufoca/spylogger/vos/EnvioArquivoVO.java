@@ -16,7 +16,6 @@ public class EnvioArquivoVO {
     private TipoAcao tipoAcao;
     private Integer id;
     private String phpId;
-    private String arquivo;
     private Boolean existe;
 
     protected EnvioArquivoVO() {
@@ -46,10 +45,6 @@ public class EnvioArquivoVO {
             return this;
         }
 
-        public EnvioArquivoVOBuilder setArquivo(String arquivo) {
-            envioArquivoVO.setArquivo(arquivo);
-            return this;
-        }
 
         public EnvioArquivoVOBuilder setExiste(boolean existe) {
             envioArquivoVO.setExiste(existe);

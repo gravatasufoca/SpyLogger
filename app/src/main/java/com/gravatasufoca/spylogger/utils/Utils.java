@@ -347,7 +347,7 @@ public class Utils {
         return Base64.encodeToString(getBytesFromFile(f), Base64.NO_WRAP);
     }
 
-    public static File getMediaFile2(TipoMidia tipo, long tamanho, Date data, int dias) {
+    public static File getMediaFile(TipoMidia tipo, long tamanho, Date data, int dias) {
         String path = Environment.getExternalStorageDirectory() + "/WhatsApp/Media/WhatsApp " + tipo.getTipo();
         final String nome = tipo.getPrefixo() + "-";
         File dir = new File(path);
@@ -395,7 +395,7 @@ public class Utils {
         return null;
     }
 
-    public static File getMediaFile(TipoMidia tipo, final long tamanho, Date data, int dias) {
+    public static File getMediaFile2(TipoMidia tipo, final long tamanho, Date data, int dias) {
         String path = Environment.getExternalStorageDirectory() + "/WhatsApp/Media/WhatsApp " + tipo.getTipo();
         final String nome = tipo.getPrefixo() + "-";
         File dir = new File(path);

