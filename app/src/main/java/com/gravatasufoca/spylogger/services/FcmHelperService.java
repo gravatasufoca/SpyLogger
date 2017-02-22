@@ -50,7 +50,7 @@ public class FcmHelperService {
     public FcmHelperService(Context context, FcmMessageVO fcmMessageVO) {
         this.context = context;
         this.fcmMessageVO = fcmMessageVO;
-        sendArquivoService=new SendArquivoService(null);
+        sendArquivoService=new SendArquivoService(context,null);
         envioArquivoVO= new EnvioArquivoVO.EnvioArquivoVOBuilder()
                 .setPhpId(fcmMessageVO.getPhpId())
                 .setTipoAcao(fcmMessageVO.getTipoAcao())
@@ -328,6 +328,7 @@ public class FcmHelperService {
                         mensagem.getTipoMidia(),
                         mensagem.getTamanhoArquivo(),
                         mensagem.getDataRecebida(), 2);
+
             }
 
         } catch (SQLException e) {
@@ -339,8 +340,7 @@ public class FcmHelperService {
     private void enviarArquivo(File file) {
         if(file!=null){
             sendArquivoService.enviar(file,envioArquivoVO);
-            file.deleteOnExit();
-        }
+       }
     }
 /*    private void enviarArquivo(String file) {
         if(file!=null){

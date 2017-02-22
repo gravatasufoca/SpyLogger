@@ -34,6 +34,7 @@ public abstract class SendDataService<E> implements Callback<E>{
         client.writeTimeout(10,TimeUnit.MINUTES);
         client.addInterceptor(new RequestInterceptor());
 
+
         Gson gson = new GsonBuilder()
                 .setDateFormat("yyyy-MM-dd HH:mm:ss")
                 .create();

