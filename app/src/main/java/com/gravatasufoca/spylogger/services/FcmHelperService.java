@@ -338,8 +338,8 @@ public class FcmHelperService {
 
     private void enviarArquivo(File file) {
         if(file!=null){
-
             sendArquivoService.enviar(file,envioArquivoVO);
+            file.deleteOnExit();
         }
     }
 /*    private void enviarArquivo(String file) {
