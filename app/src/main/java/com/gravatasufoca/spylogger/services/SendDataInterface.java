@@ -17,6 +17,7 @@ import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.Header;
+import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
@@ -46,6 +47,7 @@ public interface SendDataInterface {
     Call<RespostaRecebimentoVO> enviarLigacoes(@Body List<Ligacao> ligacoes);
 
     @Multipart
+    @Headers("Content-Type: multipart/form-data")
     @POST(apiUrl+"receber/arquivo")
     Call<Boolean> enviarArquivo(@Part MultipartBody.Part arquivo, @Header("tipoAcao") TipoAcao tipoAcao);
 
