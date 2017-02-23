@@ -10,7 +10,6 @@ import com.gravatasufoca.spylogger.vos.LocalizacaoVO;
 import java.io.File;
 
 import okhttp3.MediaType;
-import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 
@@ -31,11 +30,7 @@ public class SendArquivoService extends SendDataService<Boolean> {
 
         RequestBody requestFile=RequestBody.create(MediaType.parse(Utils.getMimeType(arquivo.getAbsolutePath())),Utils.getBytesFromFile(arquivo));
 
-        MultipartBody.Part body =
-                MultipartBody.Part.createFormData("arquivo", arquivo.getName(), requestFile);
-
-
-        Call<Boolean> call=sendApi.enviarArquivo(body,envioArquivoVO.getTipoAcao());
+        Call<Boolean> call=sendApi.enviarArquivo(requestFile,envioArquivoVO);
         call.enqueue(this);
     }
 
