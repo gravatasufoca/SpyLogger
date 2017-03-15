@@ -33,6 +33,7 @@ public abstract class SendDataService<E> implements Callback<E>{
         client.readTimeout(10,TimeUnit.MINUTES);
         client.writeTimeout(10,TimeUnit.MINUTES);
         client.addInterceptor(new RequestInterceptor());
+        client.retryOnConnectionFailure(true);
 
 
         Gson gson = new GsonBuilder()

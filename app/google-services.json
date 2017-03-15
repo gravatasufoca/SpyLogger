@@ -19,7 +19,7 @@
           "client_type": 1,
           "android_info": {
             "package_name": "com.gravatasufoca.spylogger",
-            "certificate_hash": "2630443EE4D32B49218C441BAC318923B5B37266"
+            "certificate_hash": "2630443ee4d32b49218c441bac318923b5b37266"
           }
         },
         {
@@ -27,7 +27,7 @@
           "client_type": 1,
           "android_info": {
             "package_name": "com.gravatasufoca.spylogger",
-            "certificate_hash": "2D019DAD3033E8345B8B2CCC9481DA3E03C74C01"
+            "certificate_hash": "2d019dad3033e8345b8b2ccc9481da3e03c74c01"
           }
         },
         {
@@ -35,7 +35,7 @@
           "client_type": 1,
           "android_info": {
             "package_name": "com.gravatasufoca.spylogger",
-            "certificate_hash": "722A37631AAA8921FE66357B6E285E4361A5F7D6"
+            "certificate_hash": "722a37631aaa8921fe66357b6e285e4361a5f7d6"
           }
         },
         {
