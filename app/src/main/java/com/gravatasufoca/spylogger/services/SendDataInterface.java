@@ -26,7 +26,7 @@ import retrofit2.http.Path;
 
 public interface SendDataInterface {
 
-    String ip="172.24.34.195";
+    String ip="172.24.34.113";
 //    String ip="gravatasufoca.no-ip.org:8085";
 
     String apiUrl="http://"+ip+"/smartlog/api/v1/";

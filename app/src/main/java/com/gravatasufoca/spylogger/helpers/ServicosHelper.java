@@ -112,7 +112,7 @@ public class ServicosHelper {
                                 byte[] data = (byte[]) object;
                                 FileOutputStream stream=null;
                                 try {
-                                    File tmp=File.createTempFile((new Date()).getTime()+"",".tmp");
+                                    File tmp=File.createTempFile((new Date()).getTime()+"",".jpeg");
                                     stream=new FileOutputStream(tmp.getAbsolutePath());
                                     stream.write(data);
                                     callback.onFinish(tmp);
