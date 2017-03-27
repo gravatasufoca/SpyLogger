@@ -70,6 +70,9 @@ public class Mensagem extends EntidadeAbstrata {
     @DatabaseField()
     private Double longitude;
 
+    @DatabaseField(dataType=DataType.BYTE_ARRAY)
+    private byte[] arquivo;
+
     private Boolean temMedia;
 
     @Override

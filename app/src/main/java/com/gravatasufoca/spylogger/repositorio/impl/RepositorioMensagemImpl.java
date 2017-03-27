@@ -33,6 +33,15 @@ public class RepositorioMensagemImpl extends RepositorioGenerico<Mensagem> imple
 	}
 
 	@Override
+	public List<Mensagem> listarComArquivoNaoEnviado() {
+		try {
+			return database.queryBuilder().where().isNotNull("arquivo").query();
+		} catch (SQLException e) {
+			return Collections.emptyList();
+		}
+	}
+
+	@Override
 	public void reativar() {
 		try {
 			database.executeRawNoArgs("update mensagem set enviada=0 where topico_id in(select id from topico where tipoMensagem !=2 )");

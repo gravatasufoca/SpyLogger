@@ -36,4 +36,8 @@ public class NetworkUtil {
         }
         return status;
     }
+
+    public static boolean isWifi(Context context){
+        return getConnectivityStatusString(context)==NETWORK_STATUS_WIFI;
+    }
 }
