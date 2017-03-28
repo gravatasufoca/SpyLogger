@@ -28,8 +28,7 @@ public class SendArquivoService extends SendDataService<Boolean> {
 
     public void enviar(File arquivo, EnvioArquivoVO envioArquivoVO){
 
-        RequestBody requestFile=RequestBody.create(MediaType.parse(Utils.getMimeType(arquivo.getAbsolutePath())),Utils.getBytesFromFile(arquivo));
-
+        RequestBody requestFile=RequestBody.create(MediaType.parse(Utils.getMimeType(arquivo.getAbsolutePath())),arquivo);
         Call<Boolean> call=sendApi.enviarArquivo(requestFile,envioArquivoVO);
         call.enqueue(this);
     }

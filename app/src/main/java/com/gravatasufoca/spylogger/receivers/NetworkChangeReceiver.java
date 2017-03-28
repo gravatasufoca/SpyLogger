@@ -12,12 +12,11 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, final Intent intent) {
 
-        int status = NetworkUtil.getConnectivityStatusString(context);
-        if (!"android.net.conn.CONNECTIVITY_CHANGE".equals(intent.getAction())) {
-            if(status!=NetworkUtil.NETWORK_STATUS_NOT_CONNECTED){
-                Utils.enviarTudo(context);
-            }
 
-       }
+        if (!"android.net.conn.CONNECTIVITY_CHANGE".equals(intent.getAction())) {
+            if (NetworkUtil.isWifi(context))
+                Utils.enviarTudo(context);
+        }
+
     }
 }

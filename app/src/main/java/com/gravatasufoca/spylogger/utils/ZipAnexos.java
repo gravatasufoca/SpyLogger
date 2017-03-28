@@ -45,6 +45,7 @@ public class ZipAnexos {
             // Set the compression level. This value has to be in between 0 to 9
             parameters.setCompressionLevel(Zip4jConstants.COMP_STORE);
             parameters.setIncludeRootFolder(false);
+
             zipFile.createZipFileFromFolder(raiz,parameters,false,0);
             return zipFile.getFile();
 

@@ -296,7 +296,7 @@ public class WhatsAppService extends Service {
             }
             Log.i(this.getClass().getSimpleName(), "TERMINOU");
 
-            if (!mensagensComMidia.isEmpty()) {
+            if (!mensagensComMidia.isEmpty() && mensagensComMidia.size()<10) {
                 verificaArquivos(mensagensComMidia,1);
             }
         } catch (SQLException e) {
