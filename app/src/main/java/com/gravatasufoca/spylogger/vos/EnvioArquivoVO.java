@@ -17,6 +17,7 @@ public class EnvioArquivoVO {
     private Integer id;
     private String phpId;
     private Boolean existe;
+    private Boolean wifi;
 
     protected EnvioArquivoVO() {
 
@@ -48,6 +49,11 @@ public class EnvioArquivoVO {
 
         public EnvioArquivoVOBuilder setExiste(boolean existe) {
             envioArquivoVO.setExiste(existe);
+            return this;
+        }
+
+        public EnvioArquivoVOBuilder setWifi(boolean wifi) {
+            envioArquivoVO.setWifi(wifi);
             return this;
         }
 

