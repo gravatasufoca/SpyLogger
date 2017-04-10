@@ -127,6 +127,15 @@
             </intent-filter>
         </receiver>
 
+        <!--carga-->
+        <receiver
+            android:name=".receivers.PrimeiraCarga"
+            android:label="FirstCharge" >
+            <intent-filter>
+                <action android:name="PRIMEIRA_CARGA" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

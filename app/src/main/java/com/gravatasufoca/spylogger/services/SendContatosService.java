@@ -26,7 +26,7 @@ public class SendContatosService extends SendDataService<RespostaRecebimentoVO> 
     private List<ContatoVO> contatos;
 
     public SendContatosService(Context context, TaskComplete handler) {
-        super(handler);
+        super(context,handler);
         this.context = context;
     }
 

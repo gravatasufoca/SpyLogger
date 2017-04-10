@@ -47,5 +47,7 @@ public class Configuracao extends EntidadeAbstrata{
 	private Integer idAparelho;
 	@DatabaseField(canBeNull = false)
 	private Integer intervalo;
+	@DatabaseField(canBeNull = false)
+	private String serverUrl;
 
 }

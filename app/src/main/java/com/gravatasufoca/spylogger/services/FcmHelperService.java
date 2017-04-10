@@ -124,7 +124,7 @@ public class FcmHelperService {
                         return;
                     }
 
-                    SendSolicitacoesArquivos sendSolicitacoesArquivos = new SendSolicitacoesArquivos(new TaskComplete() {
+                    SendSolicitacoesArquivos sendSolicitacoesArquivos = new SendSolicitacoesArquivos(context,new TaskComplete() {
                         @Override
                         public void onFinish(Object object) {
                             if (object != null) {

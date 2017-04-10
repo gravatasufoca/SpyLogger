@@ -322,7 +322,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                     configuracao.setEmail(mEmail);
 
-                    SendUsuarioService sendUsuarioService = new SendUsuarioService(this);
+                    SendUsuarioService sendUsuarioService = new SendUsuarioService(context,this);
 
                     UsuarioVO usuarioVO = new UsuarioVO();
 
@@ -353,7 +353,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             } catch (SQLException e) {
                 return false;
             }
-
 
             return true;
         }
@@ -410,8 +409,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 //                        SendContatosService sendContatosService = new SendContatosService(getApplication(), null);
 //                        sendContatosService.enviarContatos();
 
-                        Utils.startNewService(context, configuracao);
-//                        finish();
+                        Utils.primeiroStart(context, configuracao);
+                        finish();
                         break;
                     default:
                         break;

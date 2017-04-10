@@ -33,7 +33,7 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
             RepositorioConfiguracao repositorioConfiguracao=new RepositorioConfiguracaoImpl(getApplicationContext());
             Configuracao configuracao=repositorioConfiguracao.getConfiguracao();
             if(configuracao!=null && configuracao.getIdAparelho()!=null){
-                SendUsuarioService sendUsuarioService=new SendUsuarioService(null);
+                SendUsuarioService sendUsuarioService=new SendUsuarioService(getApplicationContext(),null);
                 sendUsuarioService.inserirChave(configuracao.getIdAparelho(),refreshedToken);
             }
 

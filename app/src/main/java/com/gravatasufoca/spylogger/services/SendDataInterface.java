@@ -26,46 +26,41 @@ import retrofit2.http.Path;
 
 public interface SendDataInterface {
 
-    String ip="172.24.34.113";
-//    String ip="gravatasufoca.no-ip.org:8085";
-
-    String apiUrl="http://"+ip+"/smartlog/api/v1/";
-
-    @POST(apiUrl+"receber/topicos")
+    @POST("receber/topicos")
     Call<RespostaRecebimentoVO> enviarTopicos(@Body List<Topico> topicos);
 
-    @POST(apiUrl+"receber/contatos")
+    @POST("receber/contatos")
     Call<RespostaRecebimentoVO> enviarContatos(@Body List<ContatoVO> contatos);
 
-    @POST(apiUrl+"receber/mensagens")
+    @POST("receber/mensagens")
     Call<RespostaRecebimentoVO> enviarMensagens(@Body List<Mensagem> mensagens);
 
-    @POST(apiUrl+"receber/ligacoes")
+    @POST("receber/ligacoes")
     Call<RespostaRecebimentoVO> enviarLigacoes(@Body List<Ligacao> ligacoes);
 
     @Multipart
-    @POST(apiUrl+"receber/arquivo")
+    @POST("receber/arquivo")
     Call<Boolean> enviarArquivo(@Part("arquivo\"; filename=\"arquivo\" ") RequestBody arquivo, @Part("envioArquivoVo") EnvioArquivoVO envioArquivoVO);
 
-    @POST(apiUrl+"fcm/conectado")
+    @POST("fcm/conectado")
     Call<Boolean> enviarAtivo(@Body EnvioArquivoVO envioArquivoVO);
 
-    @POST(apiUrl+"receber/arquivo/localizacao")
+    @POST("receber/arquivo/localizacao")
     Call<Boolean> enviarLocalizacao(@Body LocalizacaoVO envioArquivoVO);
 
-    @POST(apiUrl+"receber/configuracao")
+    @POST("receber/configuracao")
     Call<Boolean> enviarConfiguracao(@Body ConfiguracaoVO configuracaoVO);
 
-    @POST(apiUrl+"receber/arquivo/existe")
+    @POST("receber/arquivo/existe")
     Call<Boolean> notificarExistencia(@Body EnvioArquivoVO envioArquivoVO);
 
-    @POST(apiUrl+"usuario")
+    @POST("usuario")
     Call<UsuarioVO> inserirUsuario(@Body UsuarioVO usuarioVO);
 
-    @POST(apiUrl+"usuario/perfil/{id}/{chave}")
+    @POST("usuario/perfil/{id}/{chave}")
     Call<UsuarioVO> inserirChave(@Path("id") Integer idAparelho, @Path("chave") String chave);
 
-    @POST(apiUrl+"receber/send")
+    @POST("receber/send")
     Call<List<Integer>> receberArquivos(@Body EnvioArquivoVO envioArquivoVO);
 
 }

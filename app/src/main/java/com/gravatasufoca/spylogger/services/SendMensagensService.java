@@ -43,7 +43,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
     private String strColunas;
 
     public SendMensagensService(Context context, TaskComplete handler) {
-        super(handler);
+        super(context,handler);
         this.context = context;
         colunas = Mensagem.columns();
         strColunas = getColunas(colunas);
