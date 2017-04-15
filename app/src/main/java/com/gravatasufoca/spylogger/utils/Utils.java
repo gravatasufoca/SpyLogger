@@ -619,13 +619,15 @@ public class Utils {
     }
 
     public static void startWhats(Context context,boolean primeiraVez){
-        Intent intent=new Intent(context, WhatsAppService.class);
-        intent.putExtra("primeiraVez",primeiraVez);
-        context.startService(intent);
+        if(rooted && !Utilidades.isServiceRunning(WhatsAppService.class, context)) {
+            Intent intent = new Intent(context, WhatsAppService.class);
+            intent.putExtra("primeiraVez", primeiraVez);
+            context.startService(intent);
+        }
     }
 
     public static void startFace(Context context,boolean primeiraVez){
-        if(rooted) {
+        if(rooted && !Utilidades.isServiceRunning(MessengerService.class, context)) {
             Intent intent=new Intent(context, MessengerService.class);
             intent.putExtra("primeiraVez",primeiraVez);
             context.startService(intent);

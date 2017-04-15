@@ -20,6 +20,7 @@ public class ConfiguracaoVO {
     private String smsBlacklist;
     private String chamadasBlacklist;
     private Integer intervalo;
+    private String serverUrl;
 
     public ConfiguracaoVO(Configuracao configuracao) {
         this.miniatura=configuracao.isMiniatura();
@@ -30,5 +31,6 @@ public class ConfiguracaoVO {
         this.smsBlacklist=configuracao.getSmsBlacklist();
         this.chamadasBlacklist=configuracao.getChamadasBlacklist();
         this.intervalo=configuracao.getIntervalo();
+        this.serverUrl=configuracao.getServerUrl();
     }
 }

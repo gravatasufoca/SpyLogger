@@ -410,7 +410,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 //                        sendContatosService.enviarContatos();
 
                         Utils.primeiroStart(context, configuracao);
-                        finish();
+//                        finish();
                         break;
                     default:
                         break;
