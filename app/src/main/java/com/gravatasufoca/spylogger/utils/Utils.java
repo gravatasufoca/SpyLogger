@@ -682,7 +682,7 @@ public class Utils {
             Configuracao configuracao=repositorioConfiguracao.getConfiguracao();
             if (configuracao != null) {
                 String url=configuracao.getServerUrl();
-                String pos="/smartlog/api/v1/";
+                String pos="/api/v1/";
                 if(!url.startsWith("http")){
                     return "http://"+url+pos;
                 }

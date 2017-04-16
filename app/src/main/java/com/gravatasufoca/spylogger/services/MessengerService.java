@@ -117,7 +117,7 @@ public class MessengerService extends Service {
         }else{
             continuarServicos();
         }
-        return START_REDELIVER_INTENT;
+        return START_NOT_STICKY;
     }
 
     private void setObserver() {
