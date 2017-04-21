@@ -315,11 +315,11 @@ public class WhatsAppService extends Service {
                 if (rawResults != null) {
                     rawResults.close();
                 }
-                if(dbHelper!=null && dbHelper.isOpen()){
+                if (dbHelper != null && dbHelper.isOpen()) {
                     dbHelper.close();
                 }
 
-                if(external!=null && external.isOpen()){
+                if (external != null && external.isOpen()) {
                     external.close();
                 }
                 verificaArquivos(mensagensComMidia, 1);
