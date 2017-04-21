@@ -4,9 +4,9 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.gravatasufoca.spylogger.R;
 import com.gravatasufoca.spylogger.model.whatsapp.ChatList;
 import com.gravatasufoca.spylogger.model.whatsapp.Messages;
-import com.gravatasufoca.spylogger.R;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.support.ConnectionSource;
@@ -19,7 +19,7 @@ import java.sql.SQLException;
  *
  * @author bruno
  */
-public class DatabaseHelperExternal extends OrmLiteSqliteOpenHelper {
+public class DatabaseHelperWhatsApp extends OrmLiteSqliteOpenHelper {
 
 	/************************************************
 	 * Suggested Copy/Paste code. Everything from here to the done block.
@@ -30,7 +30,7 @@ public class DatabaseHelperExternal extends OrmLiteSqliteOpenHelper {
 	private Dao<Messages, Integer> messagesDao;
 	private Dao<ChatList, Integer> chatDao;
 
-	public DatabaseHelperExternal(Context context) {
+	public DatabaseHelperWhatsApp(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION, R.raw.ormlite_config);
 	}
 
@@ -45,7 +45,7 @@ public class DatabaseHelperExternal extends OrmLiteSqliteOpenHelper {
 			TableUtils.createTableIfNotExists(connectionSource, ChatList.class);
 
 		} catch (SQLException e) {
-			Log.e(DatabaseHelperExternal.class.getName(), "Unable to create datbases", e);
+			Log.e(DatabaseHelperWhatsApp.class.getName(), "Unable to create datbases", e);
 		}
 	}
 

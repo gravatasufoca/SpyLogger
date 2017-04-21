@@ -339,12 +339,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                     sendUsuarioService.inserirUsuario(usuarioVO);
 
-                   /* handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.startNewService(context);
-                        }
-                    });*/
                 } else {
                     return false;
                 }

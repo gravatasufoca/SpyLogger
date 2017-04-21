@@ -1,5 +1,7 @@
 package com.gravatasufoca.spylogger.model.messenger;
 
+import android.content.Context;
+
 import com.gravatasufoca.spylogger.model.EntidadeAbstrata;
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DataType;
@@ -61,15 +63,15 @@ public class Thread extends EntidadeAbstrata {
 	private String nomes;
 
 
-	public String getPhoto(Contact proprietario){
+	public String getPhoto(Context context,Contact proprietario){
 		if(photo==null || photo.isEmpty()){
 			photo="";
 			getSenders();
 			for(Sender sender: senders){
-				Contact contato=sender.getContato();
+				Contact contato=sender.getContato(context);
 				if(contato!=null){
-					if(!sender.getContato().equals(proprietario)){
-						photo=sender.getContato().getSmallPictureUrl();
+					if(!sender.getContato(context).equals(proprietario)){
+						photo=sender.getContato(context).getSmallPictureUrl();
 					}
 				}
 			}
@@ -77,13 +79,13 @@ public class Thread extends EntidadeAbstrata {
 		return photo;
 	}
 
-	public String getNomes(Contact proprietario){
+	public String getNomes(Context context,Contact proprietario){
 		if(nomes==null){
 			nomes="";
 			getSenders();
 			String sep="";
 			for(Sender sender: senders){
-				Contact contato=sender.getContato();
+				Contact contato=sender.getContato(context);
 				if(contato!=null){
 					if(!contato.equals(proprietario)){
 						nomes+=sep+sender.getNome();

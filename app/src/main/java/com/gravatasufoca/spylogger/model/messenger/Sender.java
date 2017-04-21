@@ -1,13 +1,15 @@
 package com.gravatasufoca.spylogger.model.messenger;
 
-import java.io.Serializable;
-import java.sql.SQLException;
+import android.content.Context;
+
+import com.gravatasufoca.spylogger.model.EntidadeAbstrata;
+import com.gravatasufoca.spylogger.utils.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.gravatasufoca.spylogger.model.EntidadeAbstrata;
-import com.gravatasufoca.spylogger.utils.Utils;
+import java.io.Serializable;
+import java.sql.SQLException;
 
 public class Sender extends EntidadeAbstrata {
 
@@ -45,10 +47,10 @@ public class Sender extends EntidadeAbstrata {
 		this.nome = nome;
 	}
 
-	public Contact getContato() {
+	public Contact getContato(Context context) {
 		if(contato==null){
 			try {
-				contato=Utils.getContato(userKey);
+				contato=Utils.getContato(context,userKey);
 
 			} catch (SQLException e) {
 				e.printStackTrace();

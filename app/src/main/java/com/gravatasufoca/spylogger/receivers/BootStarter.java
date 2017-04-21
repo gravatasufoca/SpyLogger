@@ -21,7 +21,7 @@ public class BootStarter extends BroadcastReceiver {
 			RepositorioConfiguracao repositorioConfiguracao=new RepositorioConfiguracaoImpl(context);
 
 			Configuracao configuracao= repositorioConfiguracao.getConfiguracao();
-			Utils.startNewService(context,configuracao);
+			Utils.iniciarServicos(context,configuracao);
 
 
 		} catch (SQLException e) {
