@@ -82,15 +82,14 @@ public class WhatsAppService  implements Mensageiro{
     }
 
 
-    public void start() {
+    public synchronized void start() {
         if ((new File(DatabaseHelperWhatsApp.DATABASE_NAME)).exists()) {
             updateTopicos();
         }
     }
 
 
-
-    private synchronized void updateTopicos() {
+    private void updateTopicos() {
         DatabaseHelperWhatsApp external = new DatabaseHelperWhatsApp(context);
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         Dao<Messages,Integer> daoMsgExternal;
@@ -142,7 +141,7 @@ public class WhatsAppService  implements Mensageiro{
         }
     }
 
-    private synchronized void updateMsgs(List<Topico> topicos) {
+    private void updateMsgs(List<Topico> topicos) {
         DatabaseHelperWhatsApp external = new DatabaseHelperWhatsApp(context);
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         Dao<Messages,Integer> daoMsgExternal;
@@ -157,7 +156,7 @@ public class WhatsAppService  implements Mensageiro{
             daoMsgExternal.executeRaw("attach database '" + inFileName + "' as 'localdb' ");
 
             rawResults = daoMsgExternal
-                    .queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end,media_mime_type,raw_data,thumb_image,latitude,longitude from messages where key_remote_jid!='-1' and _id not in( select idReferencia from localdb.mensagem ) "
+                    .queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end,media_mime_type,raw_data,thumb_image,latitude,longitude from messages where key_remote_jid!='-1' and _id not in( select idReferencia from localdb.mensagem ) and key_remote_jid in (select idReferencia from localdb.topico) "
                             , new DataType[]{DataType.INTEGER, DataType.STRING, DataType.INTEGER, DataType.STRING, DataType.DATE_LONG, DataType.STRING, DataType.STRING, DataType.STRING, DataType.DATE_LONG, DataType.INTEGER, DataType.STRING, DataType.BYTE_ARRAY, DataType.BYTE_ARRAY});
 
             iterator = rawResults.iterator();

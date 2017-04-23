@@ -607,10 +607,10 @@ public class Utils {
            new MensageiroAsyncHelper(context, new TaskComplete() {
                @Override
                public void onFinish(Object object) {
+                   context.startService(new Intent(context, MensageiroObserversService.class));
                    Utils.enviarTudo(context);
                }
            }).execute(new WhatsAppService(context),new MessengerService(context));
-           context.startService(new Intent(context, MensageiroObserversService.class));
        }
        startAlarm(context, configuracao);
     }
