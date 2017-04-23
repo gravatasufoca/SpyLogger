@@ -86,6 +86,9 @@ public class SendGravacoesService extends SendDataService<RespostaRecebimentoVO>
                 if (raws != null) {
                     raws.close();
                 }
+                if(dbHelper!=null){
+                    dbHelper.close();
+                }
             } catch (IOException ee) {
             }
         }
@@ -127,11 +130,29 @@ public class SendGravacoesService extends SendDataService<RespostaRecebimentoVO>
                 if (iterator.hasNext()) {
                     if (contador == MAX_MENSAGENS) {
                         contador = 0;
+                        try {
+                            if (raws != null) {
+                                raws.close();
+                            }
+                            if(dbHelper!=null){
+                                dbHelper.close();
+                            }
+                        } catch (IOException ee) {
+                        }
                         enviarLigacoes(ligacoes);
                         ligacoes = new ArrayList<>();
                         break;
                     }
                 } else {
+                    try {
+                        if (raws != null) {
+                            raws.close();
+                        }
+                        if(dbHelper!=null){
+                            dbHelper.close();
+                        }
+                    } catch (IOException ee) {
+                    }
                     enviarLigacoes(ligacoes);
                 }
             }
@@ -141,6 +162,9 @@ public class SendGravacoesService extends SendDataService<RespostaRecebimentoVO>
             try {
                 if (raws != null) {
                     raws.close();
+                }
+                if(dbHelper!=null){
+                    dbHelper.close();
                 }
             } catch (IOException ee) {
             }
@@ -173,6 +197,7 @@ public class SendGravacoesService extends SendDataService<RespostaRecebimentoVO>
                     ub.where().in("id", resposta.getIds());
                     ub.updateColumnValue("enviado", true);
                     ub.update();
+                    dbHelper.close();
                     enviarLigacoes();
                 } else {
                     if (resposta.getTipo().equalsIgnoreCase("ligacao")) {
@@ -182,7 +207,7 @@ public class SendGravacoesService extends SendDataService<RespostaRecebimentoVO>
                         ub.where().in("id", resposta.getIds());
                         ub.updateColumnValue("enviado", true);
                         ub.update();
-
+                        dbHelper.close();
                         enviarLigacoes();
                     }
                 }

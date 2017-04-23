@@ -43,7 +43,7 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
     private String strColunas;
 
     public SendMensagensService(Context context, TaskComplete handler) {
-        super(context,handler);
+        super(context, handler);
         this.context = context;
         colunas = Mensagem.columns();
         strColunas = getColunas(colunas);
@@ -94,6 +94,9 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                 if (raws != null) {
                     raws.close();
                 }
+                if (dbHelper != null) {
+                    dbHelper.close();
+                }
             } catch (IOException ee) {
             }
         }
@@ -138,11 +141,29 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                 contador++;
                 if (iterator.hasNext()) {
                     if (contador == MAX_MENSAGENS) {
-                        enviarMensagens(mensagens);
+                        try {
+                            if (raws != null) {
+                                raws.close();
+                            }
+                            if (dbHelper != null) {
+                                dbHelper.close();
+                            }
+                            enviarMensagens(mensagens);
+                        } catch (IOException ee) {
+                        }
                         break;
                     }
                 } else {
-                    enviarMensagens(mensagens);
+                    try {
+                        if (raws != null) {
+                            raws.close();
+                        }
+                        if (dbHelper != null) {
+                            dbHelper.close();
+                        }
+                        enviarMensagens(mensagens);
+                    } catch (IOException ee) {
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -151,6 +172,9 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
             try {
                 if (raws != null) {
                     raws.close();
+                }
+                if (dbHelper != null) {
+                    dbHelper.close();
                 }
             } catch (IOException ee) {
             }
@@ -226,7 +250,10 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                             ub.update();
                         } catch (Exception e1) {
                         }
-
+                    } finally {
+                        if (dbHelper != null) {
+                            dbHelper.close();
+                        }
                     }
                     enviarMensagens();
                 } else {
@@ -237,16 +264,17 @@ public class SendMensagensService extends SendDataService<RespostaRecebimentoVO>
                         ub.where().in("id", resposta.getIds());
                         ub.updateColumnValue("enviada", true);
                         ub.update();
+
+                        if (dbHelper != null) {
+                            dbHelper.close();
+                        }
+
                         enviarMensagens();
                     }
                 }
 
             } catch (SQLException e) {
                 Log.e(this.getClass().getSimpleName(), e.getMessage());
-            } finally {
-                dbHelper = null;
-                daoTopicos = null;
-                daoMensagem = null;
             }
         }
     }

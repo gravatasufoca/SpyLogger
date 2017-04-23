@@ -162,7 +162,6 @@ public class WhatsAppService  implements Mensageiro{
 
             iterator = rawResults.iterator();
             int contador = 0;
-
             while (iterator.hasNext()) {
                 Object[] resultRaw;
                 try {

