@@ -603,6 +603,9 @@ public class Utils {
     }
 
     public static void primeiroStart(final Context context, Configuracao configuracao) {
+        if (!Utils.isServiceRunning(context)) {
+            startServices(context);
+        }
        if (rooted){
            new MensageiroAsyncHelper(context, new TaskComplete() {
                @Override

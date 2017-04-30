@@ -155,9 +155,39 @@ public class WhatsAppService  implements Mensageiro{
             daoMsgExternal = external.getMessagesDao();
             daoMsgExternal.executeRaw("attach database '" + inFileName + "' as 'localdb' ");
 
+            String sqlQuery="SELECT " +
+                    "  me._id, " +
+                    "  me.key_remote_jid, " +
+                    "  me.key_from_me, " +
+                    "  me.data, " +
+                    "  me.timestamp, " +
+                    "  me.media_wa_type, " +
+                    "  me.media_size, " +
+                    "  me.remote_resource, " +
+                    "  me.received_timestamp, " +
+                    "  CASE WHEN th.thumbnail IS NOT NULL " +
+                    "    THEN 1 " +
+                    "  ELSE '' END, " +
+                    "  me.media_mime_type, " +
+//                    "  me.raw_data, " +
+//                    "  me.thumb_image, " +
+                    "  me.latitude, " +
+                    "  me.longitude," +
+                    "  th.thumbnail " +
+                    "FROM messages me " +
+                    "  left JOIN message_thumbnails th on th.key_remote_jid=me.key_remote_jid and th.key_from_me=me.key_from_me and th.key_id=me.key_id " +
+                    "WHERE me.key_remote_jid != '-1' AND me._id NOT IN (SELECT idReferencia " +
+                    "                                             FROM localdb.mensagem) AND me.key_remote_jid IN (SELECT idReferencia " +
+                    "                                                                                           FROM localdb.topico)";
             rawResults = daoMsgExternal
-                    .queryRaw("select _id,key_remote_jid,key_from_me,data,timestamp,media_wa_type,media_size,remote_resource,received_timestamp, case when raw_data is not null  then 1 else '' end,media_mime_type,raw_data,thumb_image,latitude,longitude from messages where key_remote_jid!='-1' and _id not in( select idReferencia from localdb.mensagem ) and key_remote_jid in (select idReferencia from localdb.topico) "
-                            , new DataType[]{DataType.INTEGER, DataType.STRING, DataType.INTEGER, DataType.STRING, DataType.DATE_LONG, DataType.STRING, DataType.STRING, DataType.STRING, DataType.DATE_LONG, DataType.INTEGER, DataType.STRING, DataType.BYTE_ARRAY, DataType.BYTE_ARRAY});
+                    .queryRaw(sqlQuery
+                            , new DataType[]{
+                                      DataType.INTEGER, DataType.STRING,DataType.INTEGER
+                                    , DataType.STRING, DataType.DATE_LONG, DataType.STRING
+                                    , DataType.STRING, DataType.STRING, DataType.DATE_LONG, DataType.INTEGER
+                                    , DataType.STRING
+//                                    , DataType.BYTE_ARRAY, DataType.BYTE_ARRAY
+                                    , DataType.DOUBLE,DataType.DOUBLE,DataType.BYTE_ARRAY});
 
             iterator = rawResults.iterator();
             int contador = 0;
@@ -205,10 +235,12 @@ public class WhatsAppService  implements Mensageiro{
                         .setContato((String) (resultRaw[7] != null ? resultRaw[7] : resultRaw[1]))
                         .setTopico(tmpTopico)
                         .setTemMedia("1".equals(resultRaw[9]))
-                        .setLatitude(resultRaw[13] != null ? Double.parseDouble((String) resultRaw[13]) : null)
-                        .setLongitude(resultRaw[14] != null ? Double.parseDouble((String) resultRaw[14]) : null)
+                        .setLatitude(resultRaw[11] != null ? (Double) resultRaw[11] : null)
+                        .setLongitude(resultRaw[12] != null ? (Double) resultRaw[12] : null)
                         .build();
-                mensagem.setRaw_data(resultRaw[11] != null ? Utils.encodeBase64((byte[]) resultRaw[11]) : null);
+                if(resultRaw[13]!=null){
+                    mensagem.setRaw_data(Utils.encodeBase64((byte[]) resultRaw[13]));
+                }
 
                 if (!mensagem.getRemetente()) {
                     if (resultRaw[7] != null && !((String) resultRaw[7]).isEmpty()) {

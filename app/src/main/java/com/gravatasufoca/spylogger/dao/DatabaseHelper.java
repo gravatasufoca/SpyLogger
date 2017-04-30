@@ -67,8 +67,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 		configuracao.setWifi(true);
 		configuracao.setIntervalo(60);
 //		configuracao.setServerUrl("http://gravatasufoca.no-ip.org:8123/smartlog");
-//		configuracao.setServerUrl("http://192.168.1.118");
 		configuracao.setServerUrl("http://192.168.1.144:4080/smartlog");
+		configuracao.setServerUrl("http://192.168.1.118/smartlog");
 
 		try {
 			getDao(Configuracao.class).create(configuracao);

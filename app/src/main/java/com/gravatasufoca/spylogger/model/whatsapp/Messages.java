@@ -3,7 +3,7 @@ package com.gravatasufoca.spylogger.model.whatsapp;
 import android.content.ContentResolver;
 
 import com.gravatasufoca.spylogger.model.EntidadeAbstrata;
-import com.gravatasufoca.spylogger.model.MensagenInterface;
+import com.gravatasufoca.spylogger.model.MensagemInterface;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
@@ -18,7 +18,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @DatabaseTable
-public class Messages extends EntidadeAbstrata implements Comparable<Messages>,MensagenInterface {
+public class Messages extends EntidadeAbstrata implements Comparable<Messages>,MensagemInterface {
 	private static final long serialVersionUID = -4679985146526783051L;
 
 	public Messages() {

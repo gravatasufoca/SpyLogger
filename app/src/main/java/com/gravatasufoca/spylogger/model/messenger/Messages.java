@@ -1,7 +1,7 @@
 package com.gravatasufoca.spylogger.model.messenger;
 
 import com.gravatasufoca.spylogger.model.EntidadeAbstrata;
-import com.gravatasufoca.spylogger.model.MensagenInterface;
+import com.gravatasufoca.spylogger.model.MensagemInterface;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -18,7 +18,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @DatabaseTable
-public class Messages extends EntidadeAbstrata implements Comparable<Messages>,MensagenInterface {
+public class Messages extends EntidadeAbstrata implements Comparable<Messages>,MensagemInterface {
 	private static final long serialVersionUID = -4679985146526783051L;
 
 	public Messages() {
