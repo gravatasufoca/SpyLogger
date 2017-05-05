@@ -159,6 +159,10 @@ public class FcmHelperService {
                     reenviarLigacoes(true);
                 }
                 break;
+            case REATIVAR_SERVICOS:
+                if(!Utils.isDbObserverRunning(context)){
+                    Utils.startDbObserver(context);
+                }
             default:
                 return;
         }

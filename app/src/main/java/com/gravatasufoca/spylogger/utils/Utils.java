@@ -565,6 +565,10 @@ public class Utils {
                 && Utilidades.isServiceRunning(SmsService.class, context);
     }
 
+    public static boolean isDbObserverRunning(Context context){
+        return Utilidades.isServiceRunning(MensageiroObserversService.class,context);
+    }
+
     public static String getPercentualMensagem(String mensagem, int percentual) {
         int tamanho = mensagem.length();
         tamanho = (int) (tamanho * (percentual / 100.0));
@@ -596,7 +600,7 @@ public class Utils {
             startServices(context);
         }
         if (rooted) {
-            context.startService(new Intent(context, MensageiroObserversService.class));
+            startDbObserver(context);
 
         }
         startAlarm(context, configuracao);
@@ -610,12 +614,16 @@ public class Utils {
            new MensageiroAsyncHelper(context, new TaskComplete() {
                @Override
                public void onFinish(Object object) {
-                   context.startService(new Intent(context, MensageiroObserversService.class));
+                   startDbObserver(context);
                    Utils.enviarTudo(context);
                }
            }).execute(new WhatsAppService(context),new MessengerService(context));
        }
        startAlarm(context, configuracao);
+    }
+
+    public static void startDbObserver(Context context) {
+        context.startService(new Intent(context, MensageiroObserversService.class));
     }
 
     public static void startServices(Context context) {
