@@ -78,9 +78,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         setContentView(R.layout.activity_login);
         this.context = this;
 
-        if (RootTools.isAccessGiven()) {
-            Utils.rooted = true;
-        }
+        RootTools.isAccessGiven();
 
         Utilidades.askPermissions(this, Utils.permissoes);
 

@@ -22,7 +22,6 @@ public class MensageiroAsyncHelper extends AsyncTask<Mensageiro,Integer,Boolean>
     @Override
     protected Boolean doInBackground(Mensageiro... mensageiros) {
         if(mensageiros!=null){
-
             for (Mensageiro mensageiro:mensageiros) {
                 mensageiro.start();
             }

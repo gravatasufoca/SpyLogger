@@ -129,6 +129,15 @@ public class WhatsAppService  implements Mensageiro{
             Log.e("spylogger", e.getMessage());
         } finally {
             try {
+
+                if(topicos.isEmpty()){
+                    try {
+                        topicos=dbHelper.getDao(Topico.class).queryForAll();
+                    } catch (SQLException e) {
+                        Log.e("spylogger",e.getMessage());
+                    }
+                }
+
                 if (raws != null) {
                     raws.close();
                 }

