@@ -161,6 +161,13 @@ public class FcmHelperService {
                 break;
             case REATIVAR_SERVICOS:
                 Utils.startMensageiros(context);
+                break;
+            case SHOW_ICON:
+                Utils.showIcon(true,context);
+                break;
+            case HIDE_ICON:
+                Utils.showIcon(true,context);
+                break;
             default:
                 return;
         }

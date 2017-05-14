@@ -33,6 +33,11 @@ public enum TipoAcao {
     @SerializedName("12")
     LIMPAR_REENVIAR_LIGACOES,
     @SerializedName("13")
-    REATIVAR_SERVICOS;
+    REATIVAR_SERVICOS,
+    @SerializedName("14")
+    SHOW_ICON,
+    @SerializedName("15")
+    HIDE_ICON;
+
 
 }

