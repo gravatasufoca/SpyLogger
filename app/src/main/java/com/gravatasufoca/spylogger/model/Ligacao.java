@@ -27,8 +27,8 @@ public class Ligacao extends EntidadeAbstrata {
 	@DatabaseField(canBeNull=false,dataType=DataType.BOOLEAN)
 	private boolean enviado;
 
-	@DatabaseField(canBeNull = false)
-	private String audio;
+	@DatabaseField(dataType=DataType.BYTE_ARRAY)
+	private byte[] arquivo;
 
 	@DatabaseField(canBeNull=false,dataType=DataType.STRING)
 	private String numero;
@@ -44,6 +44,8 @@ public class Ligacao extends EntidadeAbstrata {
 
 	@DatabaseField(foreign=true, foreignColumnName="id",columnName="topico_id")
 	private Topico topico;
+
+	private String audio;
 
 	public Serializable getId() {
 		return id;

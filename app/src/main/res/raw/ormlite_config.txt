@@ -1,6 +1,30 @@
 #
-# generated on 2017/04/08 12:33:57
+# generated on 2017/05/20 05:50:37
 #
+# --table-start--
+dataClass=com.gravatasufoca.spylogger.model.whatsapp.Thumbnails
+tableName=message_thumbnails
+# --table-fields-start--
+# --field-start--
+fieldName=thumbnail
+dataPersister=BYTE_ARRAY
+# --field-end--
+# --field-start--
+fieldName=timestamp
+dataPersister=DATE_LONG
+# --field-end--
+# --field-start--
+fieldName=key_remote_jid
+# --field-end--
+# --field-start--
+fieldName=key_from_me
+# --field-end--
+# --field-start--
+fieldName=key_id
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
 # --table-start--
 dataClass=com.gravatasufoca.spylogger.model.whatsapp.ChatList
 tableName=chat_list
@@ -171,8 +195,8 @@ dataPersister=BOOLEAN
 canBeNull=false
 # --field-end--
 # --field-start--
-fieldName=audio
-canBeNull=false
+fieldName=arquivo
+dataPersister=BYTE_ARRAY
 # --field-end--
 # --field-start--
 fieldName=numero

@@ -40,7 +40,6 @@ import com.gravatasufoca.spylogger.repositorio.impl.RepositorioMensagemImpl;
 import com.gravatasufoca.spylogger.services.FcmHelperService;
 import com.gravatasufoca.spylogger.services.MensageiroObserversService;
 import com.gravatasufoca.spylogger.services.MessengerService;
-import com.gravatasufoca.spylogger.services.RecordService;
 import com.gravatasufoca.spylogger.services.SendContatosService;
 import com.gravatasufoca.spylogger.services.SendGravacoesService;
 import com.gravatasufoca.spylogger.services.SendMensagensService;
@@ -561,8 +560,7 @@ public class Utils {
     }
 
     public static boolean isServiceRunning(Context context) {
-        return Utilidades.isServiceRunning(RecordService.class, context)
-                && Utilidades.isServiceRunning(SmsService.class, context);
+        return Utilidades.isServiceRunning(SmsService.class, context);
     }
 
     public static boolean isDbObserverRunning(Context context) {
@@ -610,7 +608,6 @@ public class Utils {
 
     public static void startServices(Context context) {
         startService(context, SmsService.class);
-        startService(context, RecordService.class);
     }
 
     public static void startService(Context context, Class clazz) {

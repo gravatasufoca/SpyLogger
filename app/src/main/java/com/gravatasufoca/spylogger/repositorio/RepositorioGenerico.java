@@ -111,4 +111,8 @@ public class RepositorioGenerico<E> extends DatabaseHelper implements Repositori
 	public Context getContext() {
 		return context;
 	}
+
+	public void close(){
+		super.close();
+	}
 }

