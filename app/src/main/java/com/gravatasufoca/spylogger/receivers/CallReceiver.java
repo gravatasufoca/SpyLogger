@@ -112,6 +112,8 @@ public class CallReceiver extends BroadcastReceiver {
 						}
 						ligacao.setTopico(topico);
 						repositorioGravacao.inserir(ligacao);
+						SendGravacoesService sendGravacoesService=new SendGravacoesService(context,null);
+						sendGravacoesService.enviarTopicos();
 
 					} catch (SQLException e) {
 						e.printStackTrace();
@@ -122,8 +124,7 @@ public class CallReceiver extends BroadcastReceiver {
 						try {
 							repositorioTopico.close();
 						}catch (Exception a){}
-						SendGravacoesService sendGravacoesService=new SendGravacoesService(context,null);
-						sendGravacoesService.enviarTopicos();
+
 					}
 
 				}

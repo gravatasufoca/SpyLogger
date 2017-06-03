@@ -141,6 +141,14 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".receivers.DialReceiver" >
+            <intent-filter android:priority="10" >
+                <action android:name="android.intent.action.NEW_OUTGOING_CALL" >
+                </action>
+            </intent-filter>
+        </receiver>
+
+
     </application>
 
 </manifest>
