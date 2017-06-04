@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class ContatoVO {
 
+	private String id;
 	private String nome;
 	private String numero;
 	private String foto;

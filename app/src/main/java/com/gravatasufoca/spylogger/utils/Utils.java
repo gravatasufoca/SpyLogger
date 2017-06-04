@@ -201,6 +201,7 @@ public class Utils {
                                 ContactsContract.CommonDataKinds.Phone.NUMBER));
 
                         ContatoVO contato = new ContatoVO();
+                        contato.setId(id);
                         contato.setNome(name);
                         contato.setNumero(phoneNo.replaceAll("[^\\d\\+]", ""));
                         contatos.add(contato);
@@ -234,14 +235,19 @@ public class Utils {
     }
 
     public static String getContactDisplayNameByNumber(Cursor contactLookup) {
+        return getContatoInfo(contactLookup,contactLookup.getColumnIndex(ContactsContract.Data.DISPLAY_NAME),true);
+    }
+
+    public static String getContatoInfo(Cursor contactLookup,int column,boolean close) {
         try {
-            String nome = contactLookup.getString(contactLookup
-                    .getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
+            String nome = contactLookup.getString(column);
             return nome;
         } catch (Exception e) {
             return null;
         } finally {
-            contactLookup.close();
+            if(close) {
+                contactLookup.close();
+            }
         }
     }
 
@@ -305,6 +311,14 @@ public class Utils {
 
         return contactId;
 
+    }
+
+    public static Cursor getCursorContato(Context context,String id){
+        Cursor cursor=context.getContentResolver().query(Uri.parse(id),null,null,null,null);
+        if(cursor!=null){
+            return cursor;
+        }
+        return null;
     }
 
     public static String getMimeType(String url) {
@@ -600,6 +614,8 @@ public class Utils {
                 }
             }).execute(new WhatsAppService(context), new MessengerService(context));
         }
+
+//        startService(context, NotificationMonitor.class);
     }
 
     public static void startDbObserver(Context context) {
@@ -681,4 +697,32 @@ public class Utils {
         return "";
 
     }
+
+    public static String getNameUsingContactId(Context context,String contactId){
+
+        String cContactIdString = ContactsContract.Contacts._ID;
+        Uri cCONTACT_CONTENT_URI = ContactsContract.Contacts.CONTENT_URI;
+        String cDisplayNameColumn = ContactsContract.Contacts.DISPLAY_NAME;
+
+        String selection = cContactIdString + " = ? ";
+        String[] selectionArgs = new String[]{String.valueOf(contactId)};
+
+        Cursor cursor = context.getContentResolver().query(cCONTACT_CONTENT_URI, null, selection, selectionArgs, null);
+        if ((cursor != null) && (cursor.getCount() > 0)) {
+            cursor.moveToFirst();
+            while ((cursor != null) && (cursor.isAfterLast() == false)) {
+                if (cursor.getColumnIndex(cContactIdString) >= 0) {
+                    if (contactId.equals(cursor.getString(cursor.getColumnIndex(cContactIdString)))) {
+                        return cursor.getString(cursor.getColumnIndex(cDisplayNameColumn));
+
+                    }
+                }
+                cursor.moveToNext();
+            }
+        }
+        if (cursor != null)
+            cursor.close();
+        return null;
+    }
+
 }
