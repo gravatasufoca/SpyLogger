@@ -25,7 +25,6 @@ import java.util.Date;
 
 public class CallReceiver extends BroadcastReceiver {
 
-
 	private boolean remetente;
 	private RepositorioGravacao repositorioGravacao;
 	private RepositorioTopico repositorioTopico;
@@ -100,7 +99,7 @@ public class CallReceiver extends BroadcastReceiver {
 						ligacao.setNome(com.gravatasufoca.spylogger.utils.Utils.getContactDisplayNameByNumber(phoneNumber,context.getContentResolver()));
 						ligacao.setDuracao(mediaRecorderHelper.getDuration());
 
-						Topico topico = repositorioTopico.findByName(ligacao.getNome());
+						Topico topico = repositorioTopico.porNome(ligacao.getNome());
 						if (topico == null) {
 							topico = new Topico.TopicoBuilder()
 									.setNome(ligacao.getNome())

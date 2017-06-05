@@ -90,7 +90,7 @@ public class SmsObserver extends ContentObserver {
                                 RepositorioMensagem repositorioMensagem = new RepositorioMensagemImpl(mContext);
                                 RepositorioTopico repositorioTopico = new RepositorioTopicoImpl(mContext);
 
-                                Topico topico = repositorioTopico.findByName(mensagem.getContato());
+                                Topico topico = repositorioTopico.porNome(mensagem.getContato());
                                 if (topico == null) {
                                     topico = new Topico.TopicoBuilder()
                                             .setNome(mensagem.getContato())

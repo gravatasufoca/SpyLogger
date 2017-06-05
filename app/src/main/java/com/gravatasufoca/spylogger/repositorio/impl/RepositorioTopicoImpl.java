@@ -21,11 +21,19 @@ public class RepositorioTopicoImpl extends RepositorioGenerico<Topico> implement
 	}
 
 	@Override
-	public Topico findByName(String nome) {
+	public Topico porNome(String nome) {
 		try {
 			return database.queryForFirst(database.queryBuilder().where().eq("nome",nome).prepare());
 		} catch (SQLException e) {
-			e.printStackTrace();
+			return null;
+		}
+	}
+
+	@Override
+	public Topico porReferencia(String referencia) {
+		try {
+			return database.queryForFirst(database.queryBuilder().where().eq("idReferencia",referencia).prepare());
+		} catch (SQLException e) {
 			return null;
 		}
 	}

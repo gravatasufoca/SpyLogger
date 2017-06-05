@@ -60,7 +60,7 @@ public class SMSReceiver extends BroadcastReceiver {
 									.setIdReferencia(name).build();
 
 
-							Topico topico=repositorioTopico.findByName(mensagem.getContato());
+							Topico topico=repositorioTopico.porNome(mensagem.getContato());
 							if(topico==null){
 								topico=new Topico.TopicoBuilder()
 										.setNome(mensagem.getContato())

