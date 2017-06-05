@@ -10,6 +10,7 @@ public class ContatoVO {
 	private String id;
 	private String nome;
 	private String numero;
+	private String sourceId;
 	private String foto;
 	private String fotoBase;
 
@@ -28,4 +29,6 @@ public class ContatoVO {
 	public int hashCode() {
 		return numero != null ? numero.hashCode() : 0;
 	}
+
+
 }

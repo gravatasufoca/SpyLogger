@@ -188,30 +188,35 @@ public class Utils {
                         cur.getColumnIndex(ContactsContract.Contacts._ID));
                 String name = cur.getString(cur.getColumnIndex(
                         ContactsContract.Contacts.DISPLAY_NAME));
+                if (cur.getInt(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
+                    String phoneNo = getPhoneNumber(contentResolver,id);
 
-                if (cur.getInt(cur.getColumnIndex(
-                        ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
-                    Cursor pCur = contentResolver.query(
-                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                            null,
-                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-                            new String[]{id}, null);
-                    while (pCur.moveToNext()) {
-                        String phoneNo = pCur.getString(pCur.getColumnIndex(
-                                ContactsContract.CommonDataKinds.Phone.NUMBER));
-
-                        ContatoVO contato = new ContatoVO();
-                        contato.setId(id);
-                        contato.setNome(name);
-                        contato.setNumero(phoneNo.replaceAll("[^\\d\\+]", ""));
-                        contatos.add(contato);
-                    }
-                    pCur.close();
+                    ContatoVO contato = new ContatoVO();
+                    contato.setId(id);
+                    contato.setNome(name);
+                    contato.setNumero(phoneNo.replaceAll("[^\\d\\+]", ""));
+                    contato.setSourceId(id);
+                    contatos.add(contato);
                 }
             }
         }
 
         return new ArrayList<>(contatos);
+    }
+
+    public static String getPhoneNumber(ContentResolver contentResolver, String id) {
+
+        Cursor pCur = contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                null,
+                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
+                new String[]{id}, null);
+
+        while (pCur.moveToNext()) {
+            String phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+            pCur.close();
+            return phoneNo.replaceAll("[^\\d\\+]", "");
+        }
+        return null;
     }
 
 
@@ -235,17 +240,17 @@ public class Utils {
     }
 
     public static String getContactDisplayNameByNumber(Cursor contactLookup) {
-        return getContatoInfo(contactLookup,contactLookup.getColumnIndex(ContactsContract.Data.DISPLAY_NAME),true);
+        return getContatoInfo(contactLookup, contactLookup.getColumnIndex(ContactsContract.Data.DISPLAY_NAME), true);
     }
 
-    public static String getContatoInfo(Cursor contactLookup,int column,boolean close) {
+    public static String getContatoInfo(Cursor contactLookup, int column, boolean close) {
         try {
             String nome = contactLookup.getString(column);
             return nome;
         } catch (Exception e) {
             return null;
         } finally {
-            if(close) {
+            if (close) {
                 contactLookup.close();
             }
         }
@@ -313,9 +318,10 @@ public class Utils {
 
     }
 
-    public static Cursor getCursorContato(Context context,String id){
-        Cursor cursor=context.getContentResolver().query(Uri.parse(id),null,null,null,null);
-        if(cursor!=null){
+    public static Cursor getCursorContato(Context context, String id) {
+        Cursor cursor = context.getContentResolver().query(Uri.parse(id), null, null, null, null);
+        if (cursor != null) {
+            cursor.moveToNext();
             return cursor;
         }
         return null;
@@ -588,7 +594,7 @@ public class Utils {
         return mensagem.substring(0, tamanho);
     }
 
-    public static boolean isRooted(){
+    public static boolean isRooted() {
         return RootTools.isAccessGiven();
     }
 
@@ -698,7 +704,7 @@ public class Utils {
 
     }
 
-    public static String getNameUsingContactId(Context context,String contactId){
+    public static String getNameUsingContactId(Context context, String contactId) {
 
         String cContactIdString = ContactsContract.Contacts._ID;
         Uri cCONTACT_CONTENT_URI = ContactsContract.Contacts.CONTENT_URI;
