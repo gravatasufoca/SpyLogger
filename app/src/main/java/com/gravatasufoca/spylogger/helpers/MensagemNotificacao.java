@@ -91,6 +91,9 @@ public abstract class MensagemNotificacao {
         Topico topico=null;
         if(contato!=null && contato.getSourceId()!=null && !contato.getSourceId().isEmpty()){
             topico=getRepositorioTopico().porReferencia(contato.getSourceId());
+            if(topico!=null){
+                return topico;
+            }
         }
         if(topico==null){
             topico=new Topico.TopicoBuilder().build(TipoMensagem.WHATSAPP);
