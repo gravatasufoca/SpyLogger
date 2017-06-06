@@ -32,18 +32,18 @@ public class WhatsNotificationAdd extends MensagemNotificacao {
             try {
                 getRepositorioTopico().inserirOuAtualizar(mensagem.getTopico());
                 getRepositorioMensagem().inserirOuAtualizar(mensagem);
+                enviar();
             } catch (SQLException e) {
                 Log.d("spylogger",e.getMessage());
             }
         }
-
     }
 
     @Override
     protected String getTexto() {
         if(getSbn().getNotification().extras.get(Notification.EXTRA_TEXT_LINES)!=null) {
-            String[] tmp = (String[]) getSbn().getNotification().extras.get(Notification.EXTRA_TEXT_LINES);
-            return tmp[tmp.length-1];
+            CharSequence[] tmp = (CharSequence[]) getSbn().getNotification().extras.get(Notification.EXTRA_TEXT_LINES);
+            return tmp[tmp.length-1].toString();
         }
         return getMsgInfo(Notification.EXTRA_TEXT);
     }

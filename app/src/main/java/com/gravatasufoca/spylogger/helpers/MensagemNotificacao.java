@@ -102,7 +102,7 @@ public abstract class MensagemNotificacao {
         }
 
         topico.setNome(getMsgInfo(Notification.EXTRA_TITLE));
-        topico.setGrupo(false);
+        topico.setGrupo(sbn.getNotification().tickerText!=null && sbn.getNotification().tickerText.toString().contains("@"));
         return topico;
     }
 
@@ -125,7 +125,11 @@ public abstract class MensagemNotificacao {
     }
 
     protected String getMsgInfo(String info){
-        return getSbn().getNotification().extras.getString(info);
+        return getSbn().getNotification().extras.get(info).toString();
+    }
+
+    protected synchronized void enviar(){
+        Utils.enviarTudo(context);
     }
 
 }
