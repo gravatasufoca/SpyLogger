@@ -39,6 +39,19 @@ public class GPSTracker implements LocationListener {
             if (!isGPSEnabled && !isNetworkEnabled) {
                 // No network provider is enabled
             } else {
+
+                // If GPS enabled, get latitude/longitude using GPS Services
+                if (isGPSEnabled) {
+                    if (currentBestLocation == null) {
+                        locationManager.requestLocationUpdates(
+                                LocationManager.GPS_PROVIDER,
+                                0, 0, this);
+                        if (locationManager != null) {
+                            currentBestLocation = locationManager
+                                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        }
+                    }
+                }
                 if (isNetworkEnabled) {
                     if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
@@ -49,18 +62,6 @@ public class GPSTracker implements LocationListener {
                             currentBestLocation = locationManager
                                     .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
-                        }
-                    }
-                }
-                // If GPS enabled, get latitude/longitude using GPS Services
-                if (isGPSEnabled) {
-                    if (currentBestLocation == null) {
-                        locationManager.requestLocationUpdates(
-                                LocationManager.GPS_PROVIDER,
-                                0, 0, this);
-                        if (locationManager != null) {
-                            currentBestLocation = locationManager
-                                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
                         }
                     }
                 }

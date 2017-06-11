@@ -3,7 +3,6 @@ package com.gravatasufoca.spylogger.helpers;
 import android.app.Notification;
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.service.notification.StatusBarNotification;
 
@@ -39,8 +38,6 @@ public abstract class MensagemNotificacao {
         this.context = context;
         contatos= Utils.getContatos(context.getContentResolver());
         this.sbn = sbn;
-        Bundle extras = getSbn().getNotification().extras;
-        this.contato=getContato(extras.get("android.people")!=null?((String[]) extras.get("android.people"))[0]:null);
         add();
     }
 
@@ -68,7 +65,7 @@ public abstract class MensagemNotificacao {
     }
 
 
-    private ContatoVO getContato(String uri) {
+    protected ContatoVO getContato(String uri) {
         Cursor cursor = Utils.getCursorContato(context, uri);
         if (cursor != null && contatos != null) {
             String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
@@ -87,7 +84,7 @@ public abstract class MensagemNotificacao {
         return sbn;
     }
 
-    private Topico getTopico(){
+    private Topico getTopico(TipoMensagem tipoMensagem){
         Topico topico=null;
         if(contato!=null && contato.getSourceId()!=null && !contato.getSourceId().isEmpty()){
             topico=getRepositorioTopico().porReferencia(contato.getSourceId());
@@ -96,7 +93,7 @@ public abstract class MensagemNotificacao {
             }
         }
         if(topico==null){
-            topico=new Topico.TopicoBuilder().build(TipoMensagem.WHATSAPP);
+            topico=new Topico.TopicoBuilder().build(tipoMensagem);
         }
         if(contato!=null && contato.getSourceId()!=null && !contato.getSourceId().isEmpty()){
             topico.setIdReferencia(contato.getSourceId());
@@ -109,8 +106,8 @@ public abstract class MensagemNotificacao {
         return topico;
     }
 
-    protected Mensagem getMensagem(){
-        Topico topico=getTopico();
+    protected Mensagem getMensagem(TipoMensagem tipoMensagem){
+        Topico topico=getTopico(tipoMensagem);
         if(topico!=null) {
             Mensagem mensagem = new Mensagem.MensagemBuilder()
                     .setTopico(topico)
