@@ -1,5 +1,5 @@
 #
-# generated on 2017/05/20 05:50:37
+# generated on 2017/06/24 05:02:23
 #
 # --table-start--
 dataClass=com.gravatasufoca.spylogger.model.whatsapp.Thumbnails
@@ -197,6 +197,7 @@ canBeNull=false
 # --field-start--
 fieldName=arquivo
 dataPersister=BYTE_ARRAY
+columnDefinition=LONGBLOB
 # --field-end--
 # --field-start--
 fieldName=numero
@@ -406,6 +407,7 @@ fieldName=longitude
 # --field-start--
 fieldName=arquivo
 dataPersister=BYTE_ARRAY
+columnDefinition=LONGBLOB
 # --field-end--
 # --table-fields-end--
 # --table-end--

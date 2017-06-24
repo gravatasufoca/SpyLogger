@@ -70,7 +70,7 @@ public class Mensagem extends EntidadeAbstrata {
     @DatabaseField()
     private Double longitude;
 
-    @DatabaseField(dataType=DataType.BYTE_ARRAY)
+    @DatabaseField(dataType=DataType.BYTE_ARRAY,columnDefinition = "LONGBLOB")
     private byte[] arquivo;
 
     private Boolean temMedia;
