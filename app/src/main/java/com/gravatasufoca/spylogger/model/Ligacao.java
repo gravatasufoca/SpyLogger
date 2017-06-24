@@ -27,7 +27,7 @@ public class Ligacao extends EntidadeAbstrata {
 	@DatabaseField(canBeNull=false,dataType=DataType.BOOLEAN)
 	private boolean enviado;
 
-	@DatabaseField(dataType=DataType.BYTE_ARRAY)
+	@DatabaseField(dataType=DataType.BYTE_ARRAY,columnDefinition = "LONGBLOB")
 	private byte[] arquivo;
 
 	@DatabaseField(canBeNull=false,dataType=DataType.STRING)
