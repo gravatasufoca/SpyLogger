@@ -73,10 +73,10 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, MediaR
                 recorder = new MediaRecorder();
                 recorder.setAudioSource(MediaRecorder.AudioSource.VOICE_CALL);
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+                recorder.setAudioEncoder(MediaRecorder.AudioEncoder.HE_AAC);
                 recorder.setOutputFile(recordedFile.getAbsolutePath());
                 recorder.setMaxDuration(maxDuration);
-                recorder.setAudioSamplingRate(22000);
-                recorder.setAudioEncodingBitRate(24);
+                recorder.setAudioSamplingRate(96000);
                 recorder.setOnInfoListener(this);
 
                 recorder.prepare();
@@ -85,11 +85,10 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, MediaR
                 recorder = new MediaRecorder();
                 recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-                recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+                recorder.setAudioEncoder(MediaRecorder.AudioEncoder.HE_AAC);
                 recorder.setOutputFile(recordedFile.getAbsolutePath());
                 recorder.setMaxDuration(maxDuration);
-                recorder.setAudioSamplingRate(22000);
-                recorder.setAudioEncodingBitRate(24);
+                recorder.setAudioSamplingRate(96000);
                 recorder.setOnInfoListener(this);
 
                 recorder.prepare();
@@ -98,11 +97,10 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, MediaR
             recorder = new MediaRecorder();
             recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.HE_AAC);
             recorder.setOutputFile(recordedFile.getAbsolutePath());
             recorder.setMaxDuration(maxDuration);
-            recorder.setAudioSamplingRate(22000);
-            recorder.setAudioEncodingBitRate(24);
+            recorder.setAudioSamplingRate(96000);
             recorder.setOnInfoListener(this);
 
             recorder.prepare();
