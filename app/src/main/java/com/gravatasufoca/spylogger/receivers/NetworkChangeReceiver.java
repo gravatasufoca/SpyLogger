@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.gravatasufoca.spylogger.helpers.NetworkUtil;
-import com.gravatasufoca.spylogger.utils.Utils;
 
 public class NetworkChangeReceiver extends BroadcastReceiver {
 
@@ -15,7 +14,7 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
 
         if (!"android.net.conn.CONNECTIVITY_CHANGE".equals(intent.getAction())) {
             if (NetworkUtil.isWifi(context)) {
-                Utils.enviarTudo(context);
+//                Utils.enviarTudo(context);
             }
         }
     }
