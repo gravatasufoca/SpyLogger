@@ -88,6 +88,10 @@ public class CallReceiver extends BroadcastReceiver {
 
 					try {
 
+						if(mediaRecorderHelper.getRecordedFile()==null){
+							return;
+						}
+
 						repositorioGravacao = new RepositorioGravacaoImpl(context);
 						repositorioTopico=new RepositorioTopicoImpl(context);
 
