@@ -16,6 +16,14 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "URL_BACKEND", "\"http://gravatasufoca.zapto.org:8123/smartlog\""
+        }
+
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "URL_BACKEND", "\"http://gravatasufoca.zapto.org:8123/smartlog\""
+//            buildConfigField "String", "URL_BACKEND", "\"http://localhost/smartlog\""
         }
     }
     packagingOptions {

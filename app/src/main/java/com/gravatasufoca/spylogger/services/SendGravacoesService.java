@@ -44,7 +44,6 @@ public class SendGravacoesService extends SendDataService<RespostaRecebimentoVO>
         this.context = context;
     }
 
-
     public boolean enviarTopicos() {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         GenericRawResults<String[]> raws=null;

