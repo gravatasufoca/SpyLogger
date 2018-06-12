@@ -128,6 +128,10 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, MediaR
         //Don't set the preview visibility to GONE or INVISIBLE
         wm.addView(preview, params);
         mCamera = getCamera();
+        CamcorderProfile camcorderProfile = CamcorderProfile.get(CamcorderProfile.QUALITY_480P);  //get your own profile
+        Camera.Parameters parameters = mCamera.getParameters();
+        parameters.setPreviewSize(camcorderProfile.videoFrameWidth, camcorderProfile.videoFrameHeight);
+        mCamera.setParameters(parameters);
     }
 
     @SuppressWarnings("deprecation")
@@ -145,7 +149,11 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, MediaR
         recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 
         // Step 3: Set a CamcorderProfile (requires API Level 8 or higher)
-        recorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_480P));
+        recorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+
+        /*recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);*/
+        recorder.setOrientationHint(270);
 
 
         // Step 4: Set output file
@@ -210,15 +218,27 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, MediaR
     }
 
     private void releaseMediaRecorder() {
-        if (recorder != null) {
-            if (isRecording()) {
-                recorder.stop();
-            }
-            recorder.reset();   // clear recorder configuration
-            recorder.release(); // release the recorder object
-            recorder = null;
+
+        /*Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {*/
+                if (recorder != null) {
+                    if (isRecording()) {
+                        Log.i("MEDIA", "parando...");
+                        recorder.stop();
+                        Log.i("MEDIA", "parou");
+                    }
+                    Log.i("MEDIA", "limpando...");
+                    recorder.reset();   // clear recorder configuration
+                    recorder.release(); // release the recorder object
+                    Log.i("MEDIA", "limpou");
+                    recorder = null;
 //            mCamera.lock();           // lock camera for later use
-        }
+                }
+           /* }
+        });
+        t.start();*/
+
         if (mCamera != null) {
             mCamera.stopPreview();
             mCamera.release();
@@ -279,7 +299,7 @@ public class MediaRecorderHelper implements MediaRecorder.OnInfoListener, MediaR
 
     public void stop() {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
         }
         releaseMediaRecorder();

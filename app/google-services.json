@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "34752584560-2eg74194063q5qeku0hquksarrkpj0pa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gravatasufoca.spylogger",
+            "certificate_hash": "c60744f1e2fbc570098df47b45f8f2570b47e1ac"
+          }
+        },
+        {
           "client_id": "34752584560-8bg4qc9ekqv0g7pph2vrutpech0997a1.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -37,6 +45,10 @@
             "package_name": "com.gravatasufoca.spylogger",
             "certificate_hash": "722a37631aaa8921fe66357b6e285e4361a5f7d6"
           }
+        },
+        {
+          "client_id": "34752584560-896ugejdos1vaa7rkshih8red1tlv77o.apps.googleusercontent.com",
+          "client_type": 3
         },
         {
           "client_id": "34752584560-896ugejdos1vaa7rkshih8red1tlv77o.apps.googleusercontent.com",
